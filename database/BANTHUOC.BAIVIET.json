@@ -1,0 +1,22 @@
+[{
+  "_id": {
+    "$oid": "69f42c4881e2cc492a956029"
+  },
+  "tieude": "Cách trị bệnh đốm trắng",
+  "noidung": "Chi tiết bài viết...",
+  "tomtat": "Hướng dẫn nhanh",
+  "anhbia": "",
+  "benh_id": {
+    "$oid": "69f4292e81e2cc492a955ff8"
+  },
+  "tacgia_id": {
+    "$oid": "69f4287a81e2cc492a955ff3"
+  },
+  "the": [
+    "bệnh tôm"
+  ],
+  "luotxem": 0,
+  "ngaytao": {
+    "$date": "2026-05-01T00:00:00.000Z"
+  }
+}]

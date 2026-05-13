@@ -1,0 +1,55 @@
+[
+  {
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b95001" },
+    "nguoidung_id": { "$oid": "69f4287a81e2cc492a955ff3" },
+    "ten_nguoidung": "Nguyễn Văn An",
+    "vitri_tinh": "Bạc Liêu", "vitri_ao": "Ao số 4",
+    "noidung": "Tôm có dấu hiệu lờ đờ, vỏ mềm không rõ nguyên nhân. Nhờ chuyên gia xem qua.",
+    "trang_thai": "cho_phan_hoi",
+    "ngaytao": { "$date": "2026-05-09T08:45:00.000Z" },
+    "tin_nhan": [
+      { "vai_tro": "nguoidung", "noi_dung": "Chào chuyên gia, ao số 3 của tôi sáng nay tôm có hiện tượng bỏ ăn, bơi lờ đờ sát mặt nước. Thân tôm hơi ửng đỏ. Tôi có gửi ảnh đính kèm.", "thoigian": { "$date": "2026-05-09T08:45:00.000Z" } }
+    ]
+  },
+  {
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b95002" },
+    "nguoidung_id": { "$oid": "69f4287a81e2cc492a955ff3" },
+    "ten_nguoidung": "Trần Thị Hồng",
+    "vitri_tinh": "Cà Mau", "vitri_ao": "Khu B",
+    "noidung": "Màu nước ao thay đổi sang màu trà đậm, tôm bỏ ăn.",
+    "trang_thai": "dang_tu_van",
+    "ngaytao": { "$date": "2026-05-09T07:30:00.000Z" },
+    "tin_nhan": [
+      { "vai_tro": "nguoidung", "noi_dung": "Màu nước ao thay đổi sang màu trà đậm, tôm bỏ ăn. Cần tư vấn gấp.", "thoigian": { "$date": "2026-05-09T07:30:00.000Z" } },
+      { "vai_tro": "chuyen_gia", "noi_dung": "Chào chị, hiện tượng nước trà đậm thường do tảo lam phát triển mạnh. Chị cần kiểm tra độ pH và DO của ao ngay. Dừng cho ăn 1 ngày và tăng cường sục khí.", "thoigian": { "$date": "2026-05-09T07:45:00.000Z" } }
+    ]
+  },
+  {
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b95003" },
+    "nguoidung_id": { "$oid": "69f4287a81e2cc492a955ff3" },
+    "ten_nguoidung": "Lê Minh Đức",
+    "vitri_tinh": "Sóc Trăng", "vitri_ao": "Ao nuôi 2",
+    "noidung": "Tôm chết rải rác dưới đáy ao, gan tụy teo nhỏ.",
+    "trang_thai": "dang_tu_van",
+    "ngaytao": { "$date": "2026-05-09T06:00:00.000Z" },
+    "tin_nhan": [
+      { "vai_tro": "nguoidung", "noi_dung": "Tôm chết rải rác dưới đáy ao, gan tụy teo lại. Cần hỗ trợ phác đồ điều trị khẩn.", "thoigian": { "$date": "2026-05-09T06:00:00.000Z" } },
+      { "vai_tro": "chuyen_gia", "noi_dung": "Triệu chứng bạn mô tả là AHPND (Hoại tử gan tụy cấp). Cần ngừng cho ăn ngay, thay 30% nước ao, dùng kháng sinh theo chỉ dẫn thú y.", "thoigian": { "$date": "2026-05-09T06:20:00.000Z" } },
+      { "vai_tro": "nguoidung", "noi_dung": "Sử dụng thuốc diệt khuẩn nào là phù hợp nhất ạ?", "thoigian": { "$date": "2026-05-09T06:35:00.000Z" } }
+    ]
+  },
+  {
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b95004" },
+    "nguoidung_id": { "$oid": "69f4287a81e2cc492a955ff3" },
+    "ten_nguoidung": "Phạm Hoàng Nam",
+    "vitri_tinh": "Trà Vinh", "vitri_ao": "Ao số 1",
+    "noidung": "Tôm xuất hiện đốm trắng trên vỏ.",
+    "trang_thai": "da_dong",
+    "danh_gia": 5,
+    "ngaytao": { "$date": "2026-05-08T14:00:00.000Z" },
+    "tin_nhan": [
+      { "vai_tro": "nguoidung", "noi_dung": "Đã nhận được mẫu xét nghiệm và dùng đúng theo hướng dẫn. Cảm ơn chuyên gia rất nhiều!", "thoigian": { "$date": "2026-05-08T14:00:00.000Z" } },
+      { "vai_tro": "chuyen_gia", "noi_dung": "Chúc mừng anh ao đã hồi phục. Nhớ theo dõi định kỳ và phòng ngừa WSSV theo lịch vaccine.", "thoigian": { "$date": "2026-05-08T14:30:00.000Z" } }
+    ]
+  }
+]

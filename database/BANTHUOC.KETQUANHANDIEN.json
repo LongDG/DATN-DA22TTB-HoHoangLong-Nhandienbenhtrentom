@@ -1,0 +1,54 @@
+[
+  {
+    "_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b92001"
+    },
+    "nguoidung_id": {
+      "$oid": "69f4287a81e2cc492a955ff3"
+    },
+    "hinhanh_url": "https://storage.thuy-san.com/detect/tom_ruot_trang_1.jpg",
+    "ketqua_benh_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    },
+    "do_chinh_xac": 92.5,
+    "chuandoan_text": "Phát hiện dấu hiệu đường ruột rỗng và phân trắng nhạt dọc thành ruột.",
+    "muc_do_canh_bao": "Can thiệp ngay",
+    "sanpham_goiy_ids": [
+      {
+        "$oid": "60f1a2b3c4d5e6f7a8b91003"
+      },
+      {
+        "$oid": "60f1a2b3c4d5e6f7a8b91004"
+      }
+    ],
+    "ngay_nhan_dien": {
+      "$date": "2026-05-05T09:15:00Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b92002"
+    },
+    "nguoidung_id": {
+      "$oid": "69f4287a81e2cc492a955ff3"
+    },
+    "hinhanh_url": "https://storage.thuy-san.com/detect/tom_gan_den_teo.jpg",
+    "ketqua_benh_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    },
+    "do_chinh_xac": 88,
+    "chuandoan_text": "Gan tụy teo nhỏ và chuyển màu sẫm đen bất thường.",
+    "muc_do_canh_bao": "Cấp cứu",
+    "sanpham_goiy_ids": [
+      {
+        "$oid": "60f1a2b3c4d5e6f7a8b91002"
+      },
+      {
+        "$oid": "60f1a2b3c4d5e6f7a8b91004"
+      }
+    ],
+    "ngay_nhan_dien": {
+      "$date": "2026-05-06T14:30:00Z"
+    }
+  }
+]

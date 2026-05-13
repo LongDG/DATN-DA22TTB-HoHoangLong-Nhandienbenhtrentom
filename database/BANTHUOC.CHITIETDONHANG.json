@@ -1,0 +1,32 @@
+[
+  {
+    "_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b94001"
+    },
+    "donhang_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b93001"
+    },
+    "sanpham_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b91002"
+    },
+    "tensanpham_lucmua": "Hepato Protect Max (Đặc trị Gan tụy)",
+    "soluong": 1,
+    "gia_luc_mua": 320000,
+    "tong_tien_chi_tiet": 320000
+  },
+  {
+    "_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b94002"
+    },
+    "donhang_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b93001"
+    },
+    "sanpham_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b91004"
+    },
+    "tensanpham_lucmua": "Vibrio-Clear Xử Lý Nước",
+    "soluong": 1,
+    "gia_luc_mua": 110000,
+    "tong_tien_chi_tiet": 110000
+  }
+]

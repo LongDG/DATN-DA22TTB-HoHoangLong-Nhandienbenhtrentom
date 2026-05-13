@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  /* ── Brand Palette ── */
+  --color-primary: #005d90;
+  --color-primary-dark: #004b74;
+  --color-primary-light: #cde5ff;
+  --color-secondary: #2c694e;
+  --color-secondary-light: #aeeecb;
+  --color-tertiary: #b65600;
+  --color-accent: #0ea5e9;
+  --color-background: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-danger: #dc2626;
+  --color-danger-light: #fef2f2;
+
+  /* ── Radius tokens ── */
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-slate-900 font-sans antialiased;
+  }
+}
+
+/* ── Shared utilities ── */
+.glass-panel {
+  @apply bg-white/80 backdrop-blur-md border border-white/20;
+}
+
+.phone-mockup {
+  @apply relative w-[280px] h-[580px] bg-slate-900 rounded-[3rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden;
+}
+
+/* ── Auth pages shared styles ── */
+.auth-card {
+  @apply bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-white/60 overflow-hidden;
+}
+
+.auth-input {
+  @apply w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200/80 rounded-xl
+         text-slate-900 text-sm placeholder:text-slate-400
+         outline-none transition-all duration-250
+         shadow-[inset_0_1px_2px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.03)]
+         focus:bg-white focus:border-primary focus:ring-3 focus:ring-primary/10
+         focus:shadow-[inset_0_1px_2px_rgba(0,0,0,0.04),0_0_0_3px_rgba(0,93,144,0.08)]
+         hover:border-slate-300;
+}
+
+.auth-label {
+  @apply block text-sm font-semibold text-slate-700 mb-1.5 ml-0.5;
+}
+
+.auth-icon {
+  @apply absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none
+         text-slate-400 transition-colors duration-200;
+}
+
+.auth-icon-focus {
+  @apply group-focus-within:text-primary;
+}
+
+.auth-btn-primary {
+  @apply w-full py-3.5 px-6 text-white font-bold
+         rounded-xl flex items-center justify-center gap-2.5
+         transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed
+         text-sm tracking-wide uppercase cursor-pointer;
+  background: linear-gradient(135deg, #005d90 0%, #0077b6 100%);
+  box-shadow: 0 4px 15px rgba(0, 93, 144, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.auth-btn-primary:hover {
+  background: linear-gradient(135deg, #004b74 0%, #005d90 100%);
+  box-shadow: 0 6px 20px rgba(0, 93, 144, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.auth-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 93, 144, 0.3);
+}
+
+.auth-divider {
+  @apply relative my-7;
+}
+
+.auth-divider::before {
+  content: '';
+  @apply absolute inset-0 flex items-center;
+  border-top: 1px solid theme('colors.slate.200');
+  top: 50%;
+}
+
+.auth-link {
+  @apply text-primary font-bold hover:text-primary-dark hover:underline transition-colors;
+}

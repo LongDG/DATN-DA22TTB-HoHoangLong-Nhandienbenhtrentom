@@ -1,0 +1,41 @@
+[
+  {
+    "_id": {
+      "$oid": "60f1a2b3c4d5e6f7a8b93001"
+    },
+    "nguoidung_id": {
+      "$oid": "69f4287a81e2cc492a955ff3"
+    },
+    "mavandon": "AQUAVET-120526001",
+    "tong_tien_hang": 440000,
+    "phi_vanchuyen": 30000,
+    "giam_gia": 0,
+    "tong_tien_thanh_toan": 470000,
+    "phuong_thuc_thanh_toan": "Chuyển khoản VNPay",
+    "trang_thai_thanh_toan": "da_thanh_toan",
+    "trang_thai_don_hang": "dang_giao_hang",
+    "lich_su_trang_thai": [
+      {
+        "trangthai": "cho_xac_nhan",
+        "thoigian": {
+          "$date": "2026-05-06T15:00:00Z"
+        }
+      },
+      {
+        "trangthai": "dang_giao_hang",
+        "thoigian": {
+          "$date": "2026-05-07T08:00:00Z"
+        }
+      }
+    ],
+    "thong_tin_nhan_hang": {
+      "nguoi_nhan": "Nguyễn Văn A",
+      "sodienthoai": "0123456789",
+      "diachi": "Ấp 1, Long Đức, Long Hồ, Vĩnh Long"
+    },
+    "ghi_chu": "Giao giờ hành chính, tôm đang bệnh gấp",
+    "ngaytao": {
+      "$date": "2026-05-06T15:00:00Z"
+    }
+  }
+]

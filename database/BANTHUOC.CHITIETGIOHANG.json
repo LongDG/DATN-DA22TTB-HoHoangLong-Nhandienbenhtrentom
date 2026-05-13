@@ -1,0 +1,12 @@
+[{
+  "_id": {
+    "$oid": "69f42be681e2cc492a95601e"
+  },
+  "giohang_id": {
+    "$oid": "69f42ae981e2cc492a95600d"
+  },
+  "sanpham_id": {
+    "$oid": "69f4292e81e2cc492a955ff8"
+  },
+  "soluong": 2
+}]

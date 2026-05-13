@@ -1,0 +1,36 @@
+[{
+  "_id": {
+    "$oid": "69f4287a81e2cc492a955ff3"
+  },
+  "ten": "Nguyễn Văn A",
+  "email": "user@gmail.com",
+  "matkhau": "hashed_password",
+  "sodienthoai": "0123456789",
+  "vaitro": "user",
+  "anhdaidien": "",
+  "diachi": [
+    {
+      "_id": "dc1",
+      "macdinh": true,
+      "tennguoinhan": "Nguyễn Văn A",
+      "sodienthoai": "0123456789",
+      "sonha": "Ấp 1",
+      "xa": "Long Đức",
+      "huyen": "Long Hồ",
+      "tinh": "Vĩnh Long"
+    },
+    {
+      "_id": "dc2",
+      "macdinh": false,
+      "tennguoinhan": "Nguyễn Văn A",
+      "sodienthoai": "0988888888",
+      "sonha": "123 Nguyễn Huệ",
+      "xa": "Phường 1",
+      "huyen": "Ninh Kiều",
+      "tinh": "Cần Thơ"
+    }
+  ],
+  "ngaytao": {
+    "$date": "2026-05-01T00:00:00.000Z"
+  }
+}]
