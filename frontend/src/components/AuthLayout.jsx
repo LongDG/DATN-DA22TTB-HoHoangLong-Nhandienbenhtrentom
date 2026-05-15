@@ -69,7 +69,7 @@ export default function AuthLayout({ children }) {
                   <Pill className="w-5 h-5 text-amber-300" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold text-sm">Cửa hàng thuốc thú y</h4>
+                  <h4 className="text-white font-bold text-sm">Cửa hàng thuốc thủy sản</h4>
                   <p className="text-white/50 text-[11px]">Thuốc đặc trị & dinh dưỡng cho tôm</p>
                 </div>
               </div>

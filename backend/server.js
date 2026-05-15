@@ -3,8 +3,12 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const passport = require("./config/passport"); // Lấy cấu hình passport đã tách
-const authRoutes = require("./routes/authRoutes"); // Lấy các route liên quan đến xác thực
-const adminRoutes = require("./routes/adminRoutes"); // Lấy các route dành cho admin
+const authRoutes = require("./routes/authRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const productRoutes  = require("./routes/productRoutes");
+const handbookRoutes = require("./routes/handbookRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const orderRoutes    = require("./routes/orderRoutes");    // Route đặt hàng người dùng
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,8 +26,12 @@ app.use(passport.initialize());
 // ==========================================
 // ĐỊNH TUYẾN (ROUTES)
 // ==========================================
-app.use("/api/auth", authRoutes); // Gắn các route của auth chạy qua tiền tố /api/auth
-app.use("/api/admin", adminRoutes); // Gắn các route admin
+app.use("/api/auth",       authRoutes);
+app.use("/api/admin",      adminRoutes);
+app.use("/api/products",   productRoutes);
+app.use("/api/handbook",   handbookRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/orders",     orderRoutes);    // Đặt hàng người dùng
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend Node.js is running (MVC Architecture)" });

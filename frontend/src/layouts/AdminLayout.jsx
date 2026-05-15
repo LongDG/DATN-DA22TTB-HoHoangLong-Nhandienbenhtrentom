@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Settings, LayoutDashboard, Microscope,
-  Package, ShoppingCart, MessageSquare, Book, LogOut,
+  Package, ShoppingCart, MessageSquare, Book, LogOut, Users, Tag,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { to: '/admin',           icon: LayoutDashboard, label: 'Tổng quan',         end: true },
-  { to: '/admin/diagnostics', icon: Microscope,    label: 'Nhật ký chẩn đoán'  },
-  { to: '/admin/inventory',   icon: Package,       label: 'Kho hàng'            },
-  { to: '/admin/orders',      icon: ShoppingCart,  label: 'Đơn hàng'            },
-  { to: '/admin/consult',     icon: MessageSquare, label: 'Tư vấn'              },
-  { to: '/admin/handbook',    icon: Book,          label: 'Sổ tay kỹ thuật'     },
+  { to: '/admin',             icon: LayoutDashboard, label: 'Tổng quan',         end: true },
+  { to: '/admin/diagnostics', icon: Microscope,      label: 'Nhật ký chẩn đoán'  },
+  { to: '/admin/inventory',   icon: Package,         label: 'Kho hàng'            },
+  { to: '/admin/orders',      icon: ShoppingCart,    label: 'Đơn hàng'            },
+  { to: '/admin/categories',  icon: Tag,             label: 'Danh mục'            },
+  { to: '/admin/consult',     icon: MessageSquare,   label: 'Tư vấn'              },
+  { to: '/admin/users',       icon: Users,           label: 'Người dùng'          },
+  { to: '/admin/handbook',    icon: Book,            label: 'Sổ tay kỹ thuật'     },
 ];
 
 function Sidebar() {

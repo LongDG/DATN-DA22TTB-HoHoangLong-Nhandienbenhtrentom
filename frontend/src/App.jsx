@@ -5,12 +5,22 @@ import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import OTPPage from './pages/OTPPage';
 import UserDashboard from './pages/user/UserDashboard';
+import StorePage from './pages/user/StorePage';
+import UserLayout from './layouts/UserLayout';
 import AdminLayout from './layouts/AdminLayout';
 import DashboardOverview from './pages/admin/DashboardOverview';
 import DiagnosticLog from './pages/admin/DiagnosticLog';
 import InventoryPage from './pages/admin/InventoryPage';
 import OrdersPage from './pages/admin/OrdersPage';
 import ConsultationPage from './pages/admin/ConsultationPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
+import ProductDetailPage from './pages/user/ProductDetailPage';
+import HandbookPage from './pages/user/HandbookPage';
+import HandbookAdminPage from './pages/admin/HandbookAdminPage';
+import CheckoutPage from './pages/user/CheckoutPage';
+import OrderSuccessPage from './pages/user/OrderSuccessPage';
+import ConsultUserPage from './pages/user/ConsultUserPage';
+import CategoryPage from './pages/admin/CategoryPage';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -103,14 +113,49 @@ export default function App() {
       <Route path="/forgot-password" element={user ? <Navigate to="/" replace /> : <ForgotPasswordPage />} />
       <Route path="/otp"             element={user ? <Navigate to="/" replace /> : <OTPPage />} />
 
-      {/* Root: điều hướng theo vai trò */}
+      {/* Root: redirect theo vai trò */}
       <Route path="/" element={
         !user
           ? <Navigate to="/login" replace />
           : isAdmin(user)
           ? <Navigate to="/admin" replace />
-          : <UserDashboard user={user} onLogout={handleLogout} />
+          : <Navigate to="/home" replace />
       } />
+
+      {/* User routes — bọc trong UserLayout chung */}
+      <Route
+        path="/home"
+        element={
+          user && !isAdmin(user)
+            ? <UserLayout user={user} onLogout={handleLogout} />
+            : <Navigate to="/" replace />
+        }
+      >
+        <Route index element={<UserDashboard />} />
+      </Route>
+
+      <Route
+        path="/store"
+        element={
+          user && !isAdmin(user)
+            ? <UserLayout user={user} onLogout={handleLogout} />
+            : <Navigate to="/" replace />
+        }
+      >
+        <Route index element={<StorePage />} />
+      </Route>
+
+      {/* Product detail */}
+      <Route
+        path="/product/:id"
+        element={
+          user && !isAdmin(user)
+            ? <UserLayout user={user} onLogout={handleLogout} />
+            : <Navigate to="/" replace />
+        }
+      >
+        <Route index element={<ProductDetailPage />} />
+      </Route>
 
       {/* Admin routes với layout chung */}
       <Route
@@ -126,6 +171,57 @@ export default function App() {
         <Route path="inventory"   element={<InventoryPage />} />
         <Route path="orders"      element={<OrdersPage />} />
         <Route path="consult"     element={<ConsultationPage />} />
+        <Route path="users"       element={<UserManagementPage />} />
+        <Route path="categories"  element={<CategoryPage />} />
+        <Route path="handbook"    element={<HandbookAdminPage />} />
+      </Route>
+
+      {/* Handbook user page */}
+      <Route
+        path="/handbook"
+        element={
+          user && !isAdmin(user)
+            ? <UserLayout user={user} onLogout={handleLogout} />
+            : <Navigate to="/" replace />
+        }
+      >
+        <Route index element={<HandbookPage />} />
+      </Route>
+
+      {/* Tư vấn trực tuyến (user) */}
+      <Route
+        path="/consult-user"
+        element={
+          user && !isAdmin(user)
+            ? <UserLayout user={user} onLogout={handleLogout} />
+            : <Navigate to="/" replace />
+        }
+      >
+        <Route index element={<ConsultUserPage />} />
+      </Route>
+
+      {/* Checkout */}
+      <Route
+        path="/checkout"
+        element={
+          user && !isAdmin(user)
+            ? <UserLayout user={user} onLogout={handleLogout} />
+            : <Navigate to="/" replace />
+        }
+      >
+        <Route index element={<CheckoutPage />} />
+      </Route>
+
+      {/* Order success */}
+      <Route
+        path="/order-success"
+        element={
+          user && !isAdmin(user)
+            ? <UserLayout user={user} onLogout={handleLogout} />
+            : <Navigate to="/" replace />
+        }
+      >
+        <Route index element={<OrderSuccessPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -108,7 +108,7 @@ export default function DashboardPage({ user, onLogout }) {
       {/* Footer */}
       <footer className="mt-auto py-6 px-6 border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto text-center text-sm text-[#707881]">
-          © 2024 AquaDiag Solutions. Professional Diagnostic Systems for Aquaculture.
+          © 2026 AquaDiag Solutions. Professional Diagnostic Systems for Aquaculture.
         </div>
       </footer>
     </div>

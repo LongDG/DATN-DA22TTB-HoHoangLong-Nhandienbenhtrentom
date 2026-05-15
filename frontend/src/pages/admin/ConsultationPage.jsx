@@ -151,19 +151,31 @@ function ChatArea({ consultation, onReply, onClose }) {
         </div>
 
         {consultation.tin_nhan?.map((msg, i) => {
-          const isExpert = msg.vai_tro === 'chuyen_gia';
-          return (
-            <div key={i} className={`flex items-start gap-3 ${isExpert ? 'flex-row-reverse max-w-[80%] ml-auto' : 'max-w-[80%]'}`}>
-              {/* Avatar */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isExpert ? 'bg-[#0077b6] text-white' : 'bg-[#aeeecb] text-[#2c694e]'}`}>
-                {isExpert ? 'AA' : consultation.initials || <User className="w-4 h-4" />}
+          const isAdmin = msg.vai_tro === 'chuyen_gia';
+          return isAdmin ? (
+            // Admin/chuyên gia — bên PHẢI (xanh)
+            <div key={i} className="flex flex-col items-end ml-auto max-w-[80%]">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-semibold text-[#707881]">Chuyên gia</span>
+                <div className="w-6 h-6 rounded-full bg-[#0077b6] flex items-center justify-center text-white text-[10px] font-bold">AA</div>
               </div>
-              {/* Bubble */}
-              <div className={`flex flex-col gap-1 ${isExpert ? 'items-end' : ''}`}>
-                <div className={`p-3.5 rounded-2xl shadow-sm text-sm leading-relaxed ${isExpert ? 'bg-[#0077b6] text-white rounded-tr-none' : 'bg-white border border-[#e1e3e4] text-[#191c1d] rounded-tl-none'}`}>
-                  {msg.noi_dung}
+              <div className="bg-[#0077b6] text-white px-4 py-3 rounded-2xl rounded-tr-none shadow-md">
+                <p className="text-sm leading-relaxed">{msg.noi_dung}</p>
+                <span className="text-[10px] text-white/60 mt-1 block text-right">{formatTime(msg.thoigian)}</span>
+              </div>
+            </div>
+          ) : (
+            // User/nông dân — bên TRÁI (trắng)
+            <div key={i} className="flex items-start gap-3 max-w-[80%]">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${AVATAR_COLORS[0]}`}>
+                {consultation.initials || <User className="w-4 h-4" />}
+              </div>
+              <div>
+                <span className="text-[10px] font-semibold text-[#707881] mb-1 block">{consultation.name || 'Người dùng'}</span>
+                <div className="bg-white border border-[#e1e3e4] px-4 py-3 rounded-2xl rounded-tl-none shadow-sm">
+                  <p className="text-sm leading-relaxed text-[#191c1d]">{msg.noi_dung}</p>
+                  <span className="text-[10px] text-[#707881] mt-1 block">{formatTime(msg.thoigian)}</span>
                 </div>
-                <span className="text-[10px] text-[#707881]">{formatTime(msg.thoigian)}</span>
               </div>
             </div>
           );

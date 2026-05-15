@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Microscope, ShoppingBasket, User as UserIcon, Banknote,
   TrendingUp, Calendar, Download, MoreVertical,
-  MapPin, Reply, AlertTriangle, Syringe, FlaskConical, ShoppingCart,
+  MapPin, Reply, AlertTriangle, ShoppingCart,
 } from 'lucide-react';
 import StatCard from '../../components/StatCard';
 
@@ -16,6 +17,7 @@ function formatCurrency(amount) {
 }
 
 export default function DashboardOverview() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalDiagnostics: 0,
     totalOrders: 0,
@@ -23,8 +25,9 @@ export default function DashboardOverview() {
     totalRevenue: 0,
     totalUsers: 0,
   });
-  const [recentLogs, setRecentLogs] = useState([]);
+  const [recentLogs, setRecentLogs]       = useState([]);
   const [consultations, setConsultations] = useState([]);
+  const [lowStock, setLowStock]           = useState({ items: [], outOfStock: 0, threshold: 15 });
 
   useEffect(() => {
     fetch(`${API_BASE}/admin/stats`)
@@ -37,10 +40,16 @@ export default function DashboardOverview() {
       .then(data => setRecentLogs(data.slice(0, 3)))
       .catch(err => console.error('Lỗi nhật ký:', err));
 
-    fetch(`${API_BASE}/admin/consultations`)
+    // Chỉ lấy tư vấn đang CHỜ PHẢN HỒI cho tổng quan
+    fetch(`${API_BASE}/admin/consultations?status=cho_phan_hoi`)
       .then(r => r.json())
       .then(setConsultations)
       .catch(err => console.error('Lỗi tư vấn:', err));
+
+    fetch(`${API_BASE}/admin/low-stock?limit=6`)
+      .then(r => r.json())
+      .then(setLowStock)
+      .catch(err => console.error('Lỗi tồn kho:', err));
   }, []);
 
   const KPI_CARDS = [
@@ -143,7 +152,10 @@ export default function DashboardOverview() {
           {/* Pending Consultations - Dữ liệu thật từ MongoDB */}
           <div className="bg-white rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-[#e7e8e9]">
             <div className="px-6 py-4 border-b border-[#e7e8e9] flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-[#191c1d]">Yêu cầu tư vấn chờ phản hồi</h3>
+              <div>
+                <h3 className="text-xl font-semibold text-[#191c1d]">Yêu cầu tư vấn chờ phản hồi</h3>
+                <p className="text-xs text-[#707881] mt-0.5">Chỉ hiển thị phiếu chưa được trả lời</p>
+              </div>
               {consultations.length > 0 && (
                 <span className="px-2.5 py-1 bg-[#ba1a1a] text-white text-[10px] font-bold rounded-full">
                   {consultations.length} MỚI
@@ -182,7 +194,10 @@ export default function DashboardOverview() {
                     <p className="text-sm text-[#404850] line-clamp-2 mb-5 italic">
                       "{c.message}"
                     </p>
-                    <button className="w-full py-2 bg-[#0077b6] text-white rounded-lg text-sm font-semibold hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => navigate('/admin/consult')}
+                      className="w-full py-2 bg-[#0077b6] text-white rounded-lg text-sm font-semibold hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
                       <Reply className="w-4 h-4" />Phản hồi ngay
                     </button>
                   </div>
@@ -195,34 +210,71 @@ export default function DashboardOverview() {
         {/* Right Widgets */}
         <div className="col-span-12 lg:col-span-4 space-y-8">
 
-          {/* Low Stock Alerts */}
+          {/* Low Stock Alerts — dữ liệu thật từ MongoDB */}
           <div className="bg-white rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-[#e7e8e9] overflow-hidden">
-            <div className="px-6 py-4 bg-[#ffdad6]/40 border-b border-[#ffdad6]/50 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-[#ba1a1a]" />
-              <h3 className="text-sm font-semibold text-[#ba1a1a]">Cảnh báo tồn kho thấp</h3>
+            <div className="px-6 py-4 bg-[#ffdad6]/40 border-b border-[#ffdad6]/50 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-[#ba1a1a]" />
+                <h3 className="text-sm font-semibold text-[#ba1a1a]">Cảnh báo tồn kho thấp</h3>
+                {lowStock.items.length > 0 && (
+                  <span className="ml-1 px-2 py-0.5 bg-[#ba1a1a] text-white text-[10px] font-bold rounded-full">
+                    {lowStock.items.length}
+                  </span>
+                )}
+              </div>
+              {lowStock.outOfStock > 0 && (
+                <span className="text-[10px] font-bold text-[#ba1a1a] bg-[#ffdad6] px-2 py-1 rounded-full">
+                  {lowStock.outOfStock} hết hàng
+                </span>
+              )}
             </div>
+
             <div>
-              {[
-                { icon: Syringe,      name: 'Thuốc BZ(CÁ)',    qty: 'Còn 5 bao',  qtyColor: 'text-[#ba1a1a]' },
-                { icon: FlaskConical, name: 'Vi sinh AQUA-PRO', qty: 'Còn 12 chai', qtyColor: 'text-[#b65600]' },
-              ].map(item => (
-                <div key={item.name} className="p-5 border-b border-[#e7e8e9] flex items-center justify-between hover:bg-[#f8f9fa] transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#edeeef] flex items-center justify-center text-[#bfc7d1]">
-                      <item.icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#191c1d]">{item.name}</p>
-                      <p className={`text-xs font-semibold mt-0.5 ${item.qtyColor}`}>{item.qty}</p>
-                    </div>
+              {lowStock.items.length === 0 ? (
+                <div className="p-8 text-center">
+                  <div className="w-12 h-12 bg-[#aeeecb]/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <ShoppingCart className="w-6 h-6 text-[#2c694e]" />
                   </div>
-                  <button className="p-2 text-[#0077b6] hover:bg-[#cde5ff] rounded-lg transition-colors">
-                    <ShoppingCart className="w-5 h-5" />
-                  </button>
+                  <p className="text-sm font-semibold text-[#2c694e]">Tồn kho ổn định</p>
+                  <p className="text-xs text-[#707881] mt-1">Không có sản phẩm dưới {lowStock.threshold} đơn vị</p>
                 </div>
-              ))}
+              ) : (
+                lowStock.items.map(item => {
+                  const isCritical = item.level === 'critical';
+                  const levelColor = isCritical ? 'text-[#ba1a1a]' : 'text-[#b65600]';
+                  const levelBg    = isCritical ? 'bg-[#ffdad6]'   : 'bg-[#ffdbc8]';
+                  return (
+                    <div key={item.id} className="p-4 border-b border-[#e7e8e9] flex items-center gap-3 hover:bg-[#f8f9fa] transition-colors">
+                      {/* Hình ảnh */}
+                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#edeeef] flex items-center justify-center shrink-0">
+                        {item.image
+                          ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          : <ShoppingCart className="w-5 h-5 text-[#bfc7d1]" />
+                        }
+                      </div>
+                      {/* Thông tin */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-[#191c1d] truncate">{item.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {item.brand && <span className="text-[10px] text-[#707881]">{item.brand}</span>}
+                          {item.category && <span className="text-[10px] text-[#707881]">• {item.category}</span>}
+                        </div>
+                      </div>
+                      {/* Số lượng */}
+                      <div className="shrink-0 text-right">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${levelBg} ${levelColor}`}>
+                          Còn {item.qty} {item.unit}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+
               <div className="p-4 bg-[#f3f4f5] text-center">
-                <button className="text-sm font-semibold text-[#0077b6] hover:underline">Quản lý kho hàng</button>
+                <a href="/admin/inventory" className="text-sm font-semibold text-[#0077b6] hover:underline">
+                  Quản lý kho hàng →
+                </a>
               </div>
             </div>
           </div>
