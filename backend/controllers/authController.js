@@ -1,6 +1,16 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+const OTP  = require("../models/OTP");
+const { sendSms, msgOtp } = require('../utils/sms');
+
+/**
+ * Tạo mã OTP 6 chữ số ngẫu nhiên
+ */
+function genOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 
 /**
  * Tạo JWT token cho user
@@ -159,9 +169,119 @@ const getMe = async (req, res) => {
   }
 };
 
+/**
+ * Gửi OTP về số điện thoại để reset mật khẩu
+ * POST /api/auth/forgot-password
+ * Body: { sodienthoai }
+ */
+const forgotPassword = async (req, res) => {
+  try {
+    const { sodienthoai } = req.body;
+    if (!sodienthoai) {
+      return res.status(400).json({ message: 'Vui lòng nhập số điện thoại' });
+    }
+
+    // Kiểm tra số điện thoại có tồn tại không
+    const user = await User.findOne({ sodienthoai });
+    if (!user) {
+      return res.status(404).json({ message: 'Số điện thoại chưa được đăng ký trong hệ thống' });
+    }
+
+    // Xóa OTP cũ nếu có
+    await OTP.deleteMany({ sodienthoai });
+
+    // Tạo OTP mới
+    const otp = genOtp();
+    await OTP.create({ sodienthoai, otp });
+
+    // Gửi SMS qua TextBee
+    await sendSms(sodienthoai, msgOtp(otp));
+
+    res.json({
+      message: 'Mã OTP đã được gửi đến số điện thoại của bạn',
+      // Chỉ trả về trong môi trường dev — xóa khi production
+      ...(process.env.NODE_ENV !== 'production' && { dev_otp: otp }),
+    });
+  } catch (error) {
+    console.error('forgotPassword error:', error);
+    res.status(500).json({ message: 'Lỗi server khi gửi OTP' });
+  }
+};
+
+/**
+ * Xác thực OTP
+ * POST /api/auth/verify-otp
+ * Body: { sodienthoai, otp }
+ */
+const verifyOtp = async (req, res) => {
+  try {
+    const { sodienthoai, otp } = req.body;
+    if (!sodienthoai || !otp) {
+      return res.status(400).json({ message: 'Thiếu thông tin xác thực' });
+    }
+
+    const record = await OTP.findOne({ sodienthoai });
+    if (!record) {
+      return res.status(400).json({ message: 'Mã OTP đã hết hạn hoặc không tồn tại. Vui lòng gửi lại.' });
+    }
+    if (record.otp !== otp.toString()) {
+      return res.status(400).json({ message: 'Mã OTP không đúng' });
+    }
+
+    // OTP đúng — đánh dấu đã xác minh (đổi otp thành "VERIFIED")
+    record.otp = 'VERIFIED';
+    await record.save();
+
+    res.json({ message: 'Xác thực OTP thành công', verified: true });
+  } catch (error) {
+    console.error('verifyOtp error:', error);
+    res.status(500).json({ message: 'Lỗi server khi xác thực OTP' });
+  }
+};
+
+/**
+ * Đặt lại mật khẩu mới
+ * POST /api/auth/reset-password
+ * Body: { sodienthoai, matkhau_moi }
+ */
+const resetPassword = async (req, res) => {
+  try {
+    const { sodienthoai, matkhau_moi } = req.body;
+    if (!sodienthoai || !matkhau_moi) {
+      return res.status(400).json({ message: 'Thiếu thông tin' });
+    }
+    if (matkhau_moi.length < 6) {
+      return res.status(400).json({ message: 'Mật khẩu phải có ít nhất 6 ký tự' });
+    }
+
+    // Kiểm tra đã verify OTP chưa
+    const record = await OTP.findOne({ sodienthoai, otp: 'VERIFIED' });
+    if (!record) {
+      return res.status(400).json({ message: 'Phiên xác thực không hợp lệ. Vui lòng thực hiện lại từ đầu.' });
+    }
+
+    // Hash mật khẩu mới
+    const salt   = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(matkhau_moi, salt);
+
+    await User.updateOne({ sodienthoai }, { matkhau: hashed });
+
+    // Xóa record OTP
+    await OTP.deleteMany({ sodienthoai });
+
+    res.json({ message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập.' });
+  } catch (error) {
+    console.error('resetPassword error:', error);
+    res.status(500).json({ message: 'Lỗi server khi đặt lại mật khẩu' });
+  }
+};
+
 module.exports = {
   register,
   login,
   googleCallback,
   getMe,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
 };

@@ -1,22 +1,40 @@
 import { motion } from 'motion/react';
-import { KeyRound, Mail, ArrowLeft, Send } from 'lucide-react';
+import { KeyRound, Phone, ArrowLeft, Send } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 
+const API = 'http://localhost:5000/api';
+
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
-  const [contact, setContact] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    if (!phone.trim()) return setError('Vui lòng nhập số điện thoại');
+
     setLoading(true);
-    // TODO: Gọi API gửi mã khôi phục mật khẩu
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res  = await fetch(`${API}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sodienthoai: phone.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) return setError(data.message || 'Lỗi gửi OTP');
+
+      // Lưu SĐT để các trang sau dùng
+      sessionStorage.setItem('otp_phone', phone.trim());
       navigate('/otp');
-    }, 800);
+    } catch {
+      setError('Không thể kết nối máy chủ. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,29 +63,33 @@ export default function ForgotPasswordPage() {
             Quên mật khẩu?
           </h1>
           <p className="text-slate-500 text-[15px] leading-relaxed">
-            Đừng lo, hãy nhập email hoặc số điện thoại đã đăng ký. 
-            Chúng tôi sẽ gửi mã xác nhận để khôi phục mật khẩu.
+            Nhập số điện thoại đã đăng ký. Chúng tôi sẽ gửi mã OTP 6 số qua SMS để xác nhận.
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium">
+              {error}
+            </div>
+          )}
           <div>
-            <label htmlFor="forgot_contact" className="auth-label">
-              Email hoặc số điện thoại
+            <label htmlFor="forgot_phone" className="auth-label">
+              Số điện thoại
             </label>
             <div className="relative group">
               <div className="auth-icon auth-icon-focus">
-                <Mail size={18} />
+                <Phone size={18} />
               </div>
               <input
-                id="forgot_contact"
-                type="text"
+                id="forgot_phone"
+                type="tel"
                 required
-                placeholder="Nhập email hoặc số điện thoại..."
+                placeholder="VD: 0383277120"
                 className="auth-input"
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
           </div>
@@ -84,7 +106,7 @@ export default function ForgotPasswordPage() {
             ) : (
               <Send size={18} />
             )}
-            {loading ? 'Đang gửi...' : 'Gửi mã xác nhận'}
+            {loading ? 'Đang gửi OTP...' : 'Gửi mã OTP'}
           </motion.button>
         </form>
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const passport = require("passport");
-const { register, login, googleCallback, getMe } = require("../controllers/authController");
+const { register, login, googleCallback, getMe, forgotPassword, verifyOtp, resetPassword } = require("../controllers/authController");
 const { authMiddleware } = require("../middleware/auth");
 
 const router = express.Router();
@@ -13,6 +13,11 @@ router.post("/login", login);
 
 // Lấy thông tin user hiện tại (cần token)
 router.get("/me", authMiddleware, getMe);
+
+// ── Quên mật khẩu qua SĐT (OTP) ──
+router.post("/forgot-password", forgotPassword);   // Bước 1: gửi OTP
+router.post("/verify-otp",      verifyOtp);        // Bước 2: xác thực OTP
+router.post("/reset-password",  resetPassword);    // Bước 3: đặt mật khẩu mới
 
 // Api nhảy sang trang đăng nhập của Google
 router.get(

@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import OTPPage from './pages/OTPPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import UserDashboard from './pages/user/UserDashboard';
 import StorePage from './pages/user/StorePage';
 import UserLayout from './layouts/UserLayout';
@@ -113,6 +114,7 @@ export default function App() {
       <Route path="/register"        element={user ? <Navigate to="/" replace /> : <RegisterPage onGoogleLogin={handleGoogleLogin} onRegister={handleRegister} />} />
       <Route path="/forgot-password" element={user ? <Navigate to="/" replace /> : <ForgotPasswordPage />} />
       <Route path="/otp"             element={user ? <Navigate to="/" replace /> : <OTPPage />} />
+      <Route path="/reset-password"  element={user ? <Navigate to="/" replace /> : <ResetPasswordPage />} />
 
       {/* Root: redirect theo vai trò */}
       <Route path="/" element={

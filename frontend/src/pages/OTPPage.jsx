@@ -4,11 +4,16 @@ import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 
+const API = 'http://localhost:5000/api';
+
 export default function OTPPage() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timeLeft, setTimeLeft] = useState(59);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputRefs = useRef([]);
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const phone = sessionStorage.getItem('otp_phone') || '';
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -17,16 +22,17 @@ export default function OTPPage() {
     }
   }, [timeLeft]);
 
+  // Nếu không có phone trong session → redirect về forgot-password
+  useEffect(() => {
+    if (!phone) navigate('/forgot-password', { replace: true });
+  }, []);
+
   const handleChange = (index, value) => {
     if (isNaN(Number(value))) return;
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
+    if (value && index < 5) inputRefs.current[index + 1]?.focus();
   };
 
   const handleKeyDown = (index, e) => {
@@ -47,21 +53,47 @@ export default function OTPPage() {
     }
   };
 
-  const handleResend = () => {
-    if (timeLeft === 0) {
+  const handleResend = async () => {
+    if (timeLeft > 0 || !phone) return;
+    setError('');
+    try {
+      const res  = await fetch(`${API}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sodienthoai: phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) return setError(data.message);
       setTimeLeft(59);
-      // Logic to resend OTP would go here
+      setOtp(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
+    } catch {
+      setError('Lỗi gửi lại OTP. Thử lại sau.');
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Gọi POST /api/auth/verify-otp với { otp: otp.join('') }
-    // Sau khi OTP đúng → navigate('/reset-password')
-    alert('Tính năng xác thực OTP đang được triển khai. Vui lòng thử lại sau!');
-  }
+    setError('');
+    setLoading(true);
+    try {
+      const res  = await fetch(`${API}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sodienthoai: phone, otp: otp.join('') }),
+      });
+      const data = await res.json();
+      if (!res.ok) return setError(data.message || 'Mã OTP không đúng');
+      navigate('/reset-password');
+    } catch {
+      setError('Không thể kết nối máy chủ.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const isComplete = otp.every(d => d !== '');
+  const maskedPhone = phone ? phone.slice(0, 3) + '****' + phone.slice(-3) : '';
 
   return (
     <AuthLayout>
@@ -89,12 +121,19 @@ export default function OTPPage() {
             Xác thực OTP
           </h1>
           <p className="text-slate-500 text-[15px] leading-relaxed">
-            Nhập mã 6 chữ số đã được gửi đến số điện thoại của bạn.
+            Nhập mã 6 chữ số đã được gửi đến{' '}
+            <span className="font-bold text-slate-700">{maskedPhone}</span> qua SMS.
           </p>
         </div>
 
         {/* OTP Form */}
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium text-center">
+              {error}
+            </div>
+          )}
+
           {/* OTP Inputs */}
           <div className="flex justify-between gap-2.5">
             {otp.map((digit, idx) => (
@@ -123,11 +162,14 @@ export default function OTPPage() {
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            disabled={!isComplete}
+            disabled={!isComplete || loading}
             className="auth-btn-primary"
           >
-            <ShieldCheck size={18} />
-            Xác nhận mã
+            {loading
+              ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              : <ShieldCheck size={18} />
+            }
+            {loading ? 'Đang xác thực...' : 'Xác nhận mã'}
           </motion.button>
 
           {/* Resend */}

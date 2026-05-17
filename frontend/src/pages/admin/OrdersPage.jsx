@@ -326,13 +326,22 @@ export default function OrdersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-5 text-sm text-[#404850]">{o.date}</td>
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded bg-[#f3f4f5] flex items-center justify-center"><Package className="w-4 h-4 text-[#707881]" /></div>
-                        <span className="text-sm text-[#404850]">{o.totalItems > 0 ? `${o.totalItems} sản phẩm` : '—'}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-sm font-bold text-right text-[#191c1d]">{formatVND(o.total)}</td>
+                     <td className="px-6 py-5">
+                       <div className="flex items-center gap-2">
+                         <div className="w-8 h-8 rounded bg-[#f3f4f5] flex items-center justify-center shrink-0 overflow-hidden">
+                           {o.items?.[0]?.image
+                             ? <img src={o.items[0].image} alt="" className="w-full h-full object-cover" />
+                             : <Package className="w-4 h-4 text-[#707881]" />}
+                         </div>
+                         <div>
+                           <p className="text-sm text-[#404850] font-medium max-w-[130px] truncate">
+                             {o.items?.[0]?.name || '—'}
+                           </p>
+                           {o.totalItems > 1 && <p className="text-xs text-[#707881]">+{o.totalItems - 1} sp khác</p>}
+                         </div>
+                       </div>
+                     </td>
+                     <td className="px-6 py-5 text-sm font-bold text-right text-[#191c1d]">{formatVND(o.total)}</td>
                     <td className="px-6 py-5">
                       <span className={`text-xs font-bold ${o.paymentStatus === 'da_thanh_toan' ? 'text-[#2c694e]' : 'text-[#904300]'}`}>{o.payment}</span>
                       {o.paymentStatus === 'da_thanh_toan' && <span className="ml-1.5 text-[10px] bg-[#aeeecb] text-[#2c694e] px-1.5 py-0.5 rounded-full font-semibold">✓</span>}

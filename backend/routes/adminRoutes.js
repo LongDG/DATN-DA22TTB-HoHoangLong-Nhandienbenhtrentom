@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const { sendSms, msgOrderDelivered } = require('../utils/sms');
 
 // Bảo vệ toàn bộ admin routes: phải đăng nhập và là admin
 router.use(authMiddleware);
@@ -548,17 +549,24 @@ router.get('/orders', async (req, res) => {
 
     const filter = {};
     if (status && status !== 'all') filter.trang_thai_don_hang = status;
+    // Tìm kiếm theo tên hoặc SĐT
+    if (search) {
+      filter.$or = [
+        { ho_ten:        { $regex: search, $options: 'i' } },
+        { so_dien_thoai: { $regex: search, $options: 'i' } },
+      ];
+    }
 
     const total = await db.collection('DONHANG').countDocuments(filter);
     const skip  = (parseInt(page) - 1) * parseInt(limit);
 
+    // san_pham đã embedded trong DONHANG — không cần lookup CHITIETDONHANG
     const orders = await db.collection('DONHANG').aggregate([
       { $match: filter },
-      { $sort: { ngaytao: -1 } },
+      { $sort: { ngay_tao: -1 } },
       { $skip: skip },
       { $limit: parseInt(limit) },
-      { $lookup: { from: 'NGUOIDUNG',       localField: 'nguoidung_id', foreignField: '_id', as: 'user_info' } },
-      { $lookup: { from: 'CHITIETDONHANG',  localField: '_id',          foreignField: 'donhang_id', as: 'items' } },
+      { $lookup: { from: 'NGUOIDUNG', localField: 'user_id', foreignField: '_id', as: 'user_info' } },
       { $unwind: { path: '$user_info', preserveNullAndEmptyArrays: true } },
     ]).toArray();
 
@@ -570,39 +578,60 @@ router.get('/orders', async (req, res) => {
     };
 
     const PAYMENT_MAP = {
-      chuyen_khoan:     'Chuyển khoản',
-      'Chuyển khoản VNPay': 'VNPay',
-      cod:              'COD',
-      momo:             'MoMo',
+      chuyen_khoan: 'Chuyển khoản',
+      vnpay:        'VNPay',
+      cod:          'COD',
+      momo:         'MoMo',
     };
 
     const formatted = orders.map(o => {
       const st = STATUS_MAP[o.trang_thai_don_hang] || { label: o.trang_thai_don_hang, color: 'info' };
-      const user = o.user_info;
-      const name = o.thong_tin_nhan_hang?.nguoi_nhan || user?.ten || 'Khách hàng';
-      const words = name.trim().split(/\s+/);
+
+      // Tên: ưu tiên field trực tiếp trong đơn, fallback user_info
+      const name     = o.ho_ten || o.user_info?.ten || 'Khách hàng';
+      const words    = name.trim().split(/\s+/);
       const initials = words.length >= 2
         ? (words[words.length - 2][0] + words[words.length - 1][0]).toUpperCase()
         : name.substring(0, 2).toUpperCase();
-      const location = o.thong_tin_nhan_hang?.diachi?.split(',').slice(-2).join(',').trim() || '—';
-      const date = o.ngaytao ? new Date(o.ngaytao).toLocaleDateString('vi-VN') : '—';
-      const payment = PAYMENT_MAP[o.phuong_thuc_thanh_toan] || o.phuong_thuc_thanh_toan || '—';
+
+      // Địa chỉ rút gọn
+      const parts    = [o.dia_chi, o.tinh_thanh].filter(Boolean);
+      const location = parts.length ? parts.slice(-2).join(', ') : '—';
+
+      // Ngày tạo — field thực tế là ngay_tao
+      const rawDate  = o.ngay_tao || o.ngaytao;
+      const date     = rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : '—';
+
+      // Thanh toán
+      const pttt    = o.phuong_thuc_tt || o.phuong_thuc_thanh_toan || '';
+      const payment = PAYMENT_MAP[pttt.toLowerCase()] || pttt || '—';
+
+      // Sản phẩm nhúng
+      const sanPham  = Array.isArray(o.san_pham) ? o.san_pham : [];
 
       return {
         id:           o._id.toString(),
-        code:         o.mavandon || `DH-${o._id.toString().slice(-6).toUpperCase()}`,
+        code:         o.ma_don_hang || o.mavandon || ('DH-' + o._id.toString().slice(-6).toUpperCase()),
         name,
+        phone:        o.so_dien_thoai || o.user_info?.sodienthoai || '',
         initials,
         location,
         date,
-        totalItems:   o.items?.length || 0,
-        total:        o.tong_tien_thanh_toan || 0,
+        totalItems:   sanPham.length,
+        total:        o.tong_tien || o.tong_tien_thanh_toan || 0,
         payment,
-        paymentStatus: o.trang_thai_thanh_toan,
+        paymentStatus: o.trang_thai_tt || o.trang_thai_thanh_toan || '',
         status:       o.trang_thai_don_hang,
         statusLabel:  st.label,
         statusColor:  st.color,
-        note:         o.ghi_chu,
+        note:         o.ghi_chu || '',
+        // Trả về sản phẩm cho frontend hiển thị
+        items: sanPham.map(sp => ({
+          name:  sp.ten_san_pham || sp.tensanpham || 'Sản phẩm',
+          qty:   sp.so_luong || sp.soluong || 1,
+          price: sp.don_gia || sp.gia || 0,
+          image: Array.isArray(sp.hinhanh) ? sp.hinhanh[0] : (sp.hinhanh || null),
+        })),
       };
     });
 
@@ -722,10 +751,34 @@ router.patch('/orders/:id/status', async (req, res) => {
     const { trang_thai } = req.body;
     const VALID = ['cho_xac_nhan', 'dang_giao_hang', 'da_giao_hang', 'da_huy'];
     if (!VALID.includes(trang_thai)) return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+
+    // Lấy thông tin đơn trước khi cập nhật (cần SĐT và tên để gửi SMS)
+    const order = await db.collection('DONHANG').findOne({ _id: new ObjectId(req.params.id) });
+    if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+
     await db.collection('DONHANG').updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: { trang_thai_don_hang: trang_thai, capnhat: new Date() } }
     );
+
+    // ── Gửi SMS xác nhận khi đơn hàng đã giao thành công ──
+    if (trang_thai === 'da_giao_hang') {
+      const phone  = order.so_dien_thoai || order.thong_tin_nhan_hang?.sodienthoai;
+      const hoTen  = order.ho_ten || order.thong_tin_nhan_hang?.nguoi_nhan || 'Quý khách';
+      const maDon  = order.ma_don_hang || ('DH' + order._id.toString().slice(-6).toUpperCase());
+      const tongTien  = order.tong_tien || order.tong_tien_thanh_toan || 0;
+      const sanPham   = order.san_pham?.[0]?.ten_san_pham || 'sản phẩm';
+
+      if (phone) {
+        sendSms(phone, msgOrderDelivered({
+          maDon,
+          hoTen,
+          tongTien,
+          sanPhamDau: sanPham,
+        })).catch(err => console.error('[SMS delivery]', err.message));
+      }
+    }
+
     res.json({ ok: true });
   } catch (error) {
     console.error(error);
@@ -738,32 +791,32 @@ router.get('/orders/:id', async (req, res) => {
   try {
     const db = mongoose.connection.db;
     const { ObjectId } = mongoose.Types;
-    const order = await db.collection('DONHANG').aggregate([
-      { $match: { _id: new ObjectId(req.params.id) } },
-      { $lookup: { from: 'NGUOIDUNG', localField: 'nguoidung_id', foreignField: '_id', as: 'user_info' } },
-      { $lookup: { from: 'CHITIETDONHANG', localField: '_id', foreignField: 'donhang_id', as: 'items' } },
-      { $unwind: { path: '$user_info', preserveNullAndEmptyArrays: true } },
-    ]).toArray();
-    if (!order.length) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
-    const o = order[0];
+    // san_pham đã embedded trong DONHANG
+    const o = await db.collection('DONHANG').findOne({ _id: new ObjectId(req.params.id) });
+    if (!o) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+
+    const rawDate = o.ngay_tao || o.ngaytao;
+    const pttt    = o.phuong_thuc_tt || o.phuong_thuc_thanh_toan || '';
+    const sanPham = Array.isArray(o.san_pham) ? o.san_pham : [];
+
     res.json({
-      id: o._id.toString(),
-      code: o.mavandon || `DH-${o._id.toString().slice(-6).toUpperCase()}`,
-      name: o.thong_tin_nhan_hang?.nguoi_nhan || o.user_info?.ten || 'Khách hàng',
-      phone: o.thong_tin_nhan_hang?.sodienthoai || o.user_info?.sodienthoai || '',
-      address: o.thong_tin_nhan_hang?.diachi || '',
-      date: o.ngaytao ? new Date(o.ngaytao).toLocaleDateString('vi-VN') : '—',
-      status: o.trang_thai_don_hang,
-      payment: o.phuong_thuc_thanh_toan,
-      paymentStatus: o.trang_thai_thanh_toan,
-      total: o.tong_tien_thanh_toan || 0,
-      note: o.ghi_chu || '',
-      items: (o.items || []).map(it => ({
-        id: it._id?.toString(),
-        name: it.ten_sanpham || it.tensanpham || 'Sản phẩm',
-        qty: it.soluong || 1,
-        price: it.don_gia || it.gia || 0,
-        image: it.hinhanh || null,
+      id:           o._id.toString(),
+      code:         o.ma_don_hang || o.mavandon || ('DH-' + o._id.toString().slice(-6).toUpperCase()),
+      name:         o.ho_ten || 'Khách hàng',
+      phone:        o.so_dien_thoai || '',
+      address:      [o.dia_chi, o.tinh_thanh].filter(Boolean).join(', '),
+      date:         rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : '—',
+      status:       o.trang_thai_don_hang,
+      payment:      pttt,
+      paymentStatus: o.trang_thai_tt || o.trang_thai_thanh_toan || '',
+      total:        o.tong_tien || o.tong_tien_thanh_toan || 0,
+      note:         o.ghi_chu || '',
+      items: sanPham.map(sp => ({
+        id:    sp.san_pham_id?.toString() || '',
+        name:  sp.ten_san_pham || sp.tensanpham || 'Sản phẩm',
+        qty:   sp.so_luong || sp.soluong || 1,
+        price: sp.don_gia || sp.gia || 0,
+        image: Array.isArray(sp.hinhanh) ? sp.hinhanh[0] : (sp.hinhanh || null),
       })),
     });
   } catch (error) {
