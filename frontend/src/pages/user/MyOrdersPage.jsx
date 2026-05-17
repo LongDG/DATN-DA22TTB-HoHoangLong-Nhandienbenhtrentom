@@ -5,6 +5,7 @@ import {
   ChevronDown, ChevronUp, MapPin, Phone, ArrowLeft, RefreshCw,
   AlertTriangle,
 } from 'lucide-react';
+import { authFetch } from '../../utils/authFetch';
 
 const API = 'http://localhost:5000/api';
 const fmt = (n) => n ? n.toLocaleString('vi-VN') + 'đ' : '0đ';
@@ -33,7 +34,7 @@ function OrderCard({ order, onCancel }) {
     if (!window.confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
     setCancelling(true);
     try {
-      const res = await fetch(`${API}/orders/${order._id}/cancel`, { method: 'PATCH' });
+      const res = await authFetch(`${API}/orders/${order._id}/cancel`, { method: 'PATCH' });
       if (res.ok) onCancel(order._id);
     } catch {}
     finally { setCancelling(false); }
@@ -189,7 +190,7 @@ export default function MyOrdersPage() {
     try {
       const uid = user?.id || user?._id;
       const url = uid ? `${API}/orders?user_id=${uid}` : `${API}/orders`;
-      const res  = await fetch(url);
+      const res  = await authFetch(url);
       const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
     } catch {}

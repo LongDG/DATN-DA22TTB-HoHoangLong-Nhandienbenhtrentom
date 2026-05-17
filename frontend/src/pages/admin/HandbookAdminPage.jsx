@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 const API = 'http://localhost:5000/api';
+import { authFetch } from '../../utils/authFetch';
 
 const CATEGORIES = [
   { key: 'ky_thuat_nuoi',  label: 'Kỹ thuật nuôi'   },
@@ -42,7 +43,7 @@ function ArticleModal({ article, onClose, onSave }) {
       const payload = { ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) };
       const url    = isEdit ? `${API}/handbook/${article.id}` : `${API}/handbook`;
       const method = isEdit ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const res = await authFetch(url, { method, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error((await res.json()).message);
       onSave(isEdit ? '✅ Đã cập nhật bài viết!' : '✅ Đã tạo bài viết mới!');
     } catch (e) { setError(e.message); }
@@ -180,7 +181,7 @@ export default function HandbookAdminPage() {
     const params = new URLSearchParams({ page, limit: LIMIT });
     if (search) params.set('search', search);
     // Admin fetches all statuses — workaround: fetch without trangthai filter
-    fetch(`${API}/handbook?${params}&_admin=1`)
+    authFetch(`${API}/handbook?${params}&_admin=1`)
       .then(r => r.json())
       .then(d => { setArticles(d.articles ?? []); setTotal(d.total ?? 0); })
       .catch(console.error)
@@ -194,7 +195,7 @@ export default function HandbookAdminPage() {
   }, [searchInput]);
 
   const handleDelete = async (id) => {
-    await fetch(`${API}/handbook/${id}`, { method: 'DELETE' });
+    await authFetch(`${API}/handbook/${id}`, { method: 'DELETE' });
     setModal(null);
     showToast('✅ Đã xóa bài viết!');
     fetchArticles();

@@ -95,7 +95,7 @@ function ProductModal({ mode, product, categories, onClose, onSave }) {
       };
       const url    = mode === 'edit' ? `${API_BASE}/admin/inventory/${product.id}` : `${API_BASE}/admin/inventory`;
       const method = mode === 'edit' ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const res = await authFetch(url, { method, body: JSON.stringify(payload) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       onSave();

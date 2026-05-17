@@ -75,11 +75,15 @@ export default function OrderSuccessPage() {
               className="flex items-center justify-center gap-2 py-3 border-2 border-[#0077b6] text-[#0077b6] font-bold rounded-2xl hover:bg-[#e8f4fd] transition-all">
               <ShoppingBag className="w-4 h-4" />Mua tiếp
             </button>
-            <button onClick={() => navigate('/home')}
+            <button onClick={() => navigate('/my-orders')}
               className="flex items-center justify-center gap-2 py-3 bg-[#0077b6] text-white font-bold rounded-2xl hover:bg-[#005d90] transition-all shadow-lg shadow-[#0077b6]/25">
-              <Home className="w-4 h-4" />Trang chủ
+              <Package className="w-4 h-4" />Xem đơn hàng
             </button>
           </div>
+          <button onClick={() => navigate('/home')}
+            className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-[#707881] hover:text-[#404850] transition-colors">
+            <Home className="w-4 h-4" />Về trang chủ
+          </button>
         </div>
       </div>
     </div>

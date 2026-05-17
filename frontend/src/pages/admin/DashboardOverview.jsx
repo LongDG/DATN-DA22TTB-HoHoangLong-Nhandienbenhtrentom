@@ -60,6 +60,25 @@ export default function DashboardOverview() {
     { icon: Banknote,      label: 'Doanh Thu (VND)',     value: formatCurrency(stats.totalRevenue),             badge: 'Lợi nhuận',   iconBg: 'bg-[#cde5ff]/50',   iconColor: 'text-[#005d90]' },
   ];
 
+  const exportDashboardCSV = () => {
+    const today = new Date().toLocaleDateString('vi-VN');
+    const rows = [
+      ['Chỉ số', 'Giá trị', 'Ngày xuất'],
+      ['Tổng chẩn đoán AI', stats.totalDiagnostics, today],
+      ['Số lượng đơn hàng', stats.totalOrders || stats.newOrders || 0, today],
+      ['Tổng người dùng', stats.totalUsers, today],
+      ['Doanh thu (VND)', stats.totalRevenue || 0, today],
+    ];
+    const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `bao-cao-tong-quan-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       {/* Page Header */}
@@ -73,7 +92,7 @@ export default function DashboardOverview() {
             <Calendar className="w-4 h-4" />
             Hôm nay: {new Date().toLocaleDateString('vi-VN')}
           </button>
-          <button className="px-4 py-2 bg-[#0077b6] text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm hover:brightness-110 active:scale-95 transition-all">
+          <button onClick={exportDashboardCSV} className="px-4 py-2 bg-[#0077b6] text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm hover:brightness-110 active:scale-95 transition-all">
             <Download className="w-4 h-4" />
             Xuất báo cáo
           </button>

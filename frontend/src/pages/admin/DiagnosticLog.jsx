@@ -336,6 +336,27 @@ export default function DiagnosticLog() {
     fetchLogs(applied, pg);
   };
 
+  // CSV Export
+  const exportCSV = () => {
+    if (!logs.length) return;
+    const headers = ['ID','Người dùng','Ngày chẩn đoán','Bệnh phát hiện','Độ tin cậy (%)','Trạng thái xác minh'];
+    const rows = logs.map(l => [
+      l.id, l.user, l.date, l.disease,
+      Math.round((l.confidence || 0) * 100),
+      l.status || '',
+    ]);
+    const csv = [headers, ...rows]
+      .map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `nhat-ky-chan-doan-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Kiểm tra có filter đang active không
   const hasFilter = applied.date_range !== 'all' || applied.disease !== ''
     || applied.min_confidence > 0 || applied.status !== '';
@@ -354,7 +375,9 @@ export default function DiagnosticLog() {
             {hasFilter && <span className="ml-2 px-2 py-0.5 bg-[#cde5ff] text-[#005d90] text-xs font-bold rounded-full">Đang lọc</span>}
           </p>
         </div>
-        <button className="bg-[#005d90] hover:bg-[#0077b6] text-white px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all font-semibold text-sm shadow-md active:scale-95">
+        <button onClick={exportCSV}
+          className="bg-[#005d90] hover:bg-[#0077b6] text-white px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all font-semibold text-sm shadow-md active:scale-95 disabled:opacity-40"
+          disabled={!logs.length}>
           <Download size={18} />Xuất dữ liệu CSV
         </button>
       </div>

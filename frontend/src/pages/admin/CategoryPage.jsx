@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 const API = 'http://localhost:5000/api';
+import { authFetch } from '../../utils/authFetch';
 
 /* Màu preset */
 const COLOR_PRESETS = [
@@ -60,7 +61,7 @@ function CategoryModal({ category, onClose, onSave }) {
     try {
       const url    = isEdit ? `${API}/categories/${category.id}` : `${API}/categories`;
       const method = isEdit ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const res = await authFetch(url, { method, body: JSON.stringify(form) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       onSave(isEdit ? '✅ Đã cập nhật danh mục!' : '✅ Đã thêm danh mục mới!');
@@ -192,8 +193,8 @@ function DeleteModal({ category, onClose, onConfirm }) {
 /* ── Toggle Active ── */
 async function toggleActive(id, active) {
   // Không có field active riêng — dùng PUT với toàn bộ data
-  await fetch(`${API}/categories/${id}`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+  await authFetch(`${API}/categories/${id}`, {
+    method: 'PUT',
     body: JSON.stringify({ active: !active }),
   });
 }
@@ -209,7 +210,7 @@ export default function CategoryPage() {
 
   const fetchCategories = useCallback(() => {
     setLoading(true);
-    fetch(`${API}/categories`)
+    authFetch(`${API}/categories`)
       .then(r => r.json())
       .then(setCategories)
       .catch(console.error)
@@ -219,7 +220,7 @@ export default function CategoryPage() {
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
   const handleDelete = async (id) => {
-    const res = await fetch(`${API}/categories/${id}`, { method: 'DELETE' });
+    const res = await authFetch(`${API}/categories/${id}`, { method: 'DELETE' });
     const data = await res.json();
     if (!res.ok) return { error: data.message };
     setModal(null);
@@ -228,8 +229,8 @@ export default function CategoryPage() {
   };
 
   const handleToggle = async (cat) => {
-    await fetch(`${API}/categories/${cat.id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    await authFetch(`${API}/categories/${cat.id}`, {
+      method: 'PUT',
       body: JSON.stringify({ label: cat.label, color: cat.color, icon: cat.icon, order: cat.order, active: !cat.active }),
     });
     showToast(cat.active ? '⏸ Đã ẩn danh mục' : '✅ Đã hiển thị danh mục');

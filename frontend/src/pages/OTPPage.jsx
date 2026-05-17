@@ -56,7 +56,9 @@ export default function OTPPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("OTP submitted:", otp.join(''));
+    // TODO: Gọi POST /api/auth/verify-otp với { otp: otp.join('') }
+    // Sau khi OTP đúng → navigate('/reset-password')
+    alert('Tính năng xác thực OTP đang được triển khai. Vui lòng thử lại sau!');
   }
 
   const isComplete = otp.every(d => d !== '');

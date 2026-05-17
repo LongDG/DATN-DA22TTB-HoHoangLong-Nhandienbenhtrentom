@@ -8,6 +8,7 @@ import {
 
 const API = 'http://localhost:5000/api';
 const fmt = (n) => n ? n.toLocaleString('vi-VN') + 'đ' : '0đ';
+import { authFetch } from '../../utils/authFetch';
 
 const TINH = [
   'An Giang','Bạc Liêu','Bến Tre','Cà Mau','Cần Thơ','Đồng Tháp',
@@ -16,12 +17,12 @@ const TINH = [
 ];
 
 export default function CheckoutPage() {
-  const { cart, updateQty, removeFromCart } = useOutletContext();
+  const { cart, updateQty, removeFromCart, user } = useOutletContext();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    ho_ten: '', so_dien_thoai: '', tinh_thanh: '', dia_chi: '',
-    phuong_thuc_tt: 'cod', ghi_chu: '',
+    ho_ten: user?.ten || '', so_dien_thoai: user?.sodienthoai || '',
+    tinh_thanh: '', dia_chi: '', phuong_thuc_tt: 'cod', ghi_chu: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -39,9 +40,8 @@ export default function CheckoutPage() {
     if (cart.length === 0)          return setError('Giỏ hàng trống');
     setSubmitting(true); setError('');
     try {
-      const res = await fetch(`${API}/orders`, {
+      const res = await authFetch(`${API}/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
           items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, image: i.image })),

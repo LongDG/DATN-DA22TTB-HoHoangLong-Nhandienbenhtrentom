@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 const API = 'http://localhost:5000/api';
+import { authFetch } from '../../utils/authFetch';
 
 const STATUS_CFG = {
   cho_phan_hoi: { label: 'Chờ phản hồi', cls: 'bg-[#ffdad6] text-[#ba1a1a]' },
@@ -26,8 +27,8 @@ function NewModal({ onClose, onDone, user }) {
     if (!form.vitri_tinh)     return setErr('Vui lòng chọn tỉnh/thành');
     setSaving(true); setErr('');
     try {
-      const res = await fetch(`${API}/admin/consultations`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
+      const res = await authFetch(`${API}/admin/consultations`, {
+        method:'POST',
         body: JSON.stringify({
           ten_nguoidung: user?.ten || 'Người dùng',
           nguoidung_id:  user?.id || user?._id || null,
@@ -102,7 +103,7 @@ export default function ConsultUserPage() {
       const url = uid
         ? `${API}/admin/consultations?user_id=${uid}`
         : `${API}/admin/consultations`;
-      const res = await fetch(url);
+      const res = await authFetch(url);
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
       setTickets(list);
@@ -117,7 +118,7 @@ export default function ConsultUserPage() {
 
   const fetchDetail = async (id) => {
     try {
-      const res = await fetch(`${API}/admin/consultations/${id}`);
+      const res = await authFetch(`${API}/admin/consultations/${id}`);
       const data = await res.json();
       setMessages(data.tin_nhan || []);
       // Cập nhật status trong ticket list
@@ -150,8 +151,8 @@ export default function ConsultUserPage() {
     const text = input.trim(); setInput(''); setSending(true);
     setMessages(prev => [...prev, { vai_tro:'nguoidung', noi_dung:text, thoigian:new Date().toISOString() }]);
     try {
-      await fetch(`${API}/admin/consultations/${active._id}/reply-user`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
+      await authFetch(`${API}/admin/consultations/${active._id}/reply-user`, {
+        method:'POST',
         body: JSON.stringify({ noi_dung: text }),
       });
       await fetchDetail(active._id);
