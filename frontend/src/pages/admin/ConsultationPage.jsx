@@ -7,6 +7,15 @@ import {
 
 const API_BASE = 'http://localhost:5000/api';
 
+// Tự động gắn Bearer token từ localStorage
+const authFetch = (url, opts = {}) => {
+  const token = localStorage.getItem('token') || '';
+  return fetch(url, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(opts.headers || {}) },
+  });
+};
+
 const STATUS_CONFIG = {
   cho_phan_hoi: { label: 'Chờ phản hồi', cls: 'bg-[#ffdad6] text-[#ba1a1a]' },
   dang_tu_van:  { label: 'Đang tư vấn',  cls: 'bg-[#e7e8e9] text-[#404850]'  },
@@ -239,8 +248,8 @@ export default function ConsultationPage() {
   // Fetch list + stats on mount
   const fetchList = useCallback(async () => {
     const [sRes, lRes] = await Promise.all([
-      fetch(`${API_BASE}/admin/consultations/stats`).then(r => r.json()),
-      fetch(`${API_BASE}/admin/consultations`).then(r => r.json()),
+      authFetch(`${API_BASE}/admin/consultations/stats`).then(r => r.json()),
+      authFetch(`${API_BASE}/admin/consultations`).then(r => r.json()),
     ]);
     setStats(sRes);
     setList(Array.isArray(lRes) ? lRes : []);
@@ -256,7 +265,7 @@ export default function ConsultationPage() {
   useEffect(() => {
     if (!activeId) return;
     setLoadingDetail(true);
-    fetch(`${API_BASE}/admin/consultations/${activeId}`)
+    authFetch(`${API_BASE}/admin/consultations/${activeId}`)
       .then(r => r.json())
       .then(data => {
         const listItem = list.find(l => l.id === activeId);
@@ -267,9 +276,8 @@ export default function ConsultationPage() {
   }, [activeId]);
 
   const handleReply = async (id, text) => {
-    const res = await fetch(`${API_BASE}/admin/consultations/${id}/reply`, {
+    const res = await authFetch(`${API_BASE}/admin/consultations/${id}/reply`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ noi_dung: text }),
     });
     const data = await res.json();
@@ -285,7 +293,7 @@ export default function ConsultationPage() {
   };
 
   const handleClose = async (id) => {
-    await fetch(`${API_BASE}/admin/consultations/${id}/close`, { method: 'PATCH' });
+    await authFetch(`${API_BASE}/admin/consultations/${id}/close`, { method: 'PATCH' });
     setDetail(prev => ({ ...prev, status: 'da_dong' }));
     setList(prev => prev.map(c => c.id === id ? { ...c, status: 'da_dong' } : c));
     setStats(prev => ({ ...prev, active: Math.max(0, prev.active - 1), done: prev.done + 1 }));

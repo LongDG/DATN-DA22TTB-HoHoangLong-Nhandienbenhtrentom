@@ -70,8 +70,34 @@ router.post('/', async (req, res) => {
 });
 
 /**
+ * GET /api/orders?user_id=xxx
+ * Lấy danh sách đơn hàng theo user_id
+ */
+router.get('/', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { ObjectId } = mongoose.Types;
+    const { user_id } = req.query;
+    const filter = {};
+    if (user_id) {
+      // Hỗ trợ cả string và ObjectId
+      const conditions = [{ user_id }];
+      try { conditions.push({ user_id: new ObjectId(user_id) }); } catch {}
+      filter.$or = conditions;
+    }
+    const orders = await db.collection('DONHANG')
+      .find(filter)
+      .sort({ ngay_tao: -1 })
+      .toArray();
+    res.json(orders.map(o => ({ ...o, _id: o._id.toString() })));
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi lấy đơn hàng', error: error.message });
+  }
+});
+
+/**
  * GET /api/orders/:id
- * Lấy chi tiết đơn hàng theo ID (để hiển thị trang xác nhận)
+ * Lấy chi tiết đơn hàng theo ID
  */
 router.get('/:id', async (req, res) => {
   try {
@@ -82,6 +108,29 @@ router.get('/:id', async (req, res) => {
     res.json({ ...order, _id: order._id.toString() });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi lấy đơn hàng', error: error.message });
+  }
+});
+
+/**
+ * PATCH /api/orders/:id/cancel
+ * User hủy đơn hàng (chỉ khi đang ở trạng thái cho_xac_nhan)
+ */
+router.patch('/:id/cancel', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { ObjectId } = mongoose.Types;
+    const order = await db.collection('DONHANG').findOne({ _id: new ObjectId(req.params.id) });
+    if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+    if (order.trang_thai_don_hang !== 'cho_xac_nhan') {
+      return res.status(400).json({ message: 'Chỉ có thể hủy đơn hàng đang chờ xác nhận' });
+    }
+    await db.collection('DONHANG').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: { trang_thai_don_hang: 'da_huy', capnhat: new Date() } }
+    );
+    res.json({ ok: true, message: 'Đã hủy đơn hàng' });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi hủy đơn hàng', error: error.message });
   }
 });
 

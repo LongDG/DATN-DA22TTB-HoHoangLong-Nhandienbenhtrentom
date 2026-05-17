@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
+import { authFetch } from '../../utils/authFetch';
 
 /** Trả về class Tailwind badge dựa trên tên bệnh */
 function getDiseaseBadge(disease) {
@@ -71,8 +72,8 @@ function DetailPanel({ log, onVerified }) {
         if (!correctedDisease.trim()) { setToast({ type: 'error', msg: 'Vui lòng nhập tên bệnh đúng' }); setSaving(false); return; }
         body.corrected_disease = correctedDisease.trim();
       }
-      const res = await fetch(`${API_BASE}/admin/diagnostics/${log.id}/verify`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      const res = await authFetch(`${API_BASE}/admin/diagnostics/${log.id}/verify`, {
+        method: 'PUT', body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
@@ -289,7 +290,7 @@ export default function DiagnosticLog() {
       page:           pg,
       limit:          10,
     });
-    fetch(`${API_BASE}/admin/diagnostics?${q}`)
+    authFetch(`${API_BASE}/admin/diagnostics?${q}`)
       .then(r => r.json())
       .then(data => {
         // API mới trả { logs, total, totalPages }

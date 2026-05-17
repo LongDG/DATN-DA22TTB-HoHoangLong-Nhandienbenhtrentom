@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Bell, User, LogOut, Menu, X } from 'lucide-react';
+import { ShoppingCart, Package, User, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 const NAV_LINKS = [
@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { to: '/store',        label: 'Cửa hàng thuốc',   end: false },
   { to: '/handbook',     label: 'Sổ tay kỹ thuật',  end: false },
   { to: '/consult-user', label: 'Tư vấn',            end: false },
+  { to: '/my-orders',    label: 'Đơn hàng',           end: false },
 ];
 
 export function UserHeader({ user, onLogout, cartCount = 0, onOpenCart }) {
@@ -84,10 +85,12 @@ export function UserHeader({ user, onLogout, cartCount = 0, onOpenCart }) {
             )}
           </button>
 
-          {/* Bell */}
-          <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
-            <Bell className="w-5 h-5" />
-          </button>
+          {/* My Orders shortcut */}
+          <NavLink to="/my-orders"
+            className="p-2 text-slate-500 hover:bg-[#0077b6]/10 hover:text-[#0077b6] rounded-full transition-colors"
+            title="Đơn hàng của tôi">
+            <Package className="w-5 h-5" />
+          </NavLink>
 
           {/* User */}
           <div className="flex items-center gap-2 pl-2 border-l border-slate-200">

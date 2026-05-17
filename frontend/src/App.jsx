@@ -20,6 +20,7 @@ import HandbookAdminPage from './pages/admin/HandbookAdminPage';
 import CheckoutPage from './pages/user/CheckoutPage';
 import OrderSuccessPage from './pages/user/OrderSuccessPage';
 import ConsultUserPage from './pages/user/ConsultUserPage';
+import MyOrdersPage from './pages/user/MyOrdersPage';
 import CategoryPage from './pages/admin/CategoryPage';
 
 const API_URL = 'http://localhost:5000/api';
@@ -222,6 +223,18 @@ export default function App() {
         }
       >
         <Route index element={<OrderSuccessPage />} />
+      </Route>
+
+      {/* Lịch sử đơn hàng */}
+      <Route
+        path="/my-orders"
+        element={
+          user && !isAdmin(user)
+            ? <UserLayout user={user} onLogout={handleLogout} />
+            : <Navigate to="/" replace />
+        }
+      >
+        <Route index element={<MyOrdersPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

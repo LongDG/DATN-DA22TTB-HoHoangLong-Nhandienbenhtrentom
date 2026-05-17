@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
+import { authFetch } from '../../utils/authFetch';
 
 const CATEGORIES = [
   { key: 'all',                 label: 'Tất cả danh mục' },
@@ -332,7 +333,7 @@ export default function InventoryPage() {
     setLoading(true);
     const params = new URLSearchParams({ page, limit: LIMIT, category });
     if (search) params.set('search', search);
-    fetch(`${API_BASE}/admin/inventory?${params}`)
+    authFetch(`${API_BASE}/admin/inventory?${params}`)
       .then(r => r.json())
       .then(data => {
         setProducts(data.products ?? []);
@@ -351,7 +352,7 @@ export default function InventoryPage() {
   }, [searchInput]);
 
   const handleDelete = async (id) => {
-    await fetch(`${API_BASE}/admin/inventory/${id}`, { method: 'DELETE' });
+    await authFetch(`${API_BASE}/admin/inventory/${id}`, { method: 'DELETE' });
     setModal(null);
     showToast('✅ Đã xóa sản phẩm thành công!');
     fetchInventory();

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
+import { authFetch } from '../../utils/authFetch';
 
 const ROLE_OPTIONS = [
   { key: 'all',   label: 'Tất cả vai trò' },
@@ -34,8 +35,8 @@ function EditUserModal({ user, onClose, onSave }) {
     if (!form.ten?.trim()) { setError('Vui lòng nhập tên người dùng'); return; }
     setSaving(true); setError('');
     try {
-      const res = await fetch(`${API_BASE}/admin/users/${user.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
+      const res = await authFetch(`${API_BASE}/admin/users/${user.id}`, {
+        method: 'PUT', body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error((await res.json()).message);
       onSave('✅ Đã cập nhật người dùng!');
@@ -135,7 +136,7 @@ export default function UserManagementPage() {
     setLoading(true);
     const params = new URLSearchParams({ page, limit: LIMIT, role });
     if (search) params.set('search', search);
-    fetch(`${API_BASE}/admin/users?${params}`)
+    authFetch(`${API_BASE}/admin/users?${params}`)
       .then(r => r.json())
       .then(data => { setUsers(data.users ?? []); setTotal(data.total ?? 0); })
       .catch(console.error)
@@ -149,7 +150,7 @@ export default function UserManagementPage() {
   }, [searchInput]);
 
   const handleDelete = async (id) => {
-    await fetch(`${API_BASE}/admin/users/${id}`, { method: 'DELETE' });
+    await authFetch(`${API_BASE}/admin/users/${id}`, { method: 'DELETE' });
     setModal(null);
     showToast('✅ Đã xóa tài khoản thành công!');
     fetchUsers();

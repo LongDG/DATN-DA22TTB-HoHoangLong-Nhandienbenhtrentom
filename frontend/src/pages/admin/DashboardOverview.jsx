@@ -6,6 +6,7 @@ import {
   MapPin, Reply, AlertTriangle, ShoppingCart,
 } from 'lucide-react';
 import StatCard from '../../components/StatCard';
+import { authFetch } from '../../utils/authFetch';
 
 const API_BASE = 'http://localhost:5000/api';
 
@@ -30,23 +31,23 @@ export default function DashboardOverview() {
   const [lowStock, setLowStock]           = useState({ items: [], outOfStock: 0, threshold: 15 });
 
   useEffect(() => {
-    fetch(`${API_BASE}/admin/stats`)
+    authFetch(`${API_BASE}/admin/stats`)
       .then(r => r.json())
       .then(setStats)
       .catch(err => console.error('Lỗi thống kê:', err));
 
-    fetch(`${API_BASE}/admin/diagnostics`)
+    authFetch(`${API_BASE}/admin/diagnostics`)
       .then(r => r.json())
       .then(data => setRecentLogs(data.slice(0, 3)))
       .catch(err => console.error('Lỗi nhật ký:', err));
 
     // Chỉ lấy tư vấn đang CHỜ PHẢN HỒI cho tổng quan
-    fetch(`${API_BASE}/admin/consultations?status=cho_phan_hoi`)
+    authFetch(`${API_BASE}/admin/consultations?status=cho_phan_hoi`)
       .then(r => r.json())
       .then(setConsultations)
       .catch(err => console.error('Lỗi tư vấn:', err));
 
-    fetch(`${API_BASE}/admin/low-stock?limit=6`)
+    authFetch(`${API_BASE}/admin/low-stock?limit=6`)
       .then(r => r.json())
       .then(setLowStock)
       .catch(err => console.error('Lỗi tồn kho:', err));

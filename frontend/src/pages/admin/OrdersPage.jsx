@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
+import { authFetch } from '../../utils/authFetch';
 
 const STATUS_OPTIONS = [
   { key: 'all',           label: 'Tất cả trạng thái' },
@@ -56,7 +57,7 @@ function OrderDetailModal({ orderId, onClose, onStatusChange }) {
   const [toast, setToast] = useState('');
 
   useEffect(() => {
-    fetch(`${API_BASE}/admin/orders/${orderId}`)
+    authFetch(`${API_BASE}/admin/orders/${orderId}`)
       .then(r => r.json())
       .then(setOrder)
       .catch(console.error)
@@ -66,10 +67,8 @@ function OrderDetailModal({ orderId, onClose, onStatusChange }) {
   const handleStatusChange = async (newStatus) => {
     setUpdating(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trang_thai: newStatus }),
+      const res = await authFetch(`${API_BASE}/admin/orders/${orderId}/status`, {
+        method: 'PATCH', body: JSON.stringify({ trang_thai: newStatus }),
       });
       if (res.ok) {
         setOrder(prev => ({ ...prev, status: newStatus }));
@@ -216,7 +215,7 @@ export default function OrdersPage() {
   const fetchOrders = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams({ page, limit: LIMIT, status });
-    fetch(`${API_BASE}/admin/orders?${params}`)
+    authFetch(`${API_BASE}/admin/orders?${params}`)
       .then(r => r.json())
       .then(data => {
         setOrders(data.orders ?? []);

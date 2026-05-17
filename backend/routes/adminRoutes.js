@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+
+// Bảo vệ toàn bộ admin routes: phải đăng nhập và là admin
+router.use(authMiddleware);
+router.use(adminMiddleware);
 
 router.get('/stats', async (req, res) => {
   try {
