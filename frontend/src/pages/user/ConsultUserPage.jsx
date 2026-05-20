@@ -137,11 +137,43 @@ export default function ConsultUserPage() {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages]);
 
-  // Polling 5s khi có phiếu đang chọn
+  // Polling 5s khi có phiếu đang chọn — dừng tự động khi tab ẩn
   useEffect(() => {
     if (!active) return;
-    const id = setInterval(() => fetchDetail(active._id), 5000);
-    return () => clearInterval(id);
+
+    let intervalId = null;
+
+    const startPolling = () => {
+      if (intervalId) return; // tránh tạo nhiều interval
+      intervalId = setInterval(() => {
+        if (!document.hidden) fetchDetail(active._id);
+      }, 5000);
+    };
+
+    const stopPolling = () => {
+      clearInterval(intervalId);
+      intervalId = null;
+    };
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopPolling();
+      } else {
+        // Tab active trở lại → fetch ngay lập tức rồi mới bắt đầu lại interval
+        fetchDetail(active._id);
+        startPolling();
+      }
+    };
+
+    // Khởi chạy ngay nếu tab đang hiển thị
+    if (!document.hidden) startPolling();
+
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      stopPolling();
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [active?._id]);
 
   const selectTicket = (t) => { setActive(t); fetchDetail(t._id); };
