@@ -9,6 +9,7 @@ const productRoutes  = require("./routes/productRoutes");
 const handbookRoutes = require("./routes/handbookRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const orderRoutes    = require("./routes/orderRoutes");    // Route đặt hàng người dùng
+const shrimpPriceRoutes = require("./routes/shrimpPriceRoutes"); // Giá tôm
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,7 +32,8 @@ app.use("/api/admin",      adminRoutes);
 app.use("/api/products",   productRoutes);
 app.use("/api/handbook",   handbookRoutes);
 app.use("/api/categories", categoryRoutes);
-app.use("/api/orders",     orderRoutes);    // Đặt hàng người dùng
+app.use("/api/orders",        orderRoutes);
+app.use("/api/shrimp-prices", shrimpPriceRoutes); // Giá tôm thị trường
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend Node.js is running (MVC Architecture)" });

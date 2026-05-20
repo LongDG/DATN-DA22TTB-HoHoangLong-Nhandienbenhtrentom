@@ -23,6 +23,7 @@ import OrderSuccessPage from './pages/user/OrderSuccessPage';
 import ConsultUserPage from './pages/user/ConsultUserPage';
 import MyOrdersPage from './pages/user/MyOrdersPage';
 import CategoryPage from './pages/admin/CategoryPage';
+import ShrimpPricePage from './pages/admin/ShrimpPricePage';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -176,7 +177,8 @@ export default function App() {
         <Route path="consult"     element={<ConsultationPage />} />
         <Route path="users"       element={<UserManagementPage />} />
         <Route path="categories"  element={<CategoryPage />} />
-        <Route path="handbook"    element={<HandbookAdminPage />} />
+        <Route path="handbook"      element={<HandbookAdminPage />} />
+        <Route path="shrimp-prices" element={<ShrimpPricePage />} />
       </Route>
 
       {/* Handbook user page */}

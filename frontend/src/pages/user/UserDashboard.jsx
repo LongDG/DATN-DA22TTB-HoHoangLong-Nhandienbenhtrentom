@@ -105,8 +105,34 @@ function DiagnosticSection() {
   );
 }
 
-/* ── Market Stats ── */
+/* ── Market Stats — fetch từ /api/shrimp-prices ── */
 function MarketStats() {
+  const [data, setData]       = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/shrimp-prices')
+      .then(r => r.json())
+      .then(setData)
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const fmtVND = (n) => Number(n || 0).toLocaleString('vi-VN') + 'đ';
+  const fmtTime = (iso) => {
+    if (!iso) return null;
+    const d = new Date(iso);
+    const diff = Math.round((Date.now() - d) / 60000);
+    if (diff < 1)   return 'Vừa cập nhật';
+    if (diff < 60)  return `${diff} phút trước`;
+    if (diff < 1440) return `${Math.round(diff / 60)} giờ trước`;
+    return d.toLocaleDateString('vi-VN');
+  };
+
+  const gia   = data?.gia   || [];
+  const vung  = data?.vung  || 'ĐBSCL';
+  const capNhat = fmtTime(data?.capnhat_luc);
+
   return (
     <section className="py-20 bg-slate-50">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -114,12 +140,15 @@ function MarketStats() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h3 className="text-2xl font-bold">Giá tôm thị trường</h3>
-              <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider">Cập nhật: 10 phút trước • ĐBSCL</p>
+              <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider">
+                {capNhat ? `Cập nhật: ${capNhat} • ${vung}` : `Khu vực: ${vung}`}
+              </p>
             </div>
             <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold animate-pulse">
               <div className="w-1.5 h-1.5 bg-green-600 rounded-full" /> TRỰC TIẾP
             </div>
           </div>
+
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-100">
@@ -129,23 +158,48 @@ function MarketStats() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {[
-                { size: '20 con/kg', su: '285,000đ', the: '165,000đ', up: true,  val: '+2,500' },
-                { size: '30 con/kg', su: '240,000đ', the: '142,000đ', up: true,  val: '+1,800' },
-                { size: '40 con/kg', su: '210,000đ', the: '135,000đ', up: false, val: '-500'   },
-              ].map((row, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-5 font-bold text-slate-700">{row.size}</td>
-                  <td className="py-5 text-[#0077b6] font-bold">{row.su}</td>
-                  <td className="py-5 text-[#0077b6] font-bold">{row.the}</td>
-                  <td className="py-5">
-                    <span className={`inline-flex items-center gap-1 font-bold ${row.up ? 'text-green-600' : 'text-red-500'}`}>
-                      {row.up ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                      {row.val}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {loading
+                ? /* Skeleton rows */
+                  [1, 2, 3].map(i => (
+                    <tr key={i} className="animate-pulse">
+                      {[1, 2, 3, 4].map(j => (
+                        <td key={j} className="py-5">
+                          <div className="h-4 bg-slate-100 rounded-full w-20" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                : gia.length === 0
+                ? (
+                    <tr>
+                      <td colSpan={4} className="py-8 text-center text-slate-400 text-sm">
+                        Chưa có dữ liệu giá. Admin vui lòng cập nhật.
+                      </td>
+                    </tr>
+                  )
+                : gia.map((row, i) => (
+                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-5 font-bold text-slate-700">{row.co}</td>
+                      <td className="py-5 text-[#0077b6] font-bold">{fmtVND(row.tom_su)}</td>
+                      <td className="py-5 text-[#0077b6] font-bold">{fmtVND(row.tom_the)}</td>
+                      <td className="py-5">
+                        <span className={`inline-flex items-center gap-1 font-bold ${
+                          row.xu_huong > 0 ? 'text-green-600' : row.xu_huong < 0 ? 'text-red-500' : 'text-slate-400'
+                        }`}>
+                          {row.xu_huong > 0
+                            ? <TrendingUp className="w-4 h-4" />
+                            : row.xu_huong < 0
+                            ? <TrendingDown className="w-4 h-4" />
+                            : <span className="w-4 h-4 inline-block text-center">—</span>
+                          }
+                          {row.xu_huong !== 0 && (
+                            <span>{row.xu_huong > 0 ? '+' : '-'}{Number(row.thay_doi || 0).toLocaleString('vi-VN')}</span>
+                          )}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+              }
             </tbody>
           </table>
         </div>

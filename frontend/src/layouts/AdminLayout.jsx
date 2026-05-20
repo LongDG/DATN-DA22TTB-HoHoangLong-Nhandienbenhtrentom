@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Settings, LayoutDashboard, Microscope,
-  Package, ShoppingCart, MessageSquare, Book, LogOut, Users, Tag,
+  Package, ShoppingCart, MessageSquare, Book, LogOut, Users, Tag, TrendingUp,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -13,7 +13,8 @@ const NAV_ITEMS = [
   { to: '/admin/categories',  icon: Tag,             label: 'Danh mục'            },
   { to: '/admin/consult',     icon: MessageSquare,   label: 'Tư vấn'              },
   { to: '/admin/users',       icon: Users,           label: 'Người dùng'          },
-  { to: '/admin/handbook',    icon: Book,            label: 'Sổ tay kỹ thuật'     },
+  { to: '/admin/handbook',      icon: Book,         label: 'Sổ tay kỹ thuật'     },
+  { to: '/admin/shrimp-prices', icon: TrendingUp,   label: 'Giá tôm thị trường' },
 ];
 
 function Sidebar() {
