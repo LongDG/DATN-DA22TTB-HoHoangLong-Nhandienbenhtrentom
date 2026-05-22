@@ -4,7 +4,7 @@ import {
   Camera, Upload, ShieldCheck, Users, TrendingUp, TrendingDown,
   ArrowRight, ShoppingCart, CheckCircle2, X, AlertTriangle,
   AlertCircle, Info, Loader2, RefreshCw, ChevronRight,
-  ImageIcon, Zap,
+  ImageIcon, Zap, Clock, History, ChevronDown,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -552,6 +552,170 @@ function Hero() {
 }
 
 
+/* ── Nhật ký chẩn đoán (5 cái gần nhất) ── */
+const SEVERITY_COLORS = {
+  none:        { bg: 'bg-emerald-100', text: 'text-emerald-700',  dot: 'bg-emerald-500' },
+  medium:      { bg: 'bg-amber-100',   text: 'text-amber-700',    dot: 'bg-amber-500'   },
+  high:        { bg: 'bg-orange-100',  text: 'text-orange-700',   dot: 'bg-orange-500'  },
+  critical:    { bg: 'bg-red-100',     text: 'text-red-700',      dot: 'bg-red-500'     },
+  'Bình thường': { bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  'Cảnh báo':   { bg: 'bg-amber-100',   text: 'text-amber-700',   dot: 'bg-amber-500'   },
+  'Nguy hiểm':  { bg: 'bg-orange-100',  text: 'text-orange-700',  dot: 'bg-orange-500'  },
+  'Rất nguy hiểm': { bg: 'bg-red-100',  text: 'text-red-700',     dot: 'bg-red-500'     },
+};
+
+function DiagnosisHistory() {
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [total,   setTotal]   = useState(0);
+  const [page,    setPage]    = useState(1);
+  const LIMIT = 6;
+
+  const fetchHistory = async (p = 1) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token') || '';
+      const res   = await fetch(
+        `${API_BASE}/diagnose/history?limit=${LIMIT}&page=${p}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const data  = await res.json();
+      if (res.ok) {
+        setHistory(data.history || []);
+        setTotal(data.total || 0);
+        setPage(p);
+      }
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetchHistory(1); }, []);
+
+  const MA_BENH_COLOR = {
+    khoe_manh:  'bg-emerald-100 text-emerald-700',
+    dom_trang:  'bg-red-100 text-red-700',
+    mang_den:   'bg-slate-200 text-slate-700',
+    dau_vang:   'bg-yellow-100 text-yellow-700',
+    gan_tuy:    'bg-orange-100 text-orange-700',
+    ruot_trang: 'bg-blue-100 text-blue-700',
+  };
+
+  if (!loading && history.length === 0) return null; // ẩn nếu chưa có lịch sử
+
+  return (
+    <section className="py-16 px-6 bg-slate-50">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-end mb-8">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <History className="w-4 h-4" /> Nhật ký chẩn đoán
+            </div>
+            <h2 className="text-2xl font-extrabold text-slate-900">Lịch sử chẩn đoán của bạn</h2>
+          </div>
+          <button
+            onClick={() => fetchHistory(1)}
+            className="flex items-center gap-2 text-sm font-bold text-[#0077b6] hover:underline"
+          >
+            <RefreshCw className="w-4 h-4" /> Làm mới
+          </button>
+        </div>
+
+        {/* Grid */}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {Array.from({ length: LIMIT }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl overflow-hidden border border-slate-200 animate-pulse">
+                <div className="h-32 bg-slate-100" />
+                <div className="p-3 space-y-2">
+                  <div className="h-3 bg-slate-200 rounded-full w-3/4" />
+                  <div className="h-3 bg-slate-100 rounded-full w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {history.map(item => {
+              const sc = SEVERITY_COLORS[item.muc_do] || SEVERITY_COLORS.medium;
+              const cc = MA_BENH_COLOR[item.ma_benh]  || 'bg-slate-100 text-slate-600';
+              return (
+                <motion.div
+                  key={item.id}
+                  whileHover={{ y: -4 }}
+                  className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all group"
+                >
+                  {/* Ảnh */}
+                  <div className="h-32 bg-slate-100 relative overflow-hidden">
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={item.ten_benh}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={e => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Camera className="w-8 h-8 text-slate-300" />
+                      </div>
+                    )}
+                    {/* Overlay confidence */}
+                    <div className="absolute bottom-2 right-2">
+                      <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${sc.bg} ${sc.text}`}>
+                        {item.do_chinh_xac.toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-3">
+                    <p className="text-xs font-bold text-slate-800 leading-tight line-clamp-2 mb-2">
+                      {item.ten_benh}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${sc.dot}`} />
+                      <span className="text-[10px] text-slate-400 truncate">{item.muc_do}</span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5 text-[10px] text-slate-400">
+                      <Clock className="w-3 h-3" />
+                      {item.gio} {item.ngay}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {total > LIMIT && !loading && (
+          <div className="flex justify-center mt-8 gap-3">
+            {page > 1 && (
+              <button
+                onClick={() => fetchHistory(page - 1)}
+                className="px-4 py-2 text-sm font-bold border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors"
+              >
+                ‹ Trước
+              </button>
+            )}
+            <span className="px-4 py-2 text-sm text-slate-500">
+              Trang {page} / {Math.ceil(total / LIMIT)}
+            </span>
+            {page * LIMIT < total && (
+              <button
+                onClick={() => fetchHistory(page + 1)}
+                className="px-4 py-2 text-sm font-bold border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors"
+              >
+                Sau ›
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /* ── Market Stats — fetch từ /api/shrimp-prices ── */
 function MarketStats() {
   const [data, setData]       = useState(null);
@@ -782,6 +946,7 @@ export default function UserDashboard() {
     <div>
       <Hero />
       <DiagnosticSection />
+      <DiagnosisHistory />
       <MarketStats />
       <ProductPreview />
     </div>

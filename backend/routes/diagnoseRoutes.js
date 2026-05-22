@@ -1,15 +1,16 @@
 /**
- * diagnoseRoutes.js — Chẩn đoán bệnh tôm bằng AI + Gợi ý thuốc từ BENH & SANPHAM
+ * diagnoseRoutes.js — Chẩn đoán AI + Dual-write ảnh (Local + Cloudinary) + Gợi ý thuốc
  */
 
-const express  = require('express');
-const multer   = require('multer');
-const axios    = require('axios');
-const FormData = require('form-data');
-const mongoose = require('mongoose');
-const path     = require('path');
-const fs       = require('fs');
-const { authMiddleware } = require('../middleware/auth');
+const express    = require('express');
+const multer     = require('multer');
+const axios      = require('axios');
+const FormData   = require('form-data');
+const mongoose   = require('mongoose');
+const path       = require('path');
+const fs         = require('fs');
+const { authMiddleware }              = require('../middleware/auth');
+const { uploadDiagnosisImage, getBestImageUrl } = require('../utils/cloudStorage');
 
 const router = express.Router();
 
@@ -74,10 +75,13 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     } catch (aiErr) {
       cleanupFile(file.path);
       if (aiErr.response) return res.status(aiErr.response.status).json(aiErr.response.data);
-      return res.status(503).json({ message: 'AI service không phản hồi. Vui lòng thử lại sau.', error: aiErr.message });
+      return res.status(503).json({
+        message: 'AI service không phản hồi. Vui lòng thử lại sau.',
+        error:   aiErr.message,
+      });
     }
 
-    // 2. Validation thất bại → trả ngay
+    // 2. Validation thất bại → trả ngay (KHÔNG xóa file local — giữ để debug)
     if (!aiResponse.ok) {
       cleanupFile(file.path);
       return res.status(422).json(aiResponse);
@@ -87,13 +91,15 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     const result  = aiResponse.result;
     const disease = result.disease;
 
-    // 3. Tìm BENH + SANPHAM gợi ý
+    // 3. Dual-write ảnh: local (đã có) + Cloudinary (nếu cấu hình)
+    const { cloud_url, local_relative } = await uploadDiagnosisImage(file.path);
+
+    // 4. Tìm BENH + SANPHAM gợi ý
     let benhDoc          = null;
     let benhId           = null;
     let suggestedProducts = [];
 
     if (disease.code !== 'khoe_manh') {
-      // 3a. Tìm BENH
       try {
         const keywords = DISEASE_KEYWORDS[disease.code] || [disease.name.split('(')[0].trim()];
         const orQuery  = keywords.map(kw => ({ tenbenh: { $regex: kw, $options: 'i' } }));
@@ -101,7 +107,6 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
         if (benhDoc) benhId = benhDoc._id;
       } catch {}
 
-      // 3b. Tìm SANPHAM liên kết
       if (benhId) {
         try {
           const products = await db.collection('SANPHAM')
@@ -130,9 +135,8 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       }
     }
 
-    // 3c. Lưu vào KETQUANHANDIEN
-    const imageUrl = `/uploads/diagnoses/${file.filename}`;
-    const diagDoc  = {
+    // 5. Lưu vào KETQUANHANDIEN (có cả cloud_url và local_relative)
+    const diagDoc = {
       nguoidung_id:       req.user?.id ? new mongoose.Types.ObjectId(req.user.id) : null,
       ketqua_benh_id:     benhId,
       chuandoan_text:     disease.severity === 'none'
@@ -142,7 +146,8 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       ma_benh:            disease.code,
       do_chinh_xac:       result.confidence,
       muc_do_canh_bao:    { none: 'Bình thường', medium: 'Cảnh báo', high: 'Nguy hiểm', critical: 'Rất nguy hiểm' }[disease.severity] || 'Không rõ',
-      hinhanh_url:        imageUrl,
+      hinhanh_url:        local_relative,   // URL relative local (fallback)
+      cloud_url:          cloud_url,         // Cloudinary URL (null nếu chưa cấu hình)
       thiet_bi:           req.body.device || 'Web-Upload',
       ket_qua_xac_suat:   result.all_probs,
       model_version:      result.model_version,
@@ -153,11 +158,13 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     };
     const inserted = await db.collection('KETQUANHANDIEN').insertOne(diagDoc);
 
-    // 4. Trả kết quả
+    // 6. Trả kết quả
     return res.status(201).json({
       ok:          true,
       diagnose_id: inserted.insertedId.toString(),
-      image_url:   imageUrl,
+      image_url:   cloud_url || local_relative,  // Frontend dùng field này
+      cloud_url,
+      local_url:   local_relative,
       validation:  aiResponse.validation,
       benh_info:   benhDoc ? {
         id:         benhDoc._id.toString(),
@@ -198,13 +205,15 @@ router.get('/history', authMiddleware, async (req, res) => {
     res.json({
       history: docs.map(d => ({
         id:           d._id.toString(),
-        ten_benh:     d.ten_benh     || 'Không xác định',
-        ma_benh:      d.ma_benh      || '',
-        do_chinh_xac: d.do_chinh_xac || 0,
+        ten_benh:     d.ten_benh      || 'Không xác định',
+        ma_benh:      d.ma_benh       || '',
+        do_chinh_xac: d.do_chinh_xac  || 0,
         muc_do:       d.muc_do_canh_bao || '',
-        hinhanh_url:  d.hinhanh_url  || '',
+        image_url:    getBestImageUrl(d),  // cloud_url nếu có, else full local URL
         ngay:         d.ngay_nhan_dien
                         ? new Date(d.ngay_nhan_dien).toLocaleDateString('vi-VN') : '—',
+        gio:          d.ngay_nhan_dien
+                        ? new Date(d.ngay_nhan_dien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '',
       })),
       total, page, limit,
     });

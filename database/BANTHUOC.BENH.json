@@ -1,105 +1,86 @@
 [
   {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b90001"
-    },
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b90001" },
     "tenbenh": "Bệnh đốm trắng (WSSV)",
-    "mota": "Bệnh do virus WSSV gây ra. Tôm yếu, tấp mé bờ, vỏ có đốm trắng, lây lan và gây chết hàng loạt trong thời gian rất ngắn (3-10 ngày).",
+    "mota": "Bệnh do virus WSSV gây ra. Tôm yếu, tấp mé bờ, vỏ có đốm trắng, lây lan và gây chết hàng loạt trong thời gian rất ngắn (3–10 ngày).",
     "trieuchung": [
-      "Xuất hiện đốm trắng kích thước 0.5-2mm ở giáp đầu ngực, vỏ thân",
-      "Tôm lờ đờ, bơi tấp mé bờ, giảm ăn",
-      "Gan tụy nhợt nhạt"
+      "Xuất hiện đốm trắng kích thước 0.5–2mm ở giáp đầu ngực và vỏ thân",
+      "Tôm lờ đờ, bơi tấp mé bờ, giảm ăn đột ngột",
+      "Gan tụy nhợt nhạt",
+      "Vỏ tôm mềm hơn bình thường"
     ],
-    "nguyennhan": "Virus White Spot Syndrome (WSSV), môi trường nước biến động mạnh (mưa nhiều, nhiệt độ thay đổi).",
-    "dieutri": "Chưa có thuốc đặc trị. Buộc phải sử dụng các chế phẩm tăng sức đề kháng (Vitamin C, Beta Glucan) và diệt khuẩn ao nuôi gấp.",
-    "phongngua": "Chọn giống sạch bệnh (PCR âm tính), quản lý môi trường, diệt giáp xác mang mầm bệnh.",
+    "nguyennhan": "Virus White Spot Syndrome (WSSV), môi trường nước biến động mạnh (mưa nhiều, nhiệt độ thay đổi đột ngột).",
+    "dieutri": "Chưa có thuốc đặc trị virus. Phải dùng chế phẩm tăng sức đề kháng (Vitamin C, Beta Glucan) và diệt khuẩn ao nuôi gấp để hạn chế tổn thất.",
+    "phongngua": "Chọn giống sạch bệnh (PCR âm tính), quản lý môi trường chặt chẽ, diệt giáp xác mang mầm bệnh định kỳ.",
     "nhom": "Virus",
     "mucdo": "Rất nghiêm trọng",
-    "ngaytao": {
-      "$date": "2026-05-01T00:00:00Z"
-    }
+    "ngaytao": { "$date": "2026-05-01T00:00:00.000Z" }
   },
   {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b90002"
-    },
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b90002" },
     "tenbenh": "Hoại tử gan tụy cấp tính (AHPND/EMS)",
-    "mota": "Hội chứng tôm chết sớm. Tôm thường chết hàng loạt trong 20-30 ngày đầu thả nuôi. Khó cứu chữa khi đã bùng phát.",
+    "mota": "Hội chứng tôm chết sớm. Tôm thường chết hàng loạt trong 20–30 ngày đầu thả nuôi. Rất khó cứu chữa khi đã bùng phát.",
     "trieuchung": [
-      "Khối gan tụy teo lại, có màu trắng nhợt hoặc đen sẫm",
-      "Xương tụy mềm nhũn",
+      "Khối gan tụy teo lại, màu trắng nhợt hoặc đen sẫm",
       "Vỏ mềm, ruột rỗng",
-      "Chết rớt đáy"
+      "Chết rớt đáy hàng loạt",
+      "Tôm lờ đờ, bỏ ăn hoàn toàn"
     ],
     "nguyennhan": "Vi khuẩn Vibrio parahaemolyticus tiết độc tố làm phá hủy mô gan tụy.",
-    "dieutri": "Sử dụng các dòng kháng sinh đặc trị Vibrio kết hợp với men vi sinh đường ruột và thảo dược cải thiện gan.",
+    "dieutri": "Sử dụng kháng sinh đặc trị Vibrio kết hợp với men vi sinh đường ruột và thảo dược cải thiện chức năng gan tụy.",
     "phongngua": "Cấy vi sinh có lợi định kỳ (Bacillus) để ép khuẩn Vibrio, kiểm soát mật độ tảo, sát khuẩn định kỳ.",
     "nhom": "Vi khuẩn",
     "mucdo": "Nghiêm trọng",
-    "ngaytao": {
-      "$date": "2026-05-01T00:00:00Z"
-    }
+    "ngaytao": { "$date": "2026-05-01T00:00:00.000Z" }
   },
   {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b90003"
-    },
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b90003" },
     "tenbenh": "Bệnh phân trắng trên tôm (WFD)",
     "mota": "Dịch bệnh đường ruột phổ biến, không làm tôm chết ngay nhưng tôm bị ốp thân, chậm lớn, hao hụt dần làm giảm năng suất nghiêm trọng.",
     "trieuchung": [
       "Phân tôm màu trắng nổi trên mặt nước hoặc dọc bờ ao",
-      "Ruột tôm đứt khúc, có màu trắng",
+      "Ruột tôm đứt khúc, có màu trắng nhợt",
       "Tôm ăn kém, ốp thân, vỏ mềm"
     ],
     "nguyennhan": "Khuẩn Vibrio, vi bào tử trùng EHP, tôm ăn phải tảo độc hoặc mùn bã hữu cơ thối rữa dưới đáy.",
-    "dieutri": "Cắt cử ăn 1-2 ngày, diệt khuẩn nước, sau đó trộn men tiêu hóa sống, acid hữu cơ và tỏi/thảo dược vào thức ăn.",
+    "dieutri": "Cắt giảm khẩu phần ăn 1–2 ngày, diệt khuẩn nước, sau đó trộn men tiêu hóa sống, acid hữu cơ và tỏi/thảo dược vào thức ăn.",
     "phongngua": "Xử lý đáy ao kỹ (siphon), cắt tảo độc, duy trì hệ vi sinh đường ruột khỏe mạnh cho tôm.",
     "nhom": "Đường ruột / Ký sinh trùng",
     "mucdo": "Trung bình",
-    "ngaytao": {
-      "$date": "2026-05-01T00:00:00Z"
-    }
+    "ngaytao": { "$date": "2026-05-01T00:00:00.000Z" }
   },
   {
-    "_id": {
-      "": "60f1a2b3c4d5e6f7a8b90004"
-    },
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b90004" },
     "tenbenh": "Bệnh đen mang (Black Gill)",
-    "mota": "Mang tôm chuyển sang màu đen hoặc nâu nhạt, tôm khó hô hấp và nổi đầu.",
+    "mota": "Mang tôm chuyển sang màu đen hoặc nâu nhạt do nấm, vi khuẩn hoặc môi trường ô nhiễm, tôm khó hô hấp và nổi đầu.",
     "trieuchung": [
-      "Mang đổi màu đen/nâu",
+      "Mang đổi màu đen hoặc nâu sẫm",
       "Tôm nổi đầu do ngạt khí",
-      "Bỏ ăn, chậm lớn",
+      "Bỏ ăn, chậm lớn rõ rệt",
       "Bơi lờ đờ mặt nước"
     ],
-    "nguyennhan": "Ao nuôi dơ bẩn, đáy ao tích tụ nhiều khí độc (NH3, H2S), nấm hoặc vi khuẩn bám vào mang.",
+    "nguyennhan": "Ao nuôi dơ bẩn, đáy ao tích tụ nhiều khí độc (NH3, H2S), nấm hoặc vi khuẩn bám vào bộ mang.",
     "dieutri": "Siphon đáy ao, thay nước ngay lập tức, dùng chế phẩm diệt nấm/vi khuẩn và tạt Yucca để hấp thụ khí độc.",
-    "phongngua": "Định kỳ dùng vi sinh xử lý đáy ao, quản lý thức ăn tránh dư thừa.",
-    "nhom": "Môi trường/Nấm",
+    "phongngua": "Định kỳ dùng vi sinh xử lý đáy ao, quản lý lượng thức ăn tránh dư thừa gây ô nhiễm nước.",
+    "nhom": "Môi trường / Nấm",
     "mucdo": "Trung bình",
-    "ngaytao": {
-      "": "2026-05-08T00:00:00Z"
-    }
+    "ngaytao": { "$date": "2026-05-08T00:00:00.000Z" }
   },
   {
-    "_id": {
-      "": "60f1a2b3c4d5e6f7a8b90005"
-    },
-    "tenbenh": "Bệnh đầu vàng (YHV)",
-    "mota": "Bệnh do virus cực kỳ nguy hiểm, lây lan rất nhanh và gây tỷ lệ chết cao.",
+    "_id": { "$oid": "60f1a2b3c4d5e6f7a8b90005" },
+    "tenbenh": "Bệnh đầu vàng (YHV / Yellowhead)",
+    "mota": "Bệnh do virus YHV cực kỳ nguy hiểm, lây lan rất nhanh qua nước và gây tỷ lệ chết lên đến 100% trong 3–5 ngày.",
     "trieuchung": [
-      "Tôm ăn nhiều đột biến rồi bỏ ăn hẳn",
-      "Đầu và ngực chuyển màu vàng",
-      "Gan tụy vàng nhạt",
-      "Tôm chết tấp mé bờ trong 3-5 ngày"
+      "Tôm ăn nhiều đột biến rồi bỏ ăn hoàn toàn",
+      "Đầu và ngực chuyển sang màu vàng nhạt",
+      "Gan tụy vàng nhạt, sưng to",
+      "Tôm chết tấp mé bờ hàng loạt trong 3–5 ngày"
     ],
-    "nguyennhan": "Virus Yellow Head (YHV) lây truyền từ tự nhiên hoặc tôm mang mầm bệnh.",
-    "dieutri": "Không có thuốc đặc trị. Buộc phải thu hoạch ngay nếu tôm đạt kích cỡ, hoặc tiêu hủy để tránh lây lan.",
-    "phongngua": "Tăng cường sức đề kháng bằng Vitamin C, lọc nước kỹ, diệt vật mang mầm bệnh.",
+    "nguyennhan": "Virus Yellow Head (YHV) lây truyền từ môi trường tự nhiên hoặc tôm giống mang mầm bệnh.",
+    "dieutri": "Không có thuốc đặc trị. Phải thu hoạch ngay nếu tôm đạt kích cỡ, hoặc tiêu hủy ao để tránh lây lan sang ao khác.",
+    "phongngua": "Tăng sức đề kháng bằng Vitamin C, lọc và xử lý nước kỹ trước khi cấp vào ao, diệt vật mang mầm bệnh.",
     "nhom": "Virus",
     "mucdo": "Rất nghiêm trọng",
-    "ngaytao": {
-      "": "2026-05-08T00:00:00Z"
-    }
+    "ngaytao": { "$date": "2026-05-08T00:00:00.000Z" }
   }
 ]

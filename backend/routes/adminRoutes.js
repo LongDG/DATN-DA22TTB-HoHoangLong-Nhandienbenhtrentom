@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendSms, msgOrderDelivered } = require('../utils/sms');
+const sseManager = require('../utils/sseManager');
 
 // Bảo vệ toàn bộ admin routes: phải đăng nhập và là admin
 router.use(authMiddleware);
@@ -316,6 +317,12 @@ router.patch('/consultations/:id/close', async (req, res) => {
 });
 
 router.get('/diagnostics', async (req, res) => {
+  const SERVER_URL = process.env.SERVER_URL || 'http://localhost:5000';
+  const buildImgUrl = (d) => {
+    if (d.cloud_url) return d.cloud_url;
+    if (d.hinhanh_url) return `${SERVER_URL}${d.hinhanh_url}`;
+    return null;
+  };
   try {
     const db = mongoose.connection.db;
     const {
@@ -382,8 +389,8 @@ router.get('/diagnostics', async (req, res) => {
         _rawDate:   d.ngay_nhan_dien,
         id:         d._id.toString().substring(18).toUpperCase(),
         fullId:     d._id.toString(),
-        image:      d.hinhanh_url || 'https://storage.thuy-san.com/detect/tom_ruot_trang_1.jpg',
-        heatmap:    d.hinhanh_url || 'https://storage.thuy-san.com/detect/tom_ruot_trang_1.jpg',
+        image:      buildImgUrl(d),
+        heatmap:    buildImgUrl(d),
         time:       thoigian,
         date:       ngaytao,
         disease:    diseaseName,
@@ -466,6 +473,46 @@ router.put('/diagnostics/:id/verify', async (req, res) => {
       { _id: record._id },
       { $set: updateFields }
     );
+
+    // ── Gửi thông báo cho người dùng ──
+    if (record.nguoidung_id) {
+      const isCorrect  = action === 'correct';
+      const diseaseName = corrected_disease?.trim() || record.ten_benh || 'Không rõ';
+      const tieu_de = isCorrect
+        ? '✅ Kết quả chẩn đoán đã được xác minh'
+        : '⚠️ Kết quả chẩn đoán cần điều chỉnh';
+      const noi_dung = isCorrect
+        ? `Admin đã xác nhận kết quả AI là chính xác: "${record.ten_benh || 'Khỏe mạnh'}". Bạn có thể xem lại lịch sử chẩn đoán.`
+        : `Admin đã xác nhận kết quả AI không chính xác. Chẩn đoán đúng là: "${diseaseName}". Vui lòng tham khảo ý kiến chuyên gia.`;
+      try {
+        const notifDoc = {
+          nguoidung_id: record.nguoidung_id,
+          loai:         'chan_doan',
+          tieu_de,
+          noi_dung,
+          da_doc:       false,
+          lien_ket:     '/home',
+          ngaytao:      new Date(),
+        };
+        const inserted = await db.collection('THONGBAO').insertOne(notifDoc);
+
+        // ── Push SSE realtime ──
+        sseManager.notify(record.nguoidung_id.toString(), {
+          type: 'notification',
+          notification: {
+            id:       inserted.insertedId.toString(),
+            loai:     notifDoc.loai,
+            tieu_de:  notifDoc.tieu_de,
+            noi_dung: notifDoc.noi_dung,
+            da_doc:   false,
+            lien_ket: notifDoc.lien_ket,
+            ngaytao:  notifDoc.ngaytao,
+          },
+        });
+      } catch (notifErr) {
+        console.error('[NOTIFY] Lỗi tạo thông báo:', notifErr.message);
+      }
+    }
 
     res.json({
       ok: true,

@@ -10,8 +10,9 @@ const handbookRoutes = require("./routes/handbookRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const orderRoutes    = require("./routes/orderRoutes");    // Route đặt hàng người dùng
 const shrimpPriceRoutes = require("./routes/shrimpPriceRoutes"); // Giá tôm
-const diagnoseRoutes       = require("./routes/diagnoseRoutes");       // Chẩn đoán AI
-const consultationRoutes   = require("./routes/consultationRoutes");   // Tư vấn (user)
+const diagnoseRoutes       = require('./routes/diagnoseRoutes');       // Chẩn đoán AI
+const consultationRoutes   = require('./routes/consultationRoutes');   // Tư vấn (user)
+const notificationRoutes   = require('./routes/notificationRoutes');   // Thông báo
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,8 +41,9 @@ app.use("/api/handbook",   handbookRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/orders",        orderRoutes);
 app.use("/api/shrimp-prices", shrimpPriceRoutes); // Giá tôm thị trường
-app.use("/api/diagnose",       diagnoseRoutes);      // Chẩn đoán bệnh tôm bằng AI
-app.use("/api/consultations",  consultationRoutes);  // Tư vấn (user, không cần admin)
+app.use('/api/diagnose',        diagnoseRoutes);
+app.use('/api/consultations',   consultationRoutes);
+app.use('/api/notifications',   notificationRoutes);  // Thông báo user
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend Node.js is running (MVC Architecture)" });
