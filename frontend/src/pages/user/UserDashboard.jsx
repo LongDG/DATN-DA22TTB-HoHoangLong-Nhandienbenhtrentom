@@ -1,12 +1,494 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import {
   Camera, Upload, ShieldCheck, Users, TrendingUp, TrendingDown,
-  ArrowRight, Share2, Play, Send, ShoppingCart, CheckCircle2,
+  ArrowRight, ShoppingCart, CheckCircle2, X, AlertTriangle,
+  AlertCircle, Info, Loader2, RefreshCw, ChevronRight,
+  ImageIcon, Zap,
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
-/* ── Hero ── */
+/* ── Constants ── */
+const API_BASE       = 'http://localhost:5000/api';
+const SEVERITY_CFG   = {
+  none:     { label: 'Khỏe mạnh',     cls: 'bg-[#aeeecb]/20 text-[#2c694e] border-[#2c694e]/30' },
+  medium:   { label: 'Cảnh báo',      cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  high:     { label: 'Nguy hiểm',     cls: 'bg-orange-50 text-[#904300] border-orange-200' },
+  critical: { label: 'Rất nguy hiểm', cls: 'bg-red-50 text-[#ba1a1a] border-red-200' },
+  unknown:  { label: 'Không rõ',      cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+};
+
+/* ── Quality badge ── */
+function QualityBadge({ score }) {
+  const cfg = score >= 80 ? { label: 'Tốt',      cls: 'bg-green-100 text-green-700' }
+            : score >= 55 ? { label: 'Trung bình', cls: 'bg-amber-100 text-amber-700' }
+            :               { label: 'Kém',        cls: 'bg-red-100 text-red-700' };
+  return (
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${cfg.cls}`}>
+      <Zap className="w-3 h-3" /> Chất lượng ảnh: {cfg.label} ({score}/100)
+    </span>
+  );
+}
+
+/* ── Result Modal ── */
+function ResultModal({ result, imagePreview, onClose, onNewScan }) {
+  const disease   = result.result?.disease  || {};
+  const conf      = result.result?.confidence || 0;
+  const allProbs  = result.result?.all_probs || [];
+  const sevCfg    = SEVERITY_CFG[disease.severity] || SEVERITY_CFG.unknown;
+  const validation = result.validation || {};
+  const benhInfo   = result.benh_info   || null;
+  const products   = result.suggested_products || [];
+
+  const LOAI_LABEL = {
+    dac_tri:             '\u0110ặc trị',
+    vi_sinh:             'Vi sinh',
+    vi_sinh_moi_truong:  'Vi sinh MT',
+    dinh_duong_de_khang: 'Dinh dưỡng',
+  };
+  const MUC_DICH_LABEL = {
+    dieutri:  'Điều trị',
+    phongbenh: 'Phòng bệnh',
+    hotro:    'Hỗ trợ',
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ scale: 0.92, y: 20 }} animate={{ scale: 1, y: 0 }}
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+      >
+        {/* Header */}
+        <div className={`px-6 py-5 rounded-t-3xl border-b flex justify-between items-start ${sevCfg.cls}`}>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider opacity-60 mb-1">Kết quả chẩn đoán AI</p>
+            <h2 className="text-xl font-extrabold">{disease.name || 'Không xác định'}</h2>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-black/10 rounded-full transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Ảnh + Confidence */}
+          <div className="flex gap-4">
+            {imagePreview && (
+              <div className="w-32 h-32 rounded-2xl overflow-hidden border border-slate-200 shrink-0">
+                <img src={imagePreview} alt="Ảnh chẩn đoán" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="flex-1 space-y-3">
+              {/* Độ tin cậy */}
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-sm font-semibold text-slate-600">Độ tin cậy</span>
+                  <span className="text-2xl font-extrabold text-slate-800">{conf.toFixed(1)}%</span>
+                </div>
+                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }} animate={{ width: `${conf}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className={`h-full rounded-full ${
+                      disease.severity === 'none' ? 'bg-[#2c694e]'
+                        : disease.severity === 'critical' ? 'bg-[#ba1a1a]'
+                        : 'bg-amber-500'
+                    }`}
+                  />
+                </div>
+              </div>
+              {/* Chất lượng ảnh */}
+              {validation.details?.quality_score !== undefined && (
+                <QualityBadge score={validation.details.quality_score} />
+              )}
+              {/* Severity tag */}
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold border ${sevCfg.cls}`}>
+                {disease.severity === 'none'
+                  ? <CheckCircle2 className="w-4 h-4" />
+                  : <AlertTriangle className="w-4 h-4" />}
+                {sevCfg.label}
+              </span>
+            </div>
+          </div>
+
+          {/* Mô tả */}
+          {disease.description && (
+            <div className="bg-slate-50 rounded-2xl p-4 text-sm text-slate-700 leading-relaxed border border-slate-100">
+              <p className="font-semibold text-slate-500 text-xs uppercase tracking-wider mb-1.5">Mô tả</p>
+              {disease.description}
+            </div>
+          )}
+
+          {/* Khuyến nghị */}
+          {disease.recommendation && (
+            <div className={`rounded-2xl p-4 border ${sevCfg.cls}`}>
+              <p className="font-bold text-xs uppercase tracking-wider mb-2 opacity-60">Khuyến nghị xử lý</p>
+              <pre className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                {disease.recommendation}
+              </pre>
+            </div>
+          )}
+
+          {/* Triệu chứng (từ BENH) */}
+          {benhInfo?.trieuchung?.length > 0 && (
+            <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+              <p className="font-bold text-xs uppercase tracking-wider text-amber-700 mb-2">⚠️ Triệu chứng điển hình</p>
+              <ul className="space-y-1">
+                {benhInfo.trieuchung.map((t, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"/>{t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Thuốc gợi ý */}
+          {products.length > 0 && (
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <ShoppingCart className="w-3.5 h-3.5" /> Thuốc & sản phẩm gợi ý
+              </p>
+              <div className="space-y-3">
+                {products.map(p => (
+                  <div key={p.id} className="flex gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-[#0077b6]/30 transition-colors">
+                    {/* Icon loại */}
+                    <div className="w-10 h-10 rounded-xl bg-[#0077b6]/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-5 h-5 text-[#0077b6]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-bold text-slate-800 leading-tight">{p.ten}</p>
+                        <span className="text-sm font-extrabold text-[#0077b6] shrink-0">
+                          {p.gia.toLocaleString('vi-VN')}đ
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-slate-400">{p.thuonghieu}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-300" />
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">
+                          {LOAI_LABEL[p.loai] || p.loai}
+                        </span>
+                        {p.muc_dich.map(m => (
+                          <span key={m} className="text-xs px-1.5 py-0.5 rounded bg-[#0077b6]/10 text-[#0077b6]">
+                            {MUC_DICH_LABEL[m] || m}
+                          </span>
+                        ))}
+                      </div>
+                      {p.congdung?.length > 0 && (
+                        <p className="text-xs text-slate-500 mt-1 truncate">
+                          {p.congdung.slice(0,2).join(' • ')}
+                        </p>
+                      )}
+                      {p.lieudung?.xu_ly_benh && (
+                        <p className="text-xs text-emerald-700 mt-1">
+                          📈 Liều điều trị: {p.lieudung.xu_ly_benh}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Link
+                to="/store"
+                onClick={onClose}
+                className="mt-3 w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-[#0077b6] bg-[#0077b6]/10 rounded-2xl hover:bg-[#0077b6]/20 transition-colors"
+              >
+                <ShoppingCart className="w-4 h-4" /> Xem tất cả sản phẩm trong cửa hàng
+              </Link>
+            </div>
+          )}
+
+          {/* Phân phối xác suất */}
+          {allProbs.length > 1 && (
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Phân phối xác suất</p>
+              <div className="space-y-2">
+                {allProbs.map(p => (
+                  <div key={p.name} className="flex items-center gap-3">
+                    <span className="text-sm text-slate-600 w-44 truncate shrink-0">{p.name}</span>
+                    <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#0077b6] rounded-full transition-all"
+                        style={{ width: `${p.prob}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-bold text-slate-700 w-12 text-right shrink-0">{p.prob}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-1">
+            <button
+              onClick={onNewScan}
+              className="flex-1 py-3 bg-[#0077b6] text-white font-bold rounded-2xl hover:bg-[#005d90] transition-colors flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" /> Chẩn đoán ảnh mới
+            </button>
+            <Link
+              to="/consult-user"
+              onClick={onClose}
+              className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-2xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
+            >
+              <ChevronRight className="w-4 h-4" /> Tư vấn chuyên gia
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ── Diagnostic Upload ── */
+function DiagnosticSection() {
+  const [isDrag,      setIsDrag]      = useState(false);
+  const [preview,     setPreview]     = useState(null);   // base64 preview
+  const [file,        setFile]        = useState(null);
+  const [status,      setStatus]      = useState('idle'); // idle|loading|success|error
+  const [result,      setResult]      = useState(null);
+  const [errorMsg,    setErrorMsg]    = useState('');
+  const [validation,  setValidation]  = useState(null);  // AI validation info
+  const [showResult,  setShowResult]  = useState(false);
+  const fileInputRef = useRef(null);
+
+  /* Đọc file → preview */
+  const readFile = useCallback((f) => {
+    if (!f) return;
+    setFile(f);
+    setStatus('idle');
+    setResult(null);
+    setErrorMsg('');
+    setValidation(null);
+    const reader = new FileReader();
+    reader.onload = e => setPreview(e.target.result);
+    reader.readAsDataURL(f);
+  }, []);
+
+  const handleDrop = (e) => {
+    e.preventDefault(); setIsDrag(false);
+    const f = e.dataTransfer.files[0];
+    if (f) readFile(f);
+  };
+
+  const handleFileChange = (e) => {
+    const f = e.target.files[0];
+    if (f) readFile(f);
+  };
+
+  /* Gửi ảnh lên API */
+  const handleSubmit = async () => {
+    if (!file || status === 'loading') return;
+    setStatus('loading');
+    setErrorMsg('');
+    setValidation(null);
+
+    const token   = localStorage.getItem('token') || '';
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res  = await fetch(`${API_BASE}/diagnose`, {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body:    formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        /* 422: validation thất bại từ AI service */
+        if (res.status === 422 && data.validation) {
+          setValidation(data.validation);
+          setStatus('error');
+          setErrorMsg('Ảnh không đạt yêu cầu chất lượng. Xem chi tiết bên dưới.');
+        } else {
+          setStatus('error');
+          setErrorMsg(data.message || 'Lỗi không xác định. Vui lòng thử lại.');
+        }
+        return;
+      }
+
+      setResult(data);
+      setValidation(data.validation);
+      setStatus('success');
+      setShowResult(true);
+    } catch {
+      setStatus('error');
+      setErrorMsg('Không kết nối được server. Vui lòng kiểm tra lại.');
+    }
+  };
+
+  const handleReset = () => {
+    setFile(null); setPreview(null); setStatus('idle');
+    setResult(null); setErrorMsg(''); setValidation(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  /* ── Render ── */
+  return (
+    <section className="py-24 px-6 bg-white">
+      <AnimatePresence>
+        {showResult && result && (
+          <ResultModal
+            result={result}
+            imagePreview={preview}
+            onClose={() => setShowResult(false)}
+            onNewScan={() => { setShowResult(false); handleReset(); }}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12 space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#0077b6]/10 text-[#0077b6] rounded-full text-xs font-bold uppercase tracking-wider">
+            <Camera className="w-4 h-4" /> Chẩn đoán bằng AI
+          </div>
+          <h2 className="text-4xl font-extrabold text-slate-900">Chẩn đoán thông minh</h2>
+          <p className="text-slate-500 text-lg max-w-xl mx-auto">
+            Tải ảnh tôm lên để AI phân tích và nhận diện bệnh chỉ trong vài giây.
+          </p>
+        </div>
+
+        <div className="max-w-3xl mx-auto space-y-5">
+          {/* ── Yêu cầu ảnh ── */}
+          <div className="bg-[#f0f7ff] border border-[#0077b6]/20 rounded-2xl p-4">
+            <p className="text-xs font-bold text-[#0077b6] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+              <Info className="w-4 h-4" /> Yêu cầu ảnh đầu vào
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1.5 text-sm text-slate-600">
+              {[
+                '✅ Định dạng JPG hoặc PNG',
+                '✅ Kích thước 50KB – 10MB',
+                '✅ Độ phân giải ≥ 224×224px',
+                '✅ Ảnh sắc nét, không mờ',
+                '✅ Đủ ánh sáng, không quá tối/sáng',
+                '✅ Ánh sáng đều, tránh đổ bóng',
+              ].map(t => <p key={t}>{t}</p>)}
+            </div>
+          </div>
+
+          {/* ── Drop zone ── */}
+          {!preview ? (
+            <div
+              onDragOver={e => { e.preventDefault(); setIsDrag(true); }}
+              onDragLeave={() => setIsDrag(false)}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`relative p-14 border-2 border-dashed rounded-3xl transition-all cursor-pointer flex flex-col items-center gap-5
+                ${isDrag
+                  ? 'border-[#0077b6] bg-[#0077b6]/5 scale-[1.01]'
+                  : 'border-slate-200 bg-slate-50 hover:border-[#0077b6]/50 hover:bg-slate-100'}`}
+            >
+              <input
+                type="file" ref={fileInputRef} className="hidden"
+                accept="image/jpeg,image/jpg,image/png"
+                onChange={handleFileChange}
+              />
+              <div className="w-20 h-20 bg-[#0077b6]/10 rounded-3xl flex items-center justify-center text-[#0077b6]">
+                <ImageIcon className="w-10 h-10" />
+              </div>
+              <div className="text-center space-y-1.5">
+                <h3 className="text-xl font-bold text-slate-800">Kéo thả hoặc nhấn để chọn ảnh</h3>
+                <p className="text-slate-400 text-sm">Hỗ trợ JPG, PNG — Tối đa 10MB</p>
+              </div>
+              <button className="px-8 h-12 bg-[#0077b6] text-white font-bold rounded-2xl shadow-lg shadow-[#0077b6]/20 hover:bg-[#005d90] transition-colors text-sm">
+                Chọn tệp ảnh
+              </button>
+            </div>
+          ) : (
+            /* ── Preview + actions ── */
+            <div className="rounded-3xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+              <div className="relative h-64 bg-slate-100">
+                <img src={preview} alt="Preview" className="w-full h-full object-contain" />
+                <button
+                  onClick={handleReset}
+                  className="absolute top-3 right-3 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                {/* Quality overlay khi có kết quả validation */}
+                {validation?.details?.quality_score !== undefined && (
+                  <div className="absolute bottom-3 left-3">
+                    <QualityBadge score={validation.details.quality_score} />
+                  </div>
+                )}
+              </div>
+
+              <div className="p-5 space-y-4">
+                <p className="text-sm text-slate-500 truncate">
+                  <span className="font-semibold text-slate-700">{file?.name}</span>
+                  {' · '}{file ? (file.size / 1024 < 1000
+                    ? `${(file.size / 1024).toFixed(0)} KB`
+                    : `${(file.size / 1024 / 1024).toFixed(1)} MB`) : ''}
+                </p>
+
+                {/* Warnings từ validation */}
+                {validation?.warnings?.length > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-1">
+                    {validation.warnings.map((w, i) => (
+                      <p key={i} className="text-sm text-amber-700 flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /> {w}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {/* Errors */}
+                {status === 'error' && errorMsg && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-1">
+                    <p className="text-sm text-[#ba1a1a] font-semibold flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" /> {errorMsg}
+                    </p>
+                    {validation?.errors?.map((e, i) => (
+                      <p key={i} className="text-sm text-[#ba1a1a] pl-6">{e}</p>
+                    ))}
+                    {validation?.tips?.length > 0 && (
+                      <div className="pt-1 pl-6 space-y-0.5">
+                        <p className="text-xs font-bold text-[#ba1a1a] uppercase">Gợi ý:</p>
+                        {validation.tips.map((t, i) => (
+                          <p key={i} className="text-xs text-[#ba1a1a]">• {t}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Submit / Success */}
+                {status === 'success' ? (
+                  <button
+                    onClick={() => setShowResult(true)}
+                    className="w-full py-3.5 bg-[#2c694e] text-white font-bold rounded-2xl hover:bg-[#1e4f38] transition-colors flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 className="w-5 h-5" /> Xem kết quả chẩn đoán
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSubmit}
+                    disabled={status === 'loading'}
+                    className="w-full py-3.5 bg-[#0077b6] text-white font-bold rounded-2xl hover:bg-[#005d90] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-[#0077b6]/20"
+                  >
+                    {status === 'loading' ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Đang phân tích AI...</>
+                    ) : (
+                      <><Camera className="w-5 h-5" /> Phân tích ngay</>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 function Hero() {
   return (
     <section className="relative min-h-[700px] flex items-center overflow-hidden bg-slate-900 border-b border-white/5">
@@ -69,41 +551,6 @@ function Hero() {
   );
 }
 
-/* ── Diagnostic Upload ── */
-function DiagnosticSection() {
-  const [isDragActive, setIsDragActive] = useState(false);
-  const fileInputRef = useRef(null);
-
-  return (
-    <section className="py-24 px-6 bg-white">
-      <div className="max-w-4xl mx-auto text-center mb-16 space-y-4">
-        <h2 className="text-4xl font-bold text-slate-900">Chẩn đoán thông minh</h2>
-        <p className="text-slate-500 text-lg">Kéo và thả hình ảnh tôm có dấu hiệu bệnh lý vào khu vực dưới đây để AI phân tích.</p>
-      </div>
-      <div className="max-w-3xl mx-auto">
-        <div
-          onDragOver={(e) => { e.preventDefault(); setIsDragActive(true); }}
-          onDragLeave={() => setIsDragActive(false)}
-          onDrop={(e) => { e.preventDefault(); setIsDragActive(false); }}
-          onClick={() => fileInputRef.current?.click()}
-          className={`relative p-16 border-2 border-dashed rounded-3xl transition-all cursor-pointer group flex flex-col items-center gap-6 ${isDragActive ? 'border-[#0077b6] bg-[#0077b6]/5' : 'border-slate-200 bg-slate-50 hover:border-[#0077b6] hover:bg-slate-100'}`}
-        >
-          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
-          <div className="w-20 h-20 bg-[#0077b6]/10 rounded-3xl flex items-center justify-center text-[#0077b6] group-hover:scale-110 transition-transform">
-            <Upload className="w-10 h-10" />
-          </div>
-          <div className="text-center space-y-2">
-            <h3 className="text-2xl font-bold text-slate-900">Tải lên hoặc kéo thả ảnh</h3>
-            <p className="text-slate-500">Hỗ trợ JPG, PNG (Dung lượng tối đa: 10MB)</p>
-          </div>
-          <button className="mt-4 px-10 h-14 bg-[#0077b6] text-white font-bold rounded-2xl shadow-lg hover:bg-[#005d90] transition-colors">
-            Chọn tệp tin
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ── Market Stats — fetch từ /api/shrimp-prices ── */
 function MarketStats() {

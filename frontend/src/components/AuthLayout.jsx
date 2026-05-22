@@ -96,7 +96,7 @@ export default function AuthLayout({ children }) {
 
           {/* Bottom copyright */}
           <p className="text-white/40 text-xs">
-            © 2024 AquaDiag Solutions · Hệ thống chẩn đoán thủy sản chuyên nghiệp
+            © 2026 AquaDiag Solutions · Hệ thống chẩn đoán thủy sản chuyên nghiệp
           </p>
         </div>
       </div>
@@ -136,7 +136,7 @@ export default function AuthLayout({ children }) {
         {/* Footer */}
         <footer className="relative z-10 py-4 px-6 text-center border-t border-slate-200/60">
           <p className="text-xs text-slate-400">
-            © 2024 AquaDiag Solutions · 
+            © 2026 AquaDiag Solutions · 
             <a href="#" className="hover:text-slate-600 transition-colors ml-1">Chính sách bảo mật</a> · 
             <a href="#" className="hover:text-slate-600 transition-colors ml-1">Hỗ trợ</a>
           </p>

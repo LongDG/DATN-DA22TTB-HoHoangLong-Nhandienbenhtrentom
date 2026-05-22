@@ -27,7 +27,7 @@ function NewModal({ onClose, onDone, user }) {
     if (!form.vitri_tinh)     return setErr('Vui lòng chọn tỉnh/thành');
     setSaving(true); setErr('');
     try {
-      const res = await authFetch(`${API}/admin/consultations`, {
+      const res = await authFetch(`${API}/consultations`, {
         method:'POST',
         body: JSON.stringify({
           ten_nguoidung: user?.ten || 'Người dùng',
@@ -101,8 +101,8 @@ export default function ConsultUserPage() {
     try {
       const uid = user?.id || user?._id;
       const url = uid
-        ? `${API}/admin/consultations?user_id=${uid}`
-        : `${API}/admin/consultations`;
+        ? `${API}/consultations?user_id=${uid}`
+        : `${API}/consultations`;
       const res = await authFetch(url);
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
@@ -118,7 +118,7 @@ export default function ConsultUserPage() {
 
   const fetchDetail = async (id) => {
     try {
-      const res = await authFetch(`${API}/admin/consultations/${id}`);
+      const res = await authFetch(`${API}/consultations/${id}`);
       const data = await res.json();
       setMessages(data.tin_nhan || []);
       // Cập nhật status trong ticket list
@@ -183,7 +183,7 @@ export default function ConsultUserPage() {
     const text = input.trim(); setInput(''); setSending(true);
     setMessages(prev => [...prev, { vai_tro:'nguoidung', noi_dung:text, thoigian:new Date().toISOString() }]);
     try {
-      await authFetch(`${API}/admin/consultations/${active._id}/reply-user`, {
+      await authFetch(`${API}/consultations/${active._id}/reply-user`, {
         method:'POST',
         body: JSON.stringify({ noi_dung: text }),
       });
