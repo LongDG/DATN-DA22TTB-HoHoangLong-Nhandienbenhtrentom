@@ -6,8 +6,8 @@ echo ====================================================
 :: Cai dat thu vien neu chua co
 pip install -r requirements.txt --quiet
 
-:: Chay service
-set MODEL_PATH=..\model_ai\best_model_v3.pth
+:: Chay service (ENSEMBLE 3 models)
+set MODEL_DIR=..\model_ai
 set AI_PORT=5001
 
 echo.

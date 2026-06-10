@@ -34,11 +34,11 @@ router.post('/', authMiddleware, async (req, res) => {
     const userId = req.user?.id;
     const nguoidung_id = (() => { try { return new ObjectId(userId); } catch { return null; } })();
 
-    // Tính tiền
+    // Tính tiền (miễn phí vận chuyển)
     const tong_tien_hang       = items.reduce((s, i) => s + i.price * i.qty, 0);
-    const phi_vanchuyen        = tong_tien_hang >= 500000 ? 0 : 30000;
+    const phi_vanchuyen        = 0;
     const giam_gia             = 0;
-    const tong_tien_thanh_toan = tong_tien_hang + phi_vanchuyen - giam_gia;
+    const tong_tien_thanh_toan = tong_tien_hang;
 
     // Mã đơn hàng: AQUA-DDMMYY-RANDOM4
     const now = new Date();
@@ -162,7 +162,9 @@ router.patch('/:id/cancel', authMiddleware, async (req, res) => {
     const { ObjectId } = mongoose.Types;
     const order = await db.collection('DONHANG').findOne({ _id: new ObjectId(req.params.id) });
     if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
-    if (order.trang_thai_don_hang !== 'cho_xac_nhan') {
+
+    const cancellable = ['cho_xac_nhan'].includes(order.trang_thai_don_hang);
+    if (!cancellable) {
       return res.status(400).json({ message: 'Chỉ có thể hủy đơn hàng đang chờ xác nhận' });
     }
     const now = new Date();
@@ -179,4 +181,41 @@ router.patch('/:id/cancel', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * PATCH /api/orders/:id/switch-cod — Đổi sang thanh toán COD
+ */
+router.patch('/:id/switch-cod', authMiddleware, async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { ObjectId } = mongoose.Types;
+    const order = await db.collection('DONHANG').findOne({ _id: new ObjectId(req.params.id) });
+    if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+    if (order.trang_thai_thanh_toan !== 'cho_thanh_toan') {
+      return res.status(400).json({ message: 'Chỉ đổi được đơn đang chờ thanh toán' });
+    }
+    const now = new Date();
+    await db.collection('DONHANG').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      {
+        $set: {
+          phuong_thuc_thanh_toan: 'Thanh toán tiền mặt (COD)',
+          trang_thai_thanh_toan:  'chua_thanh_toan',
+          capnhat: now,
+        },
+        $push: {
+          lich_su_trang_thai: {
+            trang_thai: 'cho_xac_nhan',
+            thoi_gian:  now,
+            ghi_chu:    'Đổi phương thức thanh toán sang COD',
+          },
+        },
+      }
+    );
+    res.json({ ok: true, message: 'Đã đổi sang thanh toán COD' });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi đổi phương thức thanh toán', error: error.message });
+  }
+});
+
 module.exports = router;
+

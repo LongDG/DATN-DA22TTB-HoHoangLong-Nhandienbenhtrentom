@@ -13,6 +13,7 @@ const shrimpPriceRoutes = require("./routes/shrimpPriceRoutes"); // Giá tôm
 const diagnoseRoutes       = require('./routes/diagnoseRoutes');       // Chẩn đoán AI
 const consultationRoutes   = require('./routes/consultationRoutes');   // Tư vấn (user)
 const notificationRoutes   = require('./routes/notificationRoutes');   // Thông báo
+const sepayRoutes          = require('./routes/sepayRoutes');           // Thanh toán SePay
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,6 +45,7 @@ app.use("/api/shrimp-prices", shrimpPriceRoutes); // Giá tôm thị trường
 app.use('/api/diagnose',        diagnoseRoutes);
 app.use('/api/consultations',   consultationRoutes);
 app.use('/api/notifications',   notificationRoutes);  // Thông báo user
+app.use('/api/sepay',           sepayRoutes);           // Webhook thanh toán SePay
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend Node.js is running (MVC Architecture)" });
@@ -52,3 +54,52 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
 });
+
+// ══════════════════════════════════════════════════════════════════
+// CRON JOB — Tự động hủy đơn chuyển khoản chưa thanh toán sau 2h
+// Chạy mỗi 30 phút
+// ══════════════════════════════════════════════════════════════════
+const mongoose = require('mongoose');
+
+async function autoCancelUnpaidOrders() {
+  try {
+    const db = mongoose.connection.db;
+    if (!db) return; // DB chưa kết nối
+
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
+    // Tìm đơn chuyển khoản chưa thanh toán quá 2 giờ
+    const result = await db.collection('DONHANG').updateMany(
+      {
+        trang_thai_thanh_toan: 'cho_thanh_toan',
+        trang_thai_don_hang:   { $ne: 'da_huy' },
+        ngaytao:               { $lte: twoHoursAgo },
+      },
+      {
+        $set: {
+          trang_thai_don_hang:  'da_huy',
+          trang_thai_thanh_toan: 'het_han_thanh_toan',
+          capnhat: new Date(),
+        },
+        $push: {
+          lich_su_trang_thai: {
+            trang_thai: 'da_huy',
+            thoi_gian:  new Date(),
+            ghi_chu:    'Tự động hủy: chưa thanh toán sau 2 giờ',
+          },
+        },
+      },
+    );
+
+    if (result.modifiedCount > 0) {
+      console.log(`[CRON] ⏰ Đã hủy ${result.modifiedCount} đơn chưa thanh toán quá 2 giờ`);
+    }
+  } catch (err) {
+    console.error('[CRON] Lỗi auto-cancel:', err.message);
+  }
+}
+
+// Chạy ngay lúc khởi động và mỗi 30 phút
+setTimeout(autoCancelUnpaidOrders, 10_000); // Chờ 10s sau khi DB kết nối
+setInterval(autoCancelUnpaidOrders, 30 * 60 * 1000);
+

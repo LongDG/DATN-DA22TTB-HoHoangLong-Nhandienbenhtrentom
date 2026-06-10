@@ -145,12 +145,17 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       ten_benh:           disease.name,
       ma_benh:            disease.code,
       do_chinh_xac:       result.confidence,
+      confidence_level:   result.confidence_level || 'unknown',
+      confidence_label:   result.confidence_label || '',
       muc_do_canh_bao:    { none: 'Bình thường', medium: 'Cảnh báo', high: 'Nguy hiểm', critical: 'Rất nguy hiểm' }[disease.severity] || 'Không rõ',
       hinhanh_url:        local_relative,   // URL relative local (fallback)
       cloud_url:          cloud_url,         // Cloudinary URL (null nếu chưa cấu hình)
       thiet_bi:           req.body.device || 'Web-Upload',
       ket_qua_xac_suat:   result.all_probs,
       model_version:      result.model_version,
+      ensemble_count:     result.ensemble_count || 1,
+      model_agreement:    result.model_agreement || 0,
+      top2_gap:           result.top2_gap || 0,
       chat_luong_anh:     aiResponse.validation?.details || {},
       trang_thai_xacminh: 'chua_xac_minh',
       san_pham_goi_y:     suggestedProducts.map(p => p.id),
@@ -222,6 +227,132 @@ router.get('/history', authMiddleware, async (req, res) => {
   }
 });
 
+// ─── GET /api/diagnose/:id — Chi tiết 1 lần chẩn đoán ────────────────────────
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const db  = mongoose.connection.db;
+    const uid = req.user?.id;
+
+    let oid;
+    try { oid = new mongoose.Types.ObjectId(req.params.id); }
+    catch { return res.status(400).json({ message: 'ID không hợp lệ.' }); }
+
+    const doc = await db.collection('KETQUANHANDIEN').findOne({ _id: oid });
+    if (!doc) return res.status(404).json({ message: 'Không tìm thấy kết quả chẩn đoán.' });
+
+    // Kiểm tra quyền: user chỉ xem được của mình
+    if (uid && doc.nguoidung_id && doc.nguoidung_id.toString() !== uid) {
+      return res.status(403).json({ message: 'Không có quyền xem kết quả này.' });
+    }
+
+    // Lấy thông tin bệnh từ BENH collection
+    let benhDoc = null;
+    if (doc.ketqua_benh_id) {
+      try {
+        benhDoc = await db.collection('BENH').findOne({ _id: doc.ketqua_benh_id });
+      } catch {}
+    }
+    // Fallback: tìm theo tên nếu không có benh_id
+    if (!benhDoc && doc.ma_benh && doc.ma_benh !== 'khoe_manh') {
+      try {
+        const keywords = DISEASE_KEYWORDS[doc.ma_benh] || [doc.ten_benh?.split('(')[0]?.trim()];
+        const orQuery  = keywords.filter(Boolean).map(kw => ({ tenbenh: { $regex: kw, $options: 'i' } }));
+        if (orQuery.length > 0) {
+          benhDoc = await db.collection('BENH').findOne({ $or: orQuery });
+        }
+      } catch {}
+    }
+
+    // Lấy sản phẩm gợi ý
+    let suggestedProducts = [];
+    const productIds = doc.san_pham_goi_y || [];
+    if (productIds.length > 0) {
+      try {
+        const oids = productIds.map(id => {
+          try { return new mongoose.Types.ObjectId(id); } catch { return null; }
+        }).filter(Boolean);
+        const products = await db.collection('SANPHAM').find({ _id: { $in: oids } }).toArray();
+        suggestedProducts = products.map(p => ({
+          id:         p._id.toString(),
+          ten:        p.tensanpham  || '',
+          thuonghieu: p.thuonghieu  || '',
+          loai:       p.loaisanpham || '',
+          mota:       p.mota        || '',
+          congdung:   p.congdung    || [],
+          lieudung:   p.lieudung    || {},
+          gia:        p.gia         || 0,
+          hinhanh:    (p.hinhanh    || [])[0] || null,
+          muc_dich:   p.muc_dich_su_dung || [],
+        }));
+      } catch {}
+    }
+    // Nếu không có sản phẩm từ record, tìm theo bệnh
+    if (suggestedProducts.length === 0 && benhDoc) {
+      try {
+        const products = await db.collection('SANPHAM')
+          .find({
+            benh_ids:  { $elemMatch: { $eq: benhDoc._id } },
+            trangthai: 'dang_ban',
+            soluong:   { $gt: 0 },
+          })
+          .sort({ daban: -1 })
+          .limit(3)
+          .toArray();
+        suggestedProducts = products.map(p => ({
+          id:         p._id.toString(),
+          ten:        p.tensanpham  || '',
+          thuonghieu: p.thuonghieu  || '',
+          loai:       p.loaisanpham || '',
+          mota:       p.mota        || '',
+          congdung:   p.congdung    || [],
+          lieudung:   p.lieudung    || {},
+          gia:        p.gia         || 0,
+          hinhanh:    (p.hinhanh    || [])[0] || null,
+          muc_dich:   p.muc_dich_su_dung || [],
+        }));
+      } catch {}
+    }
+
+    res.json({
+      id:              doc._id.toString(),
+      ten_benh:        doc.ten_benh        || 'Không xác định',
+      ma_benh:         doc.ma_benh         || '',
+      do_chinh_xac:    doc.do_chinh_xac    || 0,
+      confidence_level: doc.confidence_level || 'unknown',
+      confidence_label: doc.confidence_label || '',
+      muc_do:          doc.muc_do_canh_bao || '',
+      chuandoan_text:  doc.chuandoan_text  || '',
+      image_url:       getBestImageUrl(doc),
+      model_version:   doc.model_version   || '',
+      ensemble_count:  doc.ensemble_count  || 1,
+      model_agreement: doc.model_agreement || 0,
+      top2_gap:        doc.top2_gap        || 0,
+      ket_qua_xac_suat: doc.ket_qua_xac_suat || [],
+      chat_luong_anh:  doc.chat_luong_anh  || {},
+      thiet_bi:        doc.thiet_bi        || '',
+      ngay:            doc.ngay_nhan_dien
+                         ? new Date(doc.ngay_nhan_dien).toLocaleDateString('vi-VN') : '—',
+      gio:             doc.ngay_nhan_dien
+                         ? new Date(doc.ngay_nhan_dien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '',
+      ngay_raw:        doc.ngay_nhan_dien || null,
+      benh_info:       benhDoc ? {
+        id:         benhDoc._id.toString(),
+        tenbenh:    benhDoc.tenbenh,
+        mota:       benhDoc.mota,
+        trieuchung: benhDoc.trieuchung || [],
+        dieutri:    benhDoc.dieutri,
+        phongngua:  benhDoc.phongngua,
+        nhom:       benhDoc.nhom,
+        mucdo:      benhDoc.mucdo,
+      } : null,
+      suggested_products: suggestedProducts,
+    });
+  } catch (err) {
+    console.error('[DIAGNOSE/:id]', err);
+    res.status(500).json({ message: 'Lỗi lấy chi tiết', error: err.message });
+  }
+});
+
 // ─── Error handler ────────────────────────────────────────────────────────────
 router.use((err, _req, res, _next) => {
   if (err instanceof multer.MulterError || err.message)
@@ -230,3 +361,4 @@ router.use((err, _req, res, _next) => {
 });
 
 module.exports = router;
+

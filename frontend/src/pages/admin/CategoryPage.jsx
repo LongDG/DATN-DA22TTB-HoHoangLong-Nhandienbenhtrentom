@@ -10,29 +10,29 @@ import { authFetch } from '../../utils/authFetch';
 
 /* Màu preset */
 const COLOR_PRESETS = [
-  { label: 'Xanh dương',  value: 'bg-[#0077b6] text-white'  },
-  { label: 'Xanh đậm',   value: 'bg-[#005d90] text-white'  },
-  { label: 'Đỏ',         value: 'bg-red-600 text-white'     },
-  { label: 'Xanh lá',    value: 'bg-green-700 text-white'   },
-  { label: 'Cam',         value: 'bg-amber-600 text-white'   },
-  { label: 'Xanh teal',  value: 'bg-teal-600 text-white'    },
-  { label: 'Tím',         value: 'bg-purple-600 text-white'  },
-  { label: 'Hồng',        value: 'bg-pink-600 text-white'    },
-  { label: 'Xám',         value: 'bg-slate-500 text-white'   },
-  { label: 'Nâu',         value: 'bg-[#904300] text-white'  },
-  { label: 'Xanh mint',  value: 'bg-[#2c694e] text-white'  },
+  { label: 'Xanh dương', value: 'bg-[#0077b6] text-white' },
+  { label: 'Xanh đậm', value: 'bg-[#005d90] text-white' },
+  { label: 'Đỏ', value: 'bg-red-600 text-white' },
+  { label: 'Xanh lá', value: 'bg-green-700 text-white' },
+  { label: 'Cam', value: 'bg-amber-600 text-white' },
+  { label: 'Xanh teal', value: 'bg-teal-600 text-white' },
+  { label: 'Tím', value: 'bg-purple-600 text-white' },
+  { label: 'Hồng', value: 'bg-pink-600 text-white' },
+  { label: 'Xám', value: 'bg-slate-500 text-white' },
+  { label: 'Nâu', value: 'bg-[#904300] text-white' },
+  { label: 'Xanh mint', value: 'bg-[#2c694e] text-white' },
 ];
 
 /* Icon preset */
 const ICON_PRESETS = [
-  { label: 'Package',     value: 'Package'    },
-  { label: 'Droplet',     value: 'Droplet'    },
-  { label: 'Beaker',      value: 'Beaker'     },
-  { label: 'Heart',       value: 'Heart'      },
-  { label: 'Leaf',        value: 'Leaf'       },
-  { label: 'Shield',      value: 'ShieldCheck'},
-  { label: 'Star',        value: 'Star'       },
-  { label: 'Tag',         value: 'Tag'        },
+  { label: 'Package', value: 'Package' },
+  { label: 'Droplet', value: 'Droplet' },
+  { label: 'Beaker', value: 'Beaker' },
+  { label: 'Heart', value: 'Heart' },
+  { label: 'Leaf', value: 'Leaf' },
+  { label: 'Shield', value: 'ShieldCheck' },
+  { label: 'Star', value: 'Star' },
+  { label: 'Tag', value: 'Tag' },
 ];
 
 const ICON_MAP = { Package, Droplet, Beaker, Heart, Leaf, ShieldCheck, Star, Tag };
@@ -49,17 +49,17 @@ const EMPTY = { key: '', label: '', color: 'bg-[#0077b6] text-white', icon: 'Pac
 /* ── Form Modal ── */
 function CategoryModal({ category, onClose, onSave }) {
   const isEdit = !!category;
-  const [form, setForm]   = useState(isEdit ? { ...category, label: category.label, order: category.order } : EMPTY);
+  const [form, setForm] = useState(isEdit ? { ...category, label: category.label, order: category.order } : EMPTY);
   const [saving, setSaving] = useState(false);
-  const [error, setError]   = useState('');
+  const [error, setError] = useState('');
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   const handleSave = async () => {
-    if (!form.key?.trim())   { setError('Vui lòng nhập Key danh mục'); return; }
+    if (!form.key?.trim()) { setError('Vui lòng nhập Key danh mục'); return; }
     if (!form.label?.trim()) { setError('Vui lòng nhập Tên danh mục'); return; }
     setSaving(true); setError('');
     try {
-      const url    = isEdit ? `${API}/categories/${category.id}` : `${API}/categories`;
+      const url = isEdit ? `${API}/categories/${category.id}` : `${API}/categories`;
       const method = isEdit ? 'PUT' : 'POST';
       const res = await authFetch(url, { method, body: JSON.stringify(form) });
       const data = await res.json();
@@ -202,9 +202,9 @@ async function toggleActive(id, active) {
 /* ── Main Page ── */
 export default function CategoryPage() {
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [modal, setModal]           = useState(null); // {type:'create'|'edit'|'delete', item}
-  const [toast, setToast]           = useState('');
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null); // {type:'create'|'edit'|'delete', item}
+  const [toast, setToast] = useState('');
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
@@ -241,14 +241,14 @@ export default function CategoryPage() {
     <>
       {toast && <div className="fixed top-6 right-6 z-[100] bg-[#191c1d] text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold">{toast}</div>}
       {modal?.type === 'create' && <CategoryModal onClose={() => setModal(null)} onSave={(msg) => { setModal(null); showToast(msg); fetchCategories(); }} />}
-      {modal?.type === 'edit'   && <CategoryModal category={modal.item} onClose={() => setModal(null)} onSave={(msg) => { setModal(null); showToast(msg); fetchCategories(); }} />}
+      {modal?.type === 'edit' && <CategoryModal category={modal.item} onClose={() => setModal(null)} onSave={(msg) => { setModal(null); showToast(msg); fetchCategories(); }} />}
       {modal?.type === 'delete' && <DeleteModal category={modal.item} onClose={() => setModal(null)} onConfirm={handleDelete} />}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 mt-2">
         <div>
           <h1 className="text-4xl font-bold text-[#191c1d] tracking-tight mb-1">Danh mục sản phẩm</h1>
-          <p className="text-[#404850]">Quản lý các danh mục thuốc thú y trong cửa hàng.</p>
+          <p className="text-[#404850]">Quản lý các danh mục thuốc trong cửa hàng.</p>
         </div>
         <button
           onClick={() => setModal({ type: 'create' })}
@@ -277,7 +277,7 @@ export default function CategoryPage() {
       {/* Category Cards Grid */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[1,2,3,4].map(i => <div key={i} className="h-40 bg-white rounded-xl border border-[#e1e3e4] animate-pulse" />)}
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-40 bg-white rounded-xl border border-[#e1e3e4] animate-pulse" />)}
         </div>
       ) : categories.length === 0 ? (
         <div className="py-20 text-center bg-white rounded-xl border border-[#e1e3e4]">

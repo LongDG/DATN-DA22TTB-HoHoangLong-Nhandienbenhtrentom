@@ -29,8 +29,7 @@ export default function CheckoutPage() {
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
   const subtotal  = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping  = subtotal >= 500000 ? 0 : 30000;
-  const total     = subtotal + shipping;
+  const total     = subtotal; // Miễn phí vận chuyển
 
   const handleOrder = async () => {
     if (!form.ho_ten.trim())        return setError('Vui lòng nhập họ tên');
@@ -49,7 +48,15 @@ export default function CheckoutPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      navigate('/order-success', { state: { order: data }, replace: true });
+      // Nếu chuyển khoản → chuyển đến trang thanh toán QR
+      if (form.phuong_thuc_tt === 'chuyen_khoan') {
+        navigate('/order-success', {
+          state: { order: data, showQR: true },
+          replace: true,
+        });
+      } else {
+        navigate('/order-success', { state: { order: data }, replace: true });
+      }
     } catch (e) {
       setError(e.message || 'Lỗi đặt hàng, thử lại sau');
     } finally { setSubmitting(false); }
@@ -172,12 +179,14 @@ export default function CheckoutPage() {
                 ))}
               </div>
               {form.phuong_thuc_tt === 'chuyen_khoan' && (
-                <div className="mt-4 p-4 bg-[#fff8e1] border border-[#ffd54f] rounded-xl text-sm">
-                  <p className="font-bold text-[#795548] mb-1">Thông tin chuyển khoản:</p>
-                  <p className="text-[#5d4037]">Ngân hàng: <strong>Vietcombank</strong></p>
-                  <p className="text-[#5d4037]">STK: <strong>1234 5678 9012</strong></p>
-                  <p className="text-[#5d4037]">Tên: <strong>CONG TY AQUAHEALTH</strong></p>
-                  <p className="text-xs text-[#795548] mt-2">Nội dung CK: Họ tên + SĐT</p>
+                <div className="mt-4 p-4 bg-[#e8f4fd] border border-[#0077b6]/20 rounded-xl text-sm">
+                  <p className="font-bold text-[#0077b6] mb-1 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" /> Thanh toán qua chuyển khoản (SePay)
+                  </p>
+                  <p className="text-[#404850] text-xs mt-1">
+                    Sau khi đặt hàng, bạn sẽ nhận được <strong>mã QR</strong> để quét thanh toán.
+                    Hệ thống tự động xác nhận khi nhận được tiền.
+                  </p>
                 </div>
               )}
             </div>
@@ -240,22 +249,10 @@ export default function CheckoutPage() {
                   <span>Tạm tính ({cart.reduce((s, i) => s + i.qty, 0)} sp)</span>
                   <span className="font-semibold">{fmt(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-[#404850]">
+                <div className="flex justify-between text-[#2c694e] text-xs font-medium">
                   <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5" />Phí vận chuyển</span>
-                  <span className={`font-semibold ${shipping === 0 ? 'text-[#2c694e]' : ''}`}>
-                    {shipping === 0 ? 'Miễn phí' : fmt(shipping)}
-                  </span>
+                  <span className="font-bold">Miễn phí 🎉</span>
                 </div>
-                {shipping === 0 && (
-                  <p className="text-[10px] text-[#2c694e] bg-[#aeeecb]/30 px-2.5 py-1.5 rounded-lg font-medium">
-                    🎉 Miễn phí vận chuyển cho đơn từ 500.000đ
-                  </p>
-                )}
-                {shipping > 0 && (
-                  <p className="text-[10px] text-[#707881] bg-[#f3f4f5] px-2.5 py-1.5 rounded-lg">
-                    Mua thêm {fmt(500000 - subtotal)} để miễn phí ship
-                  </p>
-                )}
                 <div className="pt-3 border-t border-[#e7edf3] flex justify-between items-center">
                   <span className="font-bold text-[#191c1d]">Tổng thanh toán</span>
                   <span className="text-2xl font-black text-[#0077b6]">{fmt(total)}</span>

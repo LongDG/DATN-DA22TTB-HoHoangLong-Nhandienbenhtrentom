@@ -9,10 +9,10 @@ import {
 const API = 'http://localhost:5000/api';
 
 const ICON_MAP_STORE = {
-  Droplet: () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2 C12 2 4 10 4 15 a8 8 0 0 0 16 0 C20 10 12 2 12 2z"/></svg>,
-  Beaker:  () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M9 3V14L4 19h16l-5-5V3H9zM11 3h2v1h-2z"/></svg>,
-  Package: () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.2L20 8v.1L12 12 4 8.1V8L12 4.2zM4 10l8 4 8-4v7l-8 4-8-4V10z"/></svg>,
-  default: () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>,
+  Droplet: () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2 C12 2 4 10 4 15 a8 8 0 0 0 16 0 C20 10 12 2 12 2z" /></svg>,
+  Beaker: () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M9 3V14L4 19h16l-5-5V3H9zM11 3h2v1h-2z" /></svg>,
+  Package: () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.2L20 8v.1L12 12 4 8.1V8L12 4.2zM4 10l8 4 8-4v7l-8 4-8-4V10z" /></svg>,
+  default: () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" /></svg>,
 };
 
 function CatIcon({ name }) {
@@ -89,8 +89,8 @@ function ProductCard({ product, onAdd }) {
             onClick={handleAdd}
             disabled={isOut}
             className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-1.5 transition-all active:scale-95 ${added ? 'bg-green-100 text-green-700' :
-                isOut ? 'bg-slate-100 text-slate-400 cursor-not-allowed' :
-                  'bg-[#0077b6]/10 text-[#0077b6] hover:bg-[#0077b6] hover:text-white'
+              isOut ? 'bg-slate-100 text-slate-400 cursor-not-allowed' :
+                'bg-[#0077b6]/10 text-[#0077b6] hover:bg-[#0077b6] hover:text-white'
               }`}
           >
             {added
@@ -128,7 +128,7 @@ export default function StorePage() {
         const active = (Array.isArray(data) ? data : []).filter(c => c.active !== false);
         setCategories([{ key: 'all', label: 'Tất cả', icon: 'Package', color: '' }, ...active]);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Debounce search
@@ -175,9 +175,8 @@ export default function StorePage() {
                 <li key={c.key}>
                   <button
                     onClick={() => { setCategory(c.key); setPage(1); }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${
-                      category === c.key ? 'bg-[#0077b6] text-white shadow-md shadow-[#0077b6]/20' : 'text-slate-600 hover:bg-slate-50'
-                    }`}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${category === c.key ? 'bg-[#0077b6] text-white shadow-md shadow-[#0077b6]/20' : 'text-slate-600 hover:bg-slate-50'
+                      }`}
                   >
                     <CatIcon name={c.icon} />
                     {c.label}
@@ -203,7 +202,7 @@ export default function StorePage() {
           <div className="bg-[#0077b6] rounded-2xl p-6 text-white relative overflow-hidden">
             <div className="relative z-10">
               <p className="font-semibold text-sm opacity-90 mb-1">Tư vấn miễn phí</p>
-              <h4 className="text-lg font-bold mb-4 leading-tight">Chat với bác sĩ thú y ngay!</h4>
+              <h4 className="text-lg font-bold mb-4 leading-tight">Chat với chuyên gia ngay!</h4>
               <button className="bg-white text-[#0077b6] px-4 py-2 rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95">
                 Kết nối ngay
               </button>

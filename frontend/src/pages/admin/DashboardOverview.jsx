@@ -38,7 +38,7 @@ export default function DashboardOverview() {
 
     authFetch(`${API_BASE}/admin/diagnostics`)
       .then(r => r.json())
-      .then(data => setRecentLogs(data.slice(0, 3)))
+      .then(data => setRecentLogs((data.logs ?? data ?? []).slice(0, 3)))
       .catch(err => console.error('Lỗi nhật ký:', err));
 
     // Chỉ lấy tư vấn đang CHỜ PHẢN HỒI cho tổng quan

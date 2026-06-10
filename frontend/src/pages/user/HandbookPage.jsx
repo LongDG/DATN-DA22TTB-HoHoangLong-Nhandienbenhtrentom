@@ -24,15 +24,15 @@ const CATEGORY_CARDS = [
   { key: 'sop',           icon: Download,          iconBg: 'bg-[#ffdbc8]', iconHover: 'group-hover:bg-[#904300]', color: 'text-[#904300]', items: ['Tải tài liệu PDF', 'Hướng dẫn thực địa', 'Biểu mẫu nhật ký'] },
 ];
 
-const FALLBACK_IMGS = [
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuDEnI37HNFicM3EvMUdddsG2faOcaPc1uOjRMcqk6NV2272-vbJvBlwyZMurgJCCEsgWk1PjQ2Gdph9N_JW3FSIG59gJYT6Xy2tKlzUomOfqSHR7u0LPOFjE5a6oAS1nlfSA3tPBpFGV8OaqBHDRIZaiRk2ELscDah7vES9cZySDL-pWeLHnYh6KiLS_8KUBnHWvzNHX7b9UuUoSFz-lQCV14XDdW5qui-fNzqlKAsUOvm22srWmbm33J46JkYVolzjPa9uLi8ONg',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuD_JE3tRXClh7WmLv500mSs9DeaFCSUUyIjbB6MvcTmzv5NkklkvE0lDJ_aXcIRSbdddkdkSRKdHy7umnATcBcaVSq5bxIbI2KMb2FSEfCA-lloZLb12_yJI-WoP28CW48-1w-sIAvZzYhtolWoNQXjA41SI5n_ULbk7D93nuTaRX8MCEkUEr3e-No7YCcRJ4zmGivWetsCMGfjtumxAZimjsYYV26RRwF4dYkjUCDIGqn_R-iABpxYZIiHUMaq28N5qjDjhA5dog',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuBa4M-AouzN7W5EBYlpZUfUxWlvJPqsZ0gEwCURMPo1CrNtAKiwHX7be0JNXXmHLtbq6h2GtTwqNW8-nfyipVIjnKyykmtlzOb8_S3AnEbD5FyJHkV4hM7mgJqardAj2H17K_g6Sc5VTSL6ues4xMsAMcUXeQh6yEE02Wyoa54C7TYy_uTHpzU_AtsWLkd4iMn0Sjo2CNBJ3fmByHLCPEx5qKK-Ifiko-vf2B5TsvGBNsZve43Y5ISJ8-nO5sl0oTUIvFsC4pjZxw',
+const PLACEHOLDER_GRADIENTS = [
+  'linear-gradient(135deg, #0077b6 0%, #005d90 100%)',
+  'linear-gradient(135deg, #2c694e 0%, #1e4f38 100%)',
+  'linear-gradient(135deg, #904300 0%, #743500 100%)',
 ];
 
 function ArticleCard({ article, index }) {
   const navigate = useNavigate();
-  const img = article.image || FALLBACK_IMGS[index % 3];
+  const img = article.image;
 
   return (
     <article
@@ -40,7 +40,13 @@ function ArticleCard({ article, index }) {
       className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-slate-100 flex flex-col cursor-pointer group hover:-translate-y-1"
     >
       <div className="h-52 relative overflow-hidden">
-        <img src={img} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        {img ? (
+          <img src={img} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center" style={{ background: PLACEHOLDER_GRADIENTS[index % 3] }}>
+            <BookOpen className="w-12 h-12 text-white/30" />
+          </div>
+        )}
         <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold ${article.categoryColor}`}>
           {article.categoryLabel}
         </span>
@@ -65,6 +71,66 @@ function ArticleCard({ article, index }) {
         </div>
       </div>
     </article>
+  );
+}
+
+/* ── Video Library — lấy bài viết có video từ API ── */
+function VideoLibrary() {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API}/handbook?limit=8&type=video`)
+      .then(r => r.json())
+      .then(d => setVideos((d.articles ?? []).filter(a => a.videoUrl)))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (!loading && videos.length === 0) return null;
+
+  return (
+    <section className="bg-slate-50 py-16 border-t border-slate-100">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-[#191c1d] mb-1">🎬 Thư viện Video hướng dẫn</h2>
+          <p className="text-slate-500">Hướng dẫn trực quan từng bước thực hiện trên thực địa.</p>
+        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-video bg-slate-200 rounded-xl mb-3" />
+                <div className="h-4 bg-slate-200 rounded w-3/4" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {videos.slice(0, 4).map((v, i) => (
+              <a key={v.id || i} href={v.videoUrl} target="_blank" rel="noopener noreferrer" className="group cursor-pointer block">
+                <div className="relative rounded-xl overflow-hidden mb-3 aspect-video">
+                  {v.image ? (
+                    <img src={v.image} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+                      <PlayCircle className="w-12 h-12 text-white/30" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-12 h-12 text-white" />
+                  </div>
+                  {v.videoDuration && (
+                    <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-mono">{v.videoDuration}</span>
+                  )}
+                </div>
+                <h5 className="text-sm font-semibold text-[#191c1d] line-clamp-2 leading-snug group-hover:text-[#0077b6] transition-colors">{v.title}</h5>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -101,9 +167,7 @@ export default function HandbookPage() {
     <div>
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#005d90] to-[#0077b6] relative py-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXmLQvX3GM68JnblqMrKdq0utMfc5NkdyPi8M_cqrXtPkXxGXWBmJiaUZ_qU_KuorBOssgmtbfttQT6MpMggeKvrpiRYpaxAroCIIByGzNwgDoSBWs9_f9cRWexyMAQZA1h00p7Wcn77jLSNAecXO_OiPJJbra34PfMcSniEcOztjE6AJpzwLkfvt2-tIN5NW688-Mt7E2MMwJq6bOXdMuu88z21Mx5gl8BWOv7hdjAWDh8SWTj1euACqayEplm1MFTZHX4p-kgw" alt="" className="w-full h-full object-cover" />
-        </div>
+        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')] bg-repeat" />
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h1 className="text-4xl font-bold text-white mb-4 leading-tight">📚 Sổ tay kỹ thuật nuôi tôm</h1>
           <p className="text-lg text-white/85 mb-8 leading-relaxed">
@@ -213,34 +277,8 @@ export default function HandbookPage() {
         )}
       </section>
 
-      {/* Video Library */}
-      <section className="bg-slate-50 py-16 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#191c1d] mb-1">🎬 Thư viện Video hướng dẫn</h2>
-            <p className="text-slate-500">Hướng dẫn trực quan từng bước thực hiện trên thực địa.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              { img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB1lkHBNiREip_QMm1qtBBvbi7kmzRwTYUKYwSjS3_O3OcruoA1QLW4YAcN01Pph-cJMfy_R_VhU66iFEqzJNJg2WvKPeUwHDT26rMrX-yZdiTpGZ4Jm5AWWY-kXKzuvyR9GltD89ffd3Vj6n03nBOoyG5B2VNKAHTCtpPDixM6giHxwWaujuCPqArJI31fNEICdD5P5uuG6UAAifIiol9FCBTcS8ol4-YFivH2ArzanE26176zd6OHZN_-8diQCDAF23w2gDEn3g', time: '12:45', title: 'Quy trình xử lý nước ao trước khi thả tôm' },
-              { img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDKjtY0LD1SIzuGzeZGRDywZI5aEllocrqEkM6nT6QozGYbBnmKljJ5CmWh5m3M217FQn6naS1-4JMtp-m5vrij_DaTIAMn22MSMowuSj5CL6WbPJmT-xzc9yngtwAqnkKxNLMOmxnp1tXrMomqBUpTDpqjcWJndTZI_eOCE8v6kZ-tsOw_1jK3NFp8e7Es9jW62Fy20vu-K74mEIrhPZeSZ-HIKKVjXhqzrU2LnMXbp0gOa8XabGvRm9A09TqZxIjIxT44nXb51g', time: '08:20', title: 'Cách lắp đặt hệ thống quạt nước tối ưu oxy' },
-              { img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBallN9mt5ehTzzSlzRz52fMd-Dzkep1joWUgonfthFcpdsQuN-opoPHhe91CiPs9LYaPvgMnJBxcXWd8dyG_8NE9rnZv91hgD0Zp-Yn4YBhiuJyNDgnsapkFHYfaJADp7oEoNYzaQ5sGMFtiRLl5D8xFnj5_jIsgiOwwVHmbSScd4FoGUvM9cTjBzxqzqrIui2j-XVzmoBMxKpSXrsksFSUknLtCrwToI2cU25NjC8eJ4j-r14ksg_x3hliN3f6bQfAEfc6qJW2Q', time: '15:10', title: 'Nhận diện sớm bệnh phân trắng trên tôm thẻ' },
-              { img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCBUVduOKEKxl-o2NPHS01ggDT5N6x5eSZx_evDe4r0PAt4jazbxObOOvos_LO6p3xPkAjmtygq0ICeLo929IHKsVICSZMnOrhdEB5YXnskIW6ymQUUlfOKrbkdt9vkx9yrgNvryRs878QymtEGcouPjk7z-NLGtNRehQNlrqbjbh3yDhGoD5iqaYeUXcP996C4WqjUydE1v3I8yy1aOEM4ZnR_FmdaqWBvXh3BDQlueP6kreOjzUN8fACxmaprd6Zv3ohJ5sXlZA', time: '05:30', title: 'Hướng dẫn ghi chép nhật ký nuôi tôm số hóa' },
-            ].map((v, i) => (
-              <div key={i} className="group cursor-pointer">
-                <div className="relative rounded-xl overflow-hidden mb-3 aspect-video">
-                  <img src={v.img} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlayCircle className="w-12 h-12 text-white" />
-                  </div>
-                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-mono">{v.time}</span>
-                </div>
-                <h5 className="text-sm font-semibold text-[#191c1d] line-clamp-2 leading-snug">{v.title}</h5>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Video Library — hiển thị bài viết có video từ API */}
+      <VideoLibrary />
 
       {/* Newsletter */}
       <section className="max-w-7xl mx-auto px-6 py-16">

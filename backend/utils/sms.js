@@ -83,4 +83,12 @@ function msgOrderDelivered({ maDon, hoTen, tongTien, sanPhamDau }) {
   );
 }
 
-module.exports = { sendSms, msgOtp, msgOrderDelivered };
+/**
+ * Template: Xác nhận thanh toán thành công
+ */
+function msgPaymentSuccess({ maDon, tongTien }) {
+  const fmt = (n) => Number(n || 0).toLocaleString('vi-VN');
+  return `[AquaHealth] Xac nhan da nhan thanh toan ${fmt(tongTien)}d cho don hang ${maDon}. Chung toi se tien hanh giao hang som nhat.`;
+}
+
+module.exports = { sendSms, msgOtp, msgOrderDelivered, msgPaymentSuccess };

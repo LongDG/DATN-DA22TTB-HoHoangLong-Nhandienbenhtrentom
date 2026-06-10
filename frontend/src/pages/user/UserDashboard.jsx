@@ -32,13 +32,18 @@ function QualityBadge({ score }) {
 
 /* ── Result Modal ── */
 function ResultModal({ result, imagePreview, onClose, onNewScan }) {
-  const disease   = result.result?.disease  || {};
-  const conf      = result.result?.confidence || 0;
-  const allProbs  = result.result?.all_probs || [];
-  const sevCfg    = SEVERITY_CFG[disease.severity] || SEVERITY_CFG.unknown;
-  const validation = result.validation || {};
-  const benhInfo   = result.benh_info   || null;
-  const products   = result.suggested_products || [];
+  const disease        = result.result?.disease  || {};
+  const conf           = result.result?.confidence || 0;
+  const allProbs       = result.result?.all_probs || [];
+  const confLevel      = result.result?.confidence_level || 'low';
+  const confLabel      = result.result?.confidence_label || '';
+  const ensembleCount  = result.result?.ensemble_count || 1;
+  const modelAgreement = result.result?.model_agreement || 0;
+  const top2Gap        = result.result?.top2_gap || 0;
+  const sevCfg         = SEVERITY_CFG[disease.severity] || SEVERITY_CFG.unknown;
+  const validation     = result.validation || {};
+  const benhInfo       = result.benh_info   || null;
+  const products       = result.suggested_products || [];
 
   const LOAI_LABEL = {
     dac_tri:             '\u0110ặc trị',
@@ -51,6 +56,11 @@ function ResultModal({ result, imagePreview, onClose, onNewScan }) {
     phongbenh: 'Phòng bệnh',
     hotro:    'Hỗ trợ',
   };
+
+  // Confidence bar color
+  const confBarColor = confLevel === 'high' ? 'bg-[#2c694e]'
+                     : confLevel === 'medium' ? 'bg-amber-500'
+                     : 'bg-red-400';
 
   return (
     <motion.div
@@ -74,6 +84,30 @@ function ResultModal({ result, imagePreview, onClose, onNewScan }) {
         </div>
 
         <div className="p-6 space-y-5">
+          {/* Cảnh báo confidence thấp */}
+          {confLevel !== 'high' && (
+            <div className={`rounded-2xl p-4 border flex items-start gap-3 ${
+              confLevel === 'low'
+                ? 'bg-red-50 border-red-200 text-red-700'
+                : 'bg-amber-50 border-amber-200 text-amber-700'
+            }`}>
+              <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-bold text-sm">{confLabel}</p>
+                <p className="text-xs mt-1 opacity-80">
+                  {confLevel === 'low'
+                    ? 'Mô hình AI không đủ tự tin để đưa ra chẩn đoán chính xác. Ảnh có thể không rõ ràng hoặc bệnh chưa có trong dữ liệu huấn luyện. Vui lòng chụp lại ảnh rõ hơn hoặc liên hệ chuyên gia.'
+                    : 'Kết quả cần được xem xét cẩn thận. Nên chụp thêm ảnh từ góc khác hoặc tham vấn chuyên gia thú y thủy sản để xác nhận.'}
+                </p>
+                {top2Gap < 15 && (
+                  <p className="text-xs mt-1 font-semibold">
+                    ⚠️ Khoảng cách giữa 2 bệnh phổ biến nhất chỉ {top2Gap.toFixed(1)}% — AI đang phân vân giữa nhiều bệnh.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Ảnh + Confidence */}
           <div className="flex gap-4">
             {imagePreview && (
@@ -86,24 +120,39 @@ function ResultModal({ result, imagePreview, onClose, onNewScan }) {
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-sm font-semibold text-slate-600">Độ tin cậy</span>
-                  <span className="text-2xl font-extrabold text-slate-800">{conf.toFixed(1)}%</span>
+                  <span className={`text-2xl font-extrabold ${
+                    confLevel === 'high' ? 'text-slate-800'
+                    : confLevel === 'medium' ? 'text-amber-600'
+                    : 'text-red-500'
+                  }`}>{conf.toFixed(1)}%</span>
                 </div>
                 <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }} animate={{ width: `${conf}%` }}
                     transition={{ duration: 0.8, ease: 'easeOut' }}
-                    className={`h-full rounded-full ${
-                      disease.severity === 'none' ? 'bg-[#2c694e]'
-                        : disease.severity === 'critical' ? 'bg-[#ba1a1a]'
-                        : 'bg-amber-500'
-                    }`}
+                    className={`h-full rounded-full ${confBarColor}`}
                   />
                 </div>
+                {/* Confidence label */}
+                <p className={`text-xs font-bold mt-1 ${
+                  confLevel === 'high' ? 'text-emerald-600'
+                  : confLevel === 'medium' ? 'text-amber-600'
+                  : 'text-red-500'
+                }`}>
+                  {confLevel === 'high' ? '✅' : confLevel === 'medium' ? '⚠️' : '❌'} {confLabel}
+                </p>
               </div>
-              {/* Chất lượng ảnh */}
-              {validation.details?.quality_score !== undefined && (
-                <QualityBadge score={validation.details.quality_score} />
-              )}
+              {/* Chất lượng ảnh + Ensemble info */}
+              <div className="flex flex-wrap gap-2">
+                {validation.details?.quality_score !== undefined && (
+                  <QualityBadge score={validation.details.quality_score} />
+                )}
+                {ensembleCount > 1 && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                    🔗 {ensembleCount} models • Đồng thuận {modelAgreement.toFixed(0)}%
+                  </span>
+                )}
+              </div>
               {/* Severity tag */}
               <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold border ${sevCfg.cls}`}>
                 {disease.severity === 'none'
@@ -564,12 +613,206 @@ const SEVERITY_COLORS = {
   'Rất nguy hiểm': { bg: 'bg-red-100',  text: 'text-red-700',     dot: 'bg-red-500'     },
 };
 
+function HistoryDetailModal({ detail, onClose }) {
+  if (!detail) return null;
+  const sevCfg = SEVERITY_CFG[detail.ma_benh === 'khoe_manh' ? 'none' : 'critical'] || SEVERITY_CFG.unknown;
+  const benhInfo = detail.benh_info;
+  const products = detail.suggested_products || [];
+  const allProbs = detail.ket_qua_xac_suat || [];
+  const LOAI_LABEL = { dac_tri:'Đặc trị', vi_sinh:'Vi sinh', vi_sinh_moi_truong:'Vi sinh MT', dinh_duong_de_khang:'Dinh dưỡng' };
+  const MUC_DICH_LABEL = { dieutri:'Điều trị', phongbenh:'Phòng bệnh', hotro:'Hỗ trợ' };
+
+  return (
+    <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <motion.div initial={{scale:0.92,y:20}} animate={{scale:1,y:0}}
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className={`px-6 py-5 rounded-t-3xl border-b flex justify-between items-start ${
+          detail.ma_benh === 'khoe_manh' ? 'bg-[#aeeecb]/20 text-[#2c694e]'
+          : detail.muc_do === 'Rất nguy hiểm' ? 'bg-red-50 text-[#ba1a1a]'
+          : detail.muc_do === 'Nguy hiểm' ? 'bg-orange-50 text-[#904300]'
+          : 'bg-amber-50 text-amber-700'
+        }`}>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider opacity-60 mb-1">Lịch sử chẩn đoán • {detail.gio} {detail.ngay}</p>
+            <h2 className="text-xl font-extrabold">{detail.ten_benh}</h2>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-black/10 rounded-full"><X className="w-5 h-5"/></button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Ảnh + Confidence */}
+          <div className="flex gap-4">
+            {detail.image_url && (
+              <div className="w-32 h-32 rounded-2xl overflow-hidden border border-slate-200 shrink-0">
+                <img src={detail.image_url} alt="Ảnh chẩn đoán" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="flex-1 space-y-3">
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-sm font-semibold text-slate-600">Độ tin cậy</span>
+                  <span className="text-2xl font-extrabold text-slate-800">{(detail.do_chinh_xac||0).toFixed(1)}%</span>
+                </div>
+                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${
+                    detail.ma_benh==='khoe_manh'?'bg-[#2c694e]':'bg-[#ba1a1a]'
+                  }`} style={{width:`${detail.do_chinh_xac||0}%`}}/>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold border ${
+                  detail.ma_benh==='khoe_manh'?'bg-[#aeeecb]/20 text-[#2c694e] border-[#2c694e]/30'
+                  :detail.muc_do==='Rất nguy hiểm'?'bg-red-50 text-[#ba1a1a] border-red-200'
+                  :'bg-amber-50 text-amber-700 border-amber-200'
+                }`}>
+                  {detail.ma_benh==='khoe_manh'?<CheckCircle2 className="w-4 h-4"/>:<AlertTriangle className="w-4 h-4"/>}
+                  {detail.muc_do||'Không rõ'}
+                </span>
+                {detail.chat_luong_anh?.quality_score !== undefined && (
+                  <QualityBadge score={detail.chat_luong_anh.quality_score} />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Chẩn đoán text */}
+          {detail.chuandoan_text && (
+            <div className="bg-slate-50 rounded-2xl p-4 text-sm text-slate-700 leading-relaxed border border-slate-100">
+              <p className="font-semibold text-slate-500 text-xs uppercase tracking-wider mb-1.5">Kết quả chẩn đoán</p>
+              <pre className="whitespace-pre-wrap font-sans">{detail.chuandoan_text}</pre>
+            </div>
+          )}
+
+          {/* Thông tin bệnh từ DB */}
+          {benhInfo && (
+            <>
+              {benhInfo.mota && (
+                <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
+                  <p className="font-bold text-xs uppercase tracking-wider text-blue-700 mb-2">📋 Mô tả bệnh</p>
+                  <p className="text-sm text-blue-800 leading-relaxed">{benhInfo.mota}</p>
+                </div>
+              )}
+              {benhInfo.trieuchung?.length > 0 && (
+                <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+                  <p className="font-bold text-xs uppercase tracking-wider text-amber-700 mb-2">⚠️ Triệu chứng</p>
+                  <ul className="space-y-1">{benhInfo.trieuchung.map((t,i)=>(
+                    <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
+                      <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"/>{t}
+                    </li>
+                  ))}</ul>
+                </div>
+              )}
+              {benhInfo.dieutri && (
+                <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+                  <p className="font-bold text-xs uppercase tracking-wider text-emerald-700 mb-2">💊 Cách điều trị</p>
+                  <pre className="text-sm text-emerald-800 leading-relaxed whitespace-pre-wrap font-sans">{benhInfo.dieutri}</pre>
+                </div>
+              )}
+              {benhInfo.phongngua && (
+                <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100">
+                  <p className="font-bold text-xs uppercase tracking-wider text-indigo-700 mb-2">🛡️ Phòng ngừa</p>
+                  <pre className="text-sm text-indigo-800 leading-relaxed whitespace-pre-wrap font-sans">{benhInfo.phongngua}</pre>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Thuốc gợi ý */}
+          {products.length > 0 && (
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <ShoppingCart className="w-3.5 h-3.5"/> Thuốc & sản phẩm gợi ý
+              </p>
+              <div className="space-y-3">
+                {products.map(p => (
+                  <div key={p.id} className="flex gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div className="w-10 h-10 rounded-xl bg-[#0077b6]/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-5 h-5 text-[#0077b6]"/>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-bold text-slate-800">{p.ten}</p>
+                        <span className="text-sm font-extrabold text-[#0077b6] shrink-0">{(p.gia||0).toLocaleString('vi-VN')}đ</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-slate-400">{p.thuonghieu}</span>
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">{LOAI_LABEL[p.loai]||p.loai}</span>
+                        {(p.muc_dich||[]).map(m=>(
+                          <span key={m} className="text-xs px-1.5 py-0.5 rounded bg-[#0077b6]/10 text-[#0077b6]">{MUC_DICH_LABEL[m]||m}</span>
+                        ))}
+                      </div>
+                      {p.congdung?.length>0 && <p className="text-xs text-slate-500 mt-1 truncate">{p.congdung.slice(0,2).join(' • ')}</p>}
+                      {p.lieudung?.xu_ly_benh && <p className="text-xs text-emerald-700 mt-1">📈 Liều điều trị: {p.lieudung.xu_ly_benh}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Link to="/store" onClick={onClose}
+                className="mt-3 w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-[#0077b6] bg-[#0077b6]/10 rounded-2xl hover:bg-[#0077b6]/20 transition-colors">
+                <ShoppingCart className="w-4 h-4"/> Xem tất cả sản phẩm
+              </Link>
+            </div>
+          )}
+
+          {/* Phân phối xác suất */}
+          {allProbs.length > 1 && (
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Phân phối xác suất</p>
+              <div className="space-y-2">
+                {allProbs.map(p => (
+                  <div key={p.name} className="flex items-center gap-3">
+                    <span className="text-sm text-slate-600 w-44 truncate shrink-0">{p.name}</span>
+                    <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#0077b6] rounded-full" style={{width:`${p.prob}%`}}/>
+                    </div>
+                    <span className="text-sm font-bold text-slate-700 w-12 text-right shrink-0">{p.prob}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-1">
+            <Link to="/consult-user" onClick={onClose}
+              className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-2xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
+              <ChevronRight className="w-4 h-4"/> Tư vấn chuyên gia
+            </Link>
+            <button onClick={onClose}
+              className="flex-1 py-3 bg-[#0077b6] text-white font-bold rounded-2xl hover:bg-[#005d90] transition-colors flex items-center justify-center gap-2">
+              Đóng
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function DiagnosisHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total,   setTotal]   = useState(0);
   const [page,    setPage]    = useState(1);
+  const [selectedDetail, setSelectedDetail] = useState(null);
+  const [detailLoading, setDetailLoading]   = useState(false);
   const LIMIT = 6;
+
+  const fetchDetail = async (id) => {
+    setDetailLoading(true);
+    try {
+      const token = localStorage.getItem('token') || '';
+      const res = await fetch(`${API_BASE}/diagnose/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setSelectedDetail(data);
+    } catch {}
+    finally { setDetailLoading(false); }
+  };
 
   const fetchHistory = async (p = 1) => {
     setLoading(true);
@@ -600,10 +843,23 @@ function DiagnosisHistory() {
     ruot_trang: 'bg-blue-100 text-blue-700',
   };
 
-  if (!loading && history.length === 0) return null; // ẩn nếu chưa có lịch sử
+  if (!loading && history.length === 0) return null;
 
   return (
     <section className="py-16 px-6 bg-slate-50">
+      <AnimatePresence>
+        {selectedDetail && (
+          <HistoryDetailModal detail={selectedDetail} onClose={() => setSelectedDetail(null)} />
+        )}
+      </AnimatePresence>
+      {detailLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-3 shadow-2xl">
+            <Loader2 className="w-8 h-8 animate-spin text-[#0077b6]" />
+            <p className="text-sm font-bold text-slate-600">Đang tải chi tiết...</p>
+          </div>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-end mb-8">
@@ -643,7 +899,8 @@ function DiagnosisHistory() {
                 <motion.div
                   key={item.id}
                   whileHover={{ y: -4 }}
-                  className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all group"
+                  onClick={() => fetchDetail(item.id)}
+                  className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-pointer"
                 >
                   {/* Ảnh */}
                   <div className="h-32 bg-slate-100 relative overflow-hidden">

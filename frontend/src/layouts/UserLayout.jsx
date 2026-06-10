@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useOutletContext } from 'react-router-dom';
 import { UserHeader } from '../components/user/UserHeader';
 import { UserFooter } from '../components/user/UserFooter';
@@ -6,8 +6,20 @@ import { ZaloButton } from '../components/user/ZaloButton';
 import { CartDrawer } from '../components/user/CartDrawer';
 
 export default function UserLayout({ user, onLogout }) {
-  const [cart, setCart]         = useState([]);
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('aquahealth_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [showCart, setShowCart] = useState(false);
+
+  // Lưu giỏ hàng vào localStorage mỗi khi có thay đổi
+  useEffect(() => {
+    localStorage.setItem('aquahealth_cart', JSON.stringify(cart));
+  }, [cart]);
 
   const addToCart = (product) => {
     setCart(prev => {
