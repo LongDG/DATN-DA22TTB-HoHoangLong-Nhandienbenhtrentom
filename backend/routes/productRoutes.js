@@ -25,7 +25,15 @@ const TAG_COLORS = {
 router.get('/', async (req, res) => {
   try {
     const db = mongoose.connection.db;
-    const { category, search, sort = 'newest', page = 1, limit = 9 } = req.query;
+    const { ObjectId } = require('mongodb');
+    const { category, search, sort = 'newest', page = 1, limit = 9, disease } = req.query;
+
+    // Map disease key → ObjectId trong SANPHAM.benh_ids
+    const DISEASE_ID_MAP = {
+      dom_trang: '60f1a2b3c4d5e6f7a8b90001',
+      gan_tuy:   '60f1a2b3c4d5e6f7a8b90002',
+      phan_trang:'60f1a2b3c4d5e6f7a8b90003',
+    };
 
     const filter = {};
     if (category && category !== 'all') filter.loaisanpham = category;
@@ -33,8 +41,17 @@ router.get('/', async (req, res) => {
       filter.$or = [
         { tensanpham: { $regex: search, $options: 'i' } },
         { thuonghieu: { $regex: search, $options: 'i' } },
-        { mota: { $regex: search, $options: 'i' } },
+        { mota:       { $regex: search, $options: 'i' } },
       ];
+    }
+
+    // Lọc theo bệnh (disease=dom_trang,gan_tuy,...)
+    if (disease) {
+      const keys = disease.split(',').filter(k => DISEASE_ID_MAP[k]);
+      if (keys.length > 0) {
+        const ids = keys.map(k => new ObjectId(DISEASE_ID_MAP[k]));
+        filter.benh_ids = { $elemMatch: { $in: ids } };
+      }
     }
 
     const total = await db.collection('SANPHAM').countDocuments(filter);

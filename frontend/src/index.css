@@ -100,3 +100,98 @@
 .auth-link {
   @apply text-primary font-bold hover:text-primary-dark hover:underline transition-colors;
 }
+
+/* ── Nội dung bài viết Handbook ── */
+.handbook-content {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #374151;
+}
+.handbook-content h1,
+.handbook-content h2,
+.handbook-content h3,
+.handbook-content h4 {
+  font-weight: 700;
+  color: #111827;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.35;
+}
+.handbook-content h1 { font-size: 1.75rem; }
+.handbook-content h2 { font-size: 1.4rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; }
+.handbook-content h3 { font-size: 1.15rem; }
+.handbook-content h4 { font-size: 1rem; color: #374151; }
+.handbook-content p  { margin-bottom: 1rem; }
+.handbook-content ul,
+.handbook-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+.handbook-content ul { list-style-type: disc; }
+.handbook-content ol { list-style-type: decimal; }
+.handbook-content li { margin-bottom: 0.35rem; }
+.handbook-content a  { color: #0077b6; text-decoration: underline; }
+.handbook-content a:hover { color: #005d90; }
+.handbook-content strong { font-weight: 700; color: #111827; }
+.handbook-content em { font-style: italic; }
+.handbook-content blockquote {
+  border-left: 4px solid #0077b6;
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0;
+  background: #f0f9ff;
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #475569;
+  font-style: italic;
+}
+.handbook-content img {
+  max-width: 100%;
+  border-radius: 0.75rem;
+  margin: 1.25rem auto;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.handbook-content code {
+  background: #f1f5f9;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.3rem;
+  font-size: 0.875rem;
+  color: #dc2626;
+  font-family: monospace;
+}
+.handbook-content pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  font-size: 0.875rem;
+}
+.handbook-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+.handbook-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+}
+.handbook-content th,
+.handbook-content td {
+  border: 1px solid #e2e8f0;
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+}
+.handbook-content th {
+  background: #f0f9ff;
+  font-weight: 700;
+  color: #005d90;
+}
+.handbook-content tr:nth-child(even) td { background: #f8fafc; }
+.handbook-content hr {
+  border: none;
+  border-top: 2px solid #e2e8f0;
+  margin: 2rem 0;
+}

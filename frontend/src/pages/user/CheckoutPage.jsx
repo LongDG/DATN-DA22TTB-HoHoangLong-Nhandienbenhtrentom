@@ -1,59 +1,90 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, User, Phone, MapPin, CreditCard, Truck,
   Banknote, ChevronRight, Package, CheckCircle2, AlertTriangle,
-  ArrowLeft, Minus, Plus, Trash2,
+  ArrowLeft, Minus, Plus, Trash2, Loader2,
 } from 'lucide-react';
-
-const API = 'http://localhost:5000/api';
-const fmt = (n) => n ? n.toLocaleString('vi-VN') + 'đ' : '0đ';
 import { authFetch } from '../../utils/authFetch';
 
-const TINH = [
-  'An Giang','Bạc Liêu','Bến Tre','Cà Mau','Cần Thơ','Đồng Tháp',
-  'Hậu Giang','Kiên Giang','Long An','Sóc Trăng','Tiền Giang','Trà Vinh','Vĩnh Long',
-  'Thành phố Hồ Chí Minh','Hà Nội','Đà Nẵng','Khác',
-];
+const API = 'http://localhost:5000/api';
+const GEO = 'https://provinces.open-api.vn/api/v2';
+const fmt = (n) => n ? n.toLocaleString('vi-VN') + 'đ' : '0đ';
 
 export default function CheckoutPage() {
   const { cart, updateQty, removeFromCart, user } = useOutletContext();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    ho_ten: user?.ten || '', so_dien_thoai: user?.sodienthoai || '',
-    tinh_thanh: '', dia_chi: '', phuong_thuc_tt: 'cod', ghi_chu: '',
+    ho_ten: user?.ten || '',
+    so_dien_thoai: user?.sodienthoai || '',
+    tinh_thanh: '',
+    phuong_xa: '',
+    dia_chi: '',
+    phuong_thuc_tt: 'cod',
+    ghi_chu: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // ── Địa chỉ API v2 (34 tỉnh, 2 cấp: Tỉnh → Xã) ──
+  const [provinces, setProvinces] = useState([]);
+  const [wards, setWards]         = useState([]);
+  const [loadingProv, setLoadingProv] = useState(true);
+  const [loadingWard, setLoadingWard] = useState(false);
+  const [provError, setProvError] = useState(false);
+
+  useEffect(() => {
+    setLoadingProv(true);
+    setProvError(false);
+    fetch(`${GEO}/`)
+      .then(r => r.json())
+      .then(d => setProvinces(Array.isArray(d) ? d : []))
+      .catch(() => setProvError(true))
+      .finally(() => setLoadingProv(false));
+  }, []);
+
+  const handleProvince = async (e) => {
+    const code = Number(e.target.value);
+    const prov = provinces.find(p => p.code === code);
+    setForm(f => ({ ...f, tinh_thanh: prov?.name || '', phuong_xa: '' }));
+    setWards([]);
+    if (!code) return;
+    setLoadingWard(true);
+    try {
+      const r = await fetch(`${GEO}/p/${code}?depth=2`);
+      const d = await r.json();
+      setWards(d.wards || d.communes || []);
+    } catch { }
+    finally { setLoadingWard(false); }
+  };
+
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
-  const subtotal  = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const total     = subtotal; // Miễn phí vận chuyển
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
   const handleOrder = async () => {
     if (!form.ho_ten.trim())        return setError('Vui lòng nhập họ tên');
     if (!form.so_dien_thoai.trim()) return setError('Vui lòng nhập số điện thoại');
     if (!form.tinh_thanh)           return setError('Vui lòng chọn tỉnh/thành');
-    if (!form.dia_chi.trim())       return setError('Vui lòng nhập địa chỉ');
     if (cart.length === 0)          return setError('Giỏ hàng trống');
+
+    const diaChiDayDu = [form.dia_chi, form.phuong_xa, form.tinh_thanh]
+      .filter(Boolean).join(', ');
+
     setSubmitting(true); setError('');
     try {
       const res = await authFetch(`${API}/orders`, {
         method: 'POST',
         body: JSON.stringify({
           ...form,
+          dia_chi: diaChiDayDu,
           items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, image: i.image })),
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      // Nếu chuyển khoản → chuyển đến trang thanh toán QR
       if (form.phuong_thuc_tt === 'chuyen_khoan') {
-        navigate('/order-success', {
-          state: { order: data, showQR: true },
-          replace: true,
-        });
+        navigate('/order-success', { state: { order: data, showQR: true }, replace: true });
       } else {
         navigate('/order-success', { state: { order: data }, replace: true });
       }
@@ -75,10 +106,13 @@ export default function CheckoutPage() {
   );
 
   const IC = 'w-full px-4 py-3 bg-white border border-[#dde1e7] rounded-xl text-sm focus:ring-2 focus:ring-[#0077b6]/30 focus:border-[#0077b6] outline-none transition-all';
+  const selClass = (disabled) =>
+    IC + ' pl-10 appearance-none' + (disabled ? ' opacity-50 cursor-not-allowed bg-[#f8fafc]' : '');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#f8fafc] to-[#f0f7ff]">
       <div className="max-w-6xl mx-auto px-4 py-8">
+
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <button onClick={() => navigate(-1)}
@@ -92,6 +126,7 @@ export default function CheckoutPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
           {/* ── Cột trái: Form ── */}
           <div className="lg:col-span-7 space-y-5">
 
@@ -103,7 +138,9 @@ export default function CheckoutPage() {
                 </div>
                 Thông tin người nhận
               </h2>
+
               <div className="space-y-4">
+                {/* Họ tên + SĐT */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2 sm:col-span-1">
                     <label className="block text-xs font-semibold text-[#707881] mb-1.5 uppercase tracking-wide">Họ và tên *</label>
@@ -122,25 +159,87 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Tỉnh / Thành phố */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#707881] mb-1.5 uppercase tracking-wide">Tỉnh / Thành phố *</label>
+                  <label className="block text-xs font-semibold text-[#707881] mb-1.5 uppercase tracking-wide">
+                    Tỉnh / Thành phố *
+                  </label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#707881]" />
-                    <select className={IC + ' pl-10 appearance-none'} value={form.tinh_thanh} onChange={e => set('tinh_thanh', e.target.value)}>
-                      <option value="">-- Chọn tỉnh/thành --</option>
-                      {TINH.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#707881] z-10" />
+                    {loadingProv ? (
+                      <div className={IC + ' pl-10 flex items-center gap-2 text-[#707881]'}>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Đang tải danh sách tỉnh/thành...</span>
+                      </div>
+                    ) : provError ? (
+                      <div className={IC + ' pl-10 text-red-500 text-xs flex items-center gap-2'}>
+                        <AlertTriangle className="w-4 h-4" />
+                        Không tải được. <button className="underline" onClick={() => window.location.reload()}>Thử lại</button>
+                      </div>
+                    ) : (
+                      <select className={selClass(false)}
+                        value={provinces.find(p => p.name === form.tinh_thanh)?.code || ''}
+                        onChange={handleProvince}>
+                        <option value="">-- Chọn tỉnh/thành --</option>
+                        {provinces.map(p => (
+                          <option key={p.code} value={p.code}>{p.name}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 </div>
+
+                {/* Phường / Xã */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#707881] mb-1.5 uppercase tracking-wide">Địa chỉ cụ thể *</label>
+                  <label className="block text-xs font-semibold text-[#707881] mb-1.5 uppercase tracking-wide">
+                    Phường / Xã <span className="text-[#bfc7d1] normal-case font-normal">(tuỳ chọn)</span>
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#707881] z-10" />
+                    {loadingWard ? (
+                      <div className={IC + ' pl-10 flex items-center gap-2 text-[#707881]'}>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Đang tải xã/phường...</span>
+                      </div>
+                    ) : (
+                      <select
+                        className={selClass(!form.tinh_thanh || wards.length === 0)}
+                        disabled={!form.tinh_thanh || wards.length === 0}
+                        value={wards.find(w => w.name === form.phuong_xa)?.code || ''}
+                        onChange={e => {
+                          const w = wards.find(w => w.code === Number(e.target.value));
+                          set('phuong_xa', w?.name || '');
+                        }}>
+                        <option value="">
+                          {!form.tinh_thanh
+                            ? '-- Chọn tỉnh/thành trước --'
+                            : wards.length === 0
+                              ? '-- Không có dữ liệu xã/phường --'
+                              : '-- Chọn xã/phường --'}
+                        </option>
+                        {wards.map(w => (
+                          <option key={w.code} value={w.code}>{w.name}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                </div>
+
+                {/* Địa chỉ chi tiết */}
+                <div>
+                  <label className="block text-xs font-semibold text-[#707881] mb-1.5 uppercase tracking-wide">
+                    Địa chỉ chi tiết <span className="text-[#bfc7d1] normal-case font-normal">(số nhà, đường...)</span>
+                  </label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3.5 w-4 h-4 text-[#707881]" />
                     <textarea rows={2} className={IC + ' pl-10 resize-none'}
-                      placeholder="Số nhà, tên đường, xã/phường, huyện/quận..."
+                      placeholder="VD: Số 14, đường Lê Lợi (không bắt buộc)"
                       value={form.dia_chi} onChange={e => set('dia_chi', e.target.value)} />
                   </div>
                 </div>
+
+                {/* Ghi chú */}
                 <div>
                   <label className="block text-xs font-semibold text-[#707881] mb-1.5 uppercase tracking-wide">Ghi chú (tuỳ chọn)</label>
                   <textarea rows={2} className={IC + ' resize-none'}
@@ -255,15 +354,14 @@ export default function CheckoutPage() {
                 </div>
                 <div className="pt-3 border-t border-[#e7edf3] flex justify-between items-center">
                   <span className="font-bold text-[#191c1d]">Tổng thanh toán</span>
-                  <span className="text-2xl font-black text-[#0077b6]">{fmt(total)}</span>
+                  <span className="text-2xl font-black text-[#0077b6]">{fmt(subtotal)}</span>
                 </div>
               </div>
 
               <button
                 onClick={handleOrder}
                 disabled={submitting}
-                className="mt-5 w-full py-4 bg-gradient-to-r from-[#0077b6] to-[#005d90] text-white font-black text-base rounded-2xl hover:opacity-95 active:scale-95 transition-all shadow-lg shadow-[#0077b6]/30 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
+                className="mt-5 w-full py-4 bg-gradient-to-r from-[#0077b6] to-[#005d90] text-white font-black text-base rounded-2xl hover:opacity-95 active:scale-95 transition-all shadow-lg shadow-[#0077b6]/30 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                 {submitting
                   ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />Đang xử lý...</>
                   : <><CheckCircle2 className="w-5 h-5" />Xác nhận đặt hàng <ChevronRight className="w-4 h-4" /></>
@@ -274,6 +372,7 @@ export default function CheckoutPage() {
               </p>
             </div>
           </div>
+
         </div>
       </div>
     </div>

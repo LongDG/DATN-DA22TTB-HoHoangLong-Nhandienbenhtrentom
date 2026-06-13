@@ -17,6 +17,7 @@ import ConsultationPage from './pages/admin/ConsultationPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import ProductDetailPage from './pages/user/ProductDetailPage';
 import HandbookPage from './pages/user/HandbookPage';
+import HandbookDetailPage from './pages/user/HandbookDetailPage';
 import HandbookAdminPage from './pages/admin/HandbookAdminPage';
 import CheckoutPage from './pages/user/CheckoutPage';
 import OrderSuccessPage from './pages/user/OrderSuccessPage';
@@ -111,19 +112,19 @@ export default function App() {
   return (
     <Routes>
       {/* Auth routes — redirect nếu đã đăng nhập */}
-      <Route path="/login"           element={user ? <Navigate to="/" replace /> : <LoginPage onGoogleLogin={handleGoogleLogin} onLogin={handleLogin} />} />
-      <Route path="/register"        element={user ? <Navigate to="/" replace /> : <RegisterPage onGoogleLogin={handleGoogleLogin} onRegister={handleRegister} />} />
+      <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage onGoogleLogin={handleGoogleLogin} onLogin={handleLogin} />} />
+      <Route path="/register" element={user ? <Navigate to="/" replace /> : <RegisterPage onGoogleLogin={handleGoogleLogin} onRegister={handleRegister} />} />
       <Route path="/forgot-password" element={user ? <Navigate to="/" replace /> : <ForgotPasswordPage />} />
-      <Route path="/otp"             element={user ? <Navigate to="/" replace /> : <OTPPage />} />
-      <Route path="/reset-password"  element={user ? <Navigate to="/" replace /> : <ResetPasswordPage />} />
+      <Route path="/otp" element={user ? <Navigate to="/" replace /> : <OTPPage />} />
+      <Route path="/reset-password" element={user ? <Navigate to="/" replace /> : <ResetPasswordPage />} />
 
       {/* Root: redirect theo vai trò */}
       <Route path="/" element={
         !user
           ? <Navigate to="/login" replace />
           : isAdmin(user)
-          ? <Navigate to="/admin" replace />
-          : <Navigate to="/home" replace />
+            ? <Navigate to="/admin" replace />
+            : <Navigate to="/home" replace />
       } />
 
       {/* User routes — bọc trong UserLayout chung */}
@@ -170,14 +171,14 @@ export default function App() {
             : <Navigate to="/" replace />
         }
       >
-        <Route index             element={<DashboardOverview />} />
+        <Route index element={<DashboardOverview />} />
         <Route path="diagnostics" element={<DiagnosticLog />} />
-        <Route path="inventory"   element={<InventoryPage />} />
-        <Route path="orders"      element={<OrdersPage />} />
-        <Route path="consult"     element={<ConsultationPage />} />
-        <Route path="users"       element={<UserManagementPage />} />
-        <Route path="categories"  element={<CategoryPage />} />
-        <Route path="handbook"      element={<HandbookAdminPage />} />
+        <Route path="inventory" element={<InventoryPage />} />
+        <Route path="orders" element={<OrdersPage />} />
+        <Route path="consult" element={<ConsultationPage />} />
+        <Route path="users" element={<UserManagementPage />} />
+        <Route path="categories" element={<CategoryPage />} />
+        <Route path="handbook" element={<HandbookAdminPage />} />
         <Route path="shrimp-prices" element={<ShrimpPricePage />} />
       </Route>
 
@@ -191,6 +192,7 @@ export default function App() {
         }
       >
         <Route index element={<HandbookPage />} />
+        <Route path=":id" element={<HandbookDetailPage />} />
       </Route>
 
       {/* Tư vấn trực tuyến (user) */}

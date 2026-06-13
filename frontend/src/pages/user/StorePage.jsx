@@ -108,6 +108,7 @@ function ProductCard({ product, onAdd }) {
 export default function StorePage() {
   // Lấy addToCart từ UserLayout qua outlet context
   const { addToCart } = useOutletContext();
+  const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
@@ -118,6 +119,7 @@ export default function StorePage() {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [diseases, setDiseases] = useState([]); // bộ lọc bệnh
   // Danh mục động từ DB
   const [categories, setCategories] = useState([{ key: 'all', label: 'Tất cả', icon: 'Package', color: '' }]);
 
@@ -141,6 +143,7 @@ export default function StorePage() {
     setLoading(true);
     const params = new URLSearchParams({ category, sort, page, limit: 9 });
     if (search) params.set('search', search);
+    if (diseases.length > 0) params.set('disease', diseases.join(','));
     fetch(`${API}/products?${params}`)
       .then(r => r.json())
       .then(data => {
@@ -150,7 +153,14 @@ export default function StorePage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [category, sort, page, search]);
+  }, [category, sort, page, search, diseases]);
+
+  const toggleDisease = (key) => {
+    setDiseases(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+    setPage(1);
+  };
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
@@ -189,13 +199,38 @@ export default function StorePage() {
               <Droplet className="w-4 h-4" /> Tình trạng ao
             </h3>
             <ul className="space-y-2.5">
-              {DISEASE_FILTERS.map(d => (
-                <li key={d.key} className="flex items-center gap-3 group cursor-pointer px-1">
-                  <div className="w-4 h-4 rounded border-2 border-slate-300 group-hover:border-[#0077b6] transition-colors shrink-0" />
-                  <span className="text-sm text-slate-600 group-hover:text-[#0077b6]">{d.label}</span>
-                </li>
-              ))}
+              {DISEASE_FILTERS.map(d => {
+                const active = diseases.includes(d.key);
+                return (
+                  <li key={d.key}
+                    onClick={() => toggleDisease(d.key)}
+                    className="flex items-center gap-3 cursor-pointer px-1 group select-none">
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all
+                      ${active
+                        ? 'border-[#0077b6] bg-[#0077b6]'
+                        : 'border-slate-300 group-hover:border-[#0077b6]'}`}>
+                      {active && (
+                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className={`text-sm transition-colors ${active ? 'text-[#0077b6] font-semibold' : 'text-slate-600 group-hover:text-[#0077b6]'}`}>
+                      {d.label}
+                    </span>
+                    {active && (
+                      <span className="ml-auto text-[10px] bg-[#0077b6] text-white px-1.5 py-0.5 rounded-full font-bold">ON</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
+            {diseases.length > 0 && (
+              <button onClick={() => { setDiseases([]); setPage(1); }}
+                className="mt-3 w-full text-xs text-slate-400 hover:text-red-500 transition-colors py-1">
+                ✕ Xóa bộ lọc bệnh
+              </button>
+            )}
           </div>
 
           {/* Banner */}
@@ -203,7 +238,9 @@ export default function StorePage() {
             <div className="relative z-10">
               <p className="font-semibold text-sm opacity-90 mb-1">Tư vấn miễn phí</p>
               <h4 className="text-lg font-bold mb-4 leading-tight">Chat với chuyên gia ngay!</h4>
-              <button className="bg-white text-[#0077b6] px-4 py-2 rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95">
+              <button
+                onClick={() => navigate('/consult-user')}
+                className="bg-white text-[#0077b6] px-4 py-2 rounded-xl font-bold text-sm hover:shadow-lg transition-all active:scale-95">
                 Kết nối ngay
               </button>
             </div>
