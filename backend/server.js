@@ -14,6 +14,7 @@ const diagnoseRoutes       = require('./routes/diagnoseRoutes');       // Chẩn
 const consultationRoutes   = require('./routes/consultationRoutes');   // Tư vấn (user)
 const notificationRoutes   = require('./routes/notificationRoutes');   // Thông báo
 const sepayRoutes          = require('./routes/sepayRoutes');           // Thanh toán SePay
+const chatbotRoutes        = require('./routes/chatbotRoutes');         // Chatbox Gemini AI
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -46,6 +47,7 @@ app.use('/api/diagnose',        diagnoseRoutes);
 app.use('/api/consultations',   consultationRoutes);
 app.use('/api/notifications',   notificationRoutes);  // Thông báo user
 app.use('/api/sepay',           sepayRoutes);           // Webhook thanh toán SePay
+app.use('/api/chatbot',         chatbotRoutes);          // Chatbox Gemini AI
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend Node.js is running (MVC Architecture)" });

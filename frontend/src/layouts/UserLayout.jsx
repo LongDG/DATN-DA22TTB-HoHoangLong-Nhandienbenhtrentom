@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Outlet, useOutletContext } from 'react-router-dom';
 import { UserHeader } from '../components/user/UserHeader';
 import { UserFooter } from '../components/user/UserFooter';
-import { ZaloButton } from '../components/user/ZaloButton';
 import { CartDrawer } from '../components/user/CartDrawer';
+import ChatbotWidget from '../components/user/ChatbotWidget';
 
 export default function UserLayout({ user, onLogout }) {
   const [cart, setCart] = useState(() => {
@@ -67,8 +67,8 @@ export default function UserLayout({ user, onLogout }) {
       {/* Shared Footer */}
       <UserFooter />
 
-      {/* Floating Zalo */}
-      <ZaloButton />
+      {/* Chatbot AI */}
+      <ChatbotWidget user={user} />
     </div>
   );
 }

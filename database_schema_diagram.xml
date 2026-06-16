@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-06-15" agent="5.0" etag="unique-id" version="1.0">
+    <diagram name="Sơ đồ CSDL - Hệ thống AquaHealth" id="diagram-1">
+        <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1650" pageHeight="1100" background="none" math="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- HÀNG 1: THỰC THỂ CỐT LÕI -->
+
+                <!-- NGUOIDUNG -->
+                <mxCell id="nguoidung" value="NGUOIDUNG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="30" y="30" width="200" height="30"/>
+                <mxCell id="ngu-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;ten: Chuỗi&#xa;email: Chuỗi (duy nhất)&#xa;matkhau: Chuỗi (đã mã hóa)&#xa;sodienthoai: Chuỗi&#xa;vaitro: Chuỗi (user/admin)&#xa;anhdaidien: Chuỗi (URL)&#xa;googleId: Chuỗi&#xa;diachi: Mảng (nhúng)&#xa;  - tennguoinhan: Chuỗi&#xa;  - sodienthoai: Chuỗi&#xa;  - sonha: Chuỗi&#xa;  - xa, huyen, tinh: Chuỗi&#xa;  - macdinh: Boolean&#xa;ngaytao: Ngày" style="text;html=1;strokeColor=#6c8ebf;fillColor=#f5f5f5;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="30" y="60" width="200" height="290"/>
+
+                <!-- SANPHAM -->
+                <mxCell id="sanpham" value="SANPHAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="280" y="30" width="210" height="30"/>
+                <mxCell id="san-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;tensanpham: Chuỗi&#xa;thuonghieu: Chuỗi&#xa;loaisanpham: Chuỗi&#xa;mota: Chuỗi&#xa;congdung: Mảng[Chuỗi]&#xa;lieudung: Đối tượng (nhúng)&#xa;  - dinh_ky: Chuỗi&#xa;  - xu_ly_benh: Chuỗi&#xa;goc_thuoc: Chuỗi&#xa;benh_ids: Mảng[ObjectId] (*)&#xa;gia: Số&#xa;soluong: Số&#xa;daban: Số&#xa;trangthai: Chuỗi&#xa;hinhanh: Mảng[Chuỗi]&#xa;muc_dich_su_dung: Mảng[Chuỗi]&#xa;ngaytao: Ngày" style="text;html=1;strokeColor=#6c8ebf;fillColor=#f5f5f5;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="280" y="60" width="210" height="330"/>
+
+                <!-- BENH -->
+                <mxCell id="benh" value="BENH" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="540" y="30" width="200" height="30"/>
+                <mxCell id="ben-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;tenbenh: Chuỗi&#xa;mota: Chuỗi&#xa;trieuchung: Mảng[Chuỗi]&#xa;nguyennhan: Chuỗi&#xa;dieutri: Chuỗi&#xa;phongngua: Chuỗi&#xa;nhom: Chuỗi (Virus/Vi khuẩn...)&#xa;mucdo: Chuỗi&#xa;ngaytao: Ngày" style="text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="540" y="60" width="200" height="210"/>
+
+                <!-- OTP_RESET -->
+                <mxCell id="otp" value="OTP_RESET" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="790" y="30" width="200" height="30"/>
+                <mxCell id="otp-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;sodienthoai: Chuỗi (*)&#xa;otp: Chuỗi (mã 6 số / VERIFIED)&#xa;createdAt: Ngày (TTL: 5 phút)" style="text;html=1;strokeColor=#b85450;fillColor=#f8cecc;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="790" y="60" width="200" height="100"/>
+
+                <!-- HÀNG 2: ĐƠN HÀNG VÀ GIỎ HÀNG -->
+
+                <!-- DONHANG -->
+                <mxCell id="donhang" value="DONHANG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="30" y="430" width="200" height="30"/>
+                <mxCell id="don-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;nguoidung_id: ObjectId (*)&#xa;mavandon: Chuỗi (duy nhất)&#xa;tong_tien_hang: Số&#xa;phi_vanchuyen: Số&#xa;giam_gia: Số&#xa;tong_tien_thanh_toan: Số&#xa;phuong_thuc_thanh_toan: Chuỗi&#xa;trang_thai_thanh_toan: Chuỗi&#xa;trang_thai_don_hang: Chuỗi&#xa;thong_tin_nhan_hang: Đối tượng (nhúng)&#xa;  - nguoi_nhan: Chuỗi&#xa;  - sodienthoai: Chuỗi&#xa;  - diachi: Chuỗi&#xa;lich_su_trang_thai: Mảng (nhúng)&#xa;  - trangthai: Chuỗi&#xa;  - thoigian: Ngày&#xa;ghi_chu: Chuỗi&#xa;ngaytao: Ngày" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="30" y="460" width="200" height="360"/>
+
+                <!-- CHITIETDONHANG -->
+                <mxCell id="chitietdonhang" value="CHITIETDONHANG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="280" y="430" width="210" height="30"/>
+                <mxCell id="chitdon-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;donhang_id: ObjectId (*)&#xa;sanpham_id: ObjectId (*)&#xa;tensanpham_lucmua: Chuỗi&#xa;soluong: Số&#xa;gia_luc_mua: Số&#xa;tong_tien_chi_tiet: Số" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="280" y="460" width="210" height="160"/>
+
+                <!-- GIOHANG -->
+                <mxCell id="giohang" value="GIOHANG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="540" y="430" width="200" height="30"/>
+                <mxCell id="gio-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;nguoidung_id: ObjectId (*)&#xa;ngaytao: Ngày" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="540" y="460" width="200" height="90"/>
+
+                <!-- CHITIETGIOHANG -->
+                <mxCell id="chitietgiohang" value="CHITIETGIOHANG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="790" y="430" width="200" height="30"/>
+                <mxCell id="chitgio-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;giohang_id: ObjectId (*)&#xa;sanpham_id: ObjectId (*)&#xa;soluong: Số" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="790" y="460" width="200" height="100"/>
+
+                <!-- HÀNG 3: NỘI DUNG VÀ CHẨN ĐOÁN -->
+
+                <!-- SOTAYKYTHUAT -->
+                <mxCell id="sotaykythuat" value="SOTAYKYTHUAT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="30" y="870" width="200" height="30"/>
+                <mxCell id="sotay-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;tieude: Chuỗi&#xa;tomtat: Chuỗi&#xa;noidung: Chuỗi (Markdown)&#xa;danhmuc: Chuỗi&#xa;hinhanh: Chuỗi (URL/base64)&#xa;video_url: Chuỗi&#xa;video_thoigian: Chuỗi&#xa;tacgia: Chuỗi&#xa;tags: Mảng[Chuỗi]&#xa;trangthai: Chuỗi (published...)&#xa;luotxem: Số&#xa;ngaytao: Ngày&#xa;ngaycapnhat: Ngày" style="text;html=1;strokeColor=#9673a6;fillColor=#e1d5e7;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="30" y="900" width="200" height="280"/>
+
+                <!-- LIENHE -->
+                <mxCell id="lienhe" value="LIENHE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="280" y="870" width="210" height="30"/>
+                <mxCell id="lien-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;nguoidung_id: ObjectId (*)&#xa;ten_nguoidung: Chuỗi&#xa;vitri_tinh: Chuỗi&#xa;vitri_ao: Chuỗi&#xa;noidung: Chuỗi&#xa;trang_thai: Chuỗi&#xa;danh_gia: Số&#xa;ngaytao: Ngày&#xa;tin_nhan: Mảng (nhúng)&#xa;  - vai_tro: Chuỗi&#xa;  - noi_dung: Chuỗi&#xa;  - thoigian: Ngày" style="text;html=1;strokeColor=#9673a6;fillColor=#e1d5e7;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="280" y="900" width="210" height="260"/>
+
+                <!-- KETQUANHANDIEN -->
+                <mxCell id="ketqua" value="KETQUANHANDIEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;" vertex="1" parent="1" x="540" y="870" width="200" height="30"/>
+                <mxCell id="ketqua-fields" value="&#xa;_id: ObjectId (Khóa chính)&#xa;nguoidung_id: ObjectId (*)&#xa;hinhanh_url: Chuỗi&#xa;ketqua_benh_id: ObjectId (*)&#xa;do_chinh_xac: Số (%)&#xa;chuandoan_text: Chuỗi&#xa;muc_do_canh_bao: Chuỗi&#xa;sanpham_goiy_ids: Mảng[ObjectId] (*)&#xa;ngay_nhan_dien: Ngày" style="text;html=1;strokeColor=#9673a6;fillColor=#e1d5e7;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;whiteSpace=wrap;" vertex="1" parent="1" x="540" y="900" width="200" height="200"/>
+
+                <!-- MỐI QUAN HỆ HÀNG 1 -->
+
+                <!-- SANPHAM <-> BENH (N:N) qua benh_ids -->
+                <mxCell id="rel-san-ben" value="N:N&#xa;(chữa trị)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;rounded=0;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" edge="1" parent="1" source="sanpham" target="benh">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- MỐI QUAN HỆ HÀNG 1 → HÀNG 2 -->
+
+                <!-- NGUOIDUNG -> DONHANG (1:N) -->
+                <mxCell id="rel-ngu-don" value="1:N" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E91E63;strokeWidth=2;rounded=0;entryX=0;entryY=0;exitX=0;exitY=1;" edge="1" parent="1" source="nguoidung" target="donhang">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- NGUOIDUNG -> GIOHANG (1:1) -->
+                <mxCell id="rel-ngu-gio" value="1:1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E91E63;strokeWidth=2;rounded=0;entryX=0;entryY=0;exitX=0.5;exitY=1;" edge="1" parent="1" source="nguoidung" target="giohang">
+                    <mxGeometry relative="1" as="geometry" x="20" y="0"/>
+                </mxCell>
+
+                <!-- DONHANG -> CHITIETDONHANG (1:N) -->
+                <mxCell id="rel-don-chitdon" value="1:N" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#4CAF50;strokeWidth=2;rounded=0;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" edge="1" parent="1" source="donhang" target="chitietdonhang">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- SANPHAM -> CHITIETDONHANG (1:N) -->
+                <mxCell id="rel-san-chitdon" value="1:N" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2196F3;strokeWidth=2;rounded=0;entryX=0.5;entryY=0;exitX=0.5;exitY=1;" edge="1" parent="1" source="sanpham" target="chitietdonhang">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- GIOHANG -> CHITIETGIOHANG (1:N) -->
+                <mxCell id="rel-gio-chitgio" value="1:N" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#4CAF50;strokeWidth=2;rounded=0;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" edge="1" parent="1" source="giohang" target="chitietgiohang">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- SANPHAM -> CHITIETGIOHANG (1:N) -->
+                <mxCell id="rel-san-chitgio" value="1:N" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2196F3;strokeWidth=2;rounded=0;entryX=1;entryY=0;exitX=1;exitY=1;" edge="1" parent="1" source="sanpham" target="chitietgiohang">
+                    <mxGeometry relative="1" as="geometry" x="40" y="0"/>
+                </mxCell>
+
+                <!-- MỐI QUAN HỆ HÀNG 2 → HÀNG 3 -->
+
+                <!-- NGUOIDUNG -> LIENHE (1:N) -->
+                <mxCell id="rel-ngu-lien" value="1:N" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E91E63;strokeWidth=2;rounded=0;entryX=0.5;entryY=0;exitX=0.2;exitY=1;" edge="1" parent="1" source="nguoidung" target="lienhe">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- NGUOIDUNG -> KETQUANHANDIEN (1:N) -->
+                <mxCell id="rel-ngu-ketqua" value="1:N" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#E91E63;strokeWidth=2;rounded=0;entryX=0;entryY=0;exitX=0.8;exitY=1;" edge="1" parent="1" source="nguoidung" target="ketqua">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- BENH -> KETQUANHANDIEN (1:N) -->
+                <mxCell id="rel-ben-ketqua" value="1:N" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;rounded=0;entryX=0.5;entryY=0;exitX=0.5;exitY=1;" edge="1" parent="1" source="benh" target="ketqua">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- SANPHAM -> KETQUANHANDIEN (N:N gợi ý) -->
+                <mxCell id="rel-san-ketqua" value="N:N&#xa;(gợi ý)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#FF6F00;strokeWidth=2;rounded=0;entryX=1;entryY=0.5;exitX=1;exitY=1;" edge="1" parent="1" source="sanpham" target="ketqua">
+                    <mxGeometry relative="1" as="geometry" x="60" y="0"/>
+                </mxCell>
+
+                <!-- CHÚ THÍCH -->
+                <mxCell id="chu-thich-title" value="Chú thích" style="text;fontSize=14;fontStyle=1;" vertex="1" parent="1" x="1030" y="30"/>
+                <mxCell id="ct-1" value="(*) = Khóa ngoại / Tham chiếu" style="text;fontSize=11;" vertex="1" parent="1" x="1030" y="60"/>
+                <mxCell id="ct-2" value="N:N = Quan hệ Nhiều-Nhiều" style="text;fontSize=11;" vertex="1" parent="1" x="1030" y="85"/>
+                <mxCell id="ct-3" value="1:N = Quan hệ Một-Nhiều" style="text;fontSize=11;" vertex="1" parent="1" x="1030" y="110"/>
+                <mxCell id="ct-4" value="1:1 = Quan hệ Một-Một" style="text;fontSize=11;" vertex="1" parent="1" x="1030" y="135"/>
+                <mxCell id="ct-5" value="Tài liệu nhúng: diachi (NGUOIDUNG), tin_nhan (LIENHE),&#xa;thong_tin_nhan_hang &amp; lich_su_trang_thai (DONHANG), lieudung (SANPHAM)" style="text;fontSize=10;" vertex="1" parent="1" x="1030" y="165"/>
+
+                <!-- CHÚ THÍCH MÀU SẮC -->
+                <mxCell id="mau-1" value="" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1" x="1030" y="220" width="20" height="20"/>
+                <mxCell id="mau-1-text" value="Người dùng &amp; Sản phẩm" style="text;fontSize=11;" vertex="1" parent="1" x="1060" y="220"/>
+                <mxCell id="mau-2" value="" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1" x="1030" y="250" width="20" height="20"/>
+                <mxCell id="mau-2-text" value="Bệnh trên tôm" style="text;fontSize=11;" vertex="1" parent="1" x="1060" y="250"/>
+                <mxCell id="mau-3" value="" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1" x="1030" y="280" width="20" height="20"/>
+                <mxCell id="mau-3-text" value="Đơn hàng &amp; Giỏ hàng" style="text;fontSize=11;" vertex="1" parent="1" x="1060" y="280"/>
+                <mxCell id="mau-4" value="" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;" vertex="1" parent="1" x="1030" y="310" width="20" height="20"/>
+                <mxCell id="mau-4-text" value="Nội dung &amp; Chẩn đoán" style="text;fontSize=11;" vertex="1" parent="1" x="1060" y="310"/>
+                <mxCell id="mau-5" value="" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1" x="1030" y="340" width="20" height="20"/>
+                <mxCell id="mau-5-text" value="Hệ thống (OTP)" style="text;fontSize=11;" vertex="1" parent="1" x="1060" y="340"/>
+
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
