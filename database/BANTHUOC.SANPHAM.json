@@ -1,471 +1,1091 @@
-[
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91001"
-    },
-    "tensanpham": "Beta Glucan Tỏi - Đề Kháng WSSV",
-    "thuonghieu": "AquaVet",
-    "loaisanpham": "dinh_duong_de_khang",
-    "mota": "Kích thích hệ miễn dịch tự nhiên, bổ sung Allicin từ tỏi tươi giúp tôm tăng sức đề kháng chống lại virus đốm trắng WSSV và các biến động thời tiết.",
-    "congdung": [
-      "Tăng đề kháng miễn dịch chống WSSV",
-      "Phục hồi sức khỏe sau bệnh",
-      "Thúc đẩy tiêu hóa và hấp thu thức ăn"
-    ],
-    "lieudung": {
-      "dinh_ky": "3g/kg thức ăn",
-      "xu_ly_benh": "5–7g/kg thức ăn liên tục 7 ngày"
-    },
-    "goc_thuoc": "Beta Glucan 1,3/1,6 + Allicin từ tỏi",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90001"
-      },
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90003"
-      }
-    ],
-    "gia": 150000,
-    "soluong": 200,
-    "daban": 45,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/beta-glucan-toi.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-02T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "phongbenh",
-      "hotro"
-    ]
+[{
+  "_id": {
+    "$oid": "60f1a2b3c4d5e6f7a8b91001"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91002"
-    },
-    "tensanpham": "Hepato Protect Max - Đặc Trị Gan Tụy",
-    "thuonghieu": "BioPharma",
-    "loaisanpham": "dac_tri",
-    "mota": "Chiết xuất hoa kế sữa (Silymarin) và Sorbitol giúp làm mát gan, phục hồi tế bào gan tụy bị sưng, teo do vi khuẩn Vibrio trong bệnh AHPND/EMS.",
-    "congdung": [
-      "Đặc trị sưng gan, teo gan tụy AHPND",
-      "Ức chế vi khuẩn Vibrio parahaemolyticus",
-      "Tái tạo và bảo vệ mô gan tụy"
-    ],
-    "lieudung": {
-      "dinh_ky": "5ml/kg thức ăn",
-      "xu_ly_benh": "10–15ml/kg thức ăn, liên tục 5 ngày"
-    },
-    "goc_thuoc": "Silymarin (hoa kế sữa) + Sorbitol + chiết xuất atiso",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90002"
-      }
-    ],
-    "gia": 320000,
-    "soluong": 100,
-    "daban": 80,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/hepato-protect.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-02T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "dieutri",
-      "hotro"
-    ]
+  "tensanpham": "Beta Glucan tỏi - Đề Kháng WSSV",
+  "thuonghieu": "AquaVet",
+  "loaisanpham": "dinh_duong_de_khang",
+  "mota": "Kích thích hệ miễn dịch, bổ sung Allicin từ tỏi tươi giúp tôm tăng sức đề kháng chống lại Virus đốm trắng và thời tiết thay đổi.",
+  "congdung": [
+    "Tăng đề kháng chống WSSV",
+    "Phục hồi sức khỏe sau bệnh",
+    "Thúc đẩy tiêu hóa"
+  ],
+  "lieudung": {
+    "dinh_ky": "3g/kg thức ăn",
+    "xu_ly_benh": "5-7g/kg thức ăn"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91003"
+  "goc_thuoc": "Thảo dược / Vitamin",
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90001"
     },
-    "tensanpham": "Bio-Lactic Men Đường Ruột Sống",
-    "thuonghieu": "MicroBio",
-    "loaisanpham": "vi_sinh",
-    "mota": "Cung cấp Lactobacillus nồng độ cao giúp tạo môi trường acid trong ruột tôm, cạnh tranh triệt để Vibrio và EHP gây bệnh phân trắng.",
-    "congdung": [
-      "Trị tôm đi phân trắng, lỏng ruột, đứt khúc",
-      "Phát triển hệ vi sinh đường ruột khỏe mạnh",
-      "Ép khuẩn có hại trong ruột tôm"
-    ],
-    "lieudung": {
-      "dinh_ky": "5g/kg thức ăn",
-      "xu_ly_benh": "10g/kg thức ăn liên tục 5 ngày"
-    },
-    "goc_thuoc": "Lactobacillus plantarum + Bacillus subtilis",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90003"
-      }
-    ],
-    "gia": 250000,
-    "soluong": 150,
-    "daban": 120,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/bio-lactic.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-02T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "dieutri",
-      "phongbenh"
-    ]
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "gia": 200000,
+  "soluong": 200,
+  "daban": 45,
+  "trangthai": "dang_ban",
+  "hinhanh": [
+    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSDJq9GgABb7rtMMedeDrSZY78am1kJHgg79Cas8vEEtCmu03VHT09Ll2DbwA3xQh3h_rHB0IeRuKHcv68ViVYW-Y6TMr-6TQPiWGUquT5yR_aJUYPp3JtnibSDmWz2RNO4YrFikWEyNQ&usqp=CAc"
+  ],
+  "ngaytao": {
+    "$date": "2026-05-02T00:00:00.000Z"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91004"
-    },
-    "tensanpham": "Vibrio-Clear Xử Lý Nước",
-    "thuonghieu": "EcoAqua",
-    "loaisanpham": "vi_sinh_moi_truong",
-    "mota": "Vi sinh cắt tảo, phân hủy thức ăn thừa, ức chế vi khuẩn Vibrio trong nước — nền tảng phòng ngừa gan tụy và phân trắng.",
-    "congdung": [
-      "Phân hủy bùn đáy, giảm tích lũy hữu cơ",
-      "Giảm khí độc NH3, NO2 trong nước",
-      "Ức chế mầm bệnh Vibrio ngoài môi trường"
-    ],
-    "lieudung": {
-      "dinh_ky": "1 gói 200g/2000m³",
-      "xu_ly_benh": "1 gói/1000m³ tạt lúc 8h tối"
-    },
-    "goc_thuoc": "Bacillus sp. mật độ cao (>10^9 CFU/g)",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90002"
-      },
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90003"
-      }
-    ],
-    "gia": 110000,
-    "soluong": 500,
-    "daban": 300,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/vibrio-clear.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-02T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "phongbenh",
-      "hotro"
-    ]
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "capnhat": {
+    "$date": "2026-07-04T04:50:20.972Z"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91005"
-    },
-    "tensanpham": "Yucca Zeo - Hấp Thu Khí Độc Đen Mang",
-    "thuonghieu": "EcoAqua",
-    "loaisanpham": "vi_sinh_moi_truong",
-    "mota": "Hấp thu cực nhanh khí độc NH3, H2S dưới đáy ao, làm sạch và thông thoáng mang tôm bị bẩn, giúp tôm thở dễ dàng trong bệnh đen mang.",
-    "congdung": [
-      "Hấp thu khí độc NH3, H2S tức thì",
-      "Cấp cứu tôm ngạt nổi đầu khẩn cấp",
-      "Làm sạch mang — đặc trị bệnh đen mang do môi trường"
-    ],
-    "lieudung": {
-      "dinh_ky": "1kg/2000m³",
-      "xu_ly_benh": "2kg/1000m³ tạt thẳng xuống ao"
-    },
-    "goc_thuoc": "Yucca Schidigera + Zeolite tự nhiên",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90004"
-      }
-    ],
-    "gia": 180000,
-    "soluong": 100,
-    "daban": 20,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/yucca-zeo.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-08T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "hotro",
-      "dieutri"
-    ]
+  "donvi": "chai"
+},
+{
+  "_id": {
+    "$oid": "60f1a2b3c4d5e6f7a8b91002"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91006"
-    },
-    "tensanpham": "Iodine 90 - Siêu Diệt Khuẩn & Nấm",
-    "thuonghieu": "AquaVet",
-    "loaisanpham": "dac_tri",
-    "mota": "Dung dịch sát khuẩn phổ rộng cực mạnh. Đặc trị các bệnh do nấm và vi khuẩn bám trên mang tôm — nguyên nhân gây đen mang và đốm đen vỏ.",
-    "congdung": [
-      "Đặc trị đen mang do nấm và vi khuẩn",
-      "Trị đốm đen, mòn đuôi, ăn mòn vỏ",
-      "Sát trùng nguồn nước hỗ trợ trị bệnh đầu vàng"
-    ],
-    "lieudung": {
-      "dinh_ky": "1L/3000m³",
-      "xu_ly_benh": "1L/1500m³ tạt vào buổi tối"
-    },
-    "goc_thuoc": "Povidone Iodine 90%",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90004"
-      },
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90005"
-      }
-    ],
-    "gia": 210000,
-    "soluong": 150,
-    "daban": 80,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/iodine-90.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-08T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "dieutri",
-      "phongbenh"
-    ]
+  "tensanpham": "Hepato Protect Max (Đặc trị Gan tụy)",
+  "thuonghieu": "BioPharma",
+  "loaisanpham": "dac_tri",
+  "mota": "Thảo dược chiết xuất từ hoa kế sữa và Sorbitol làm mát gan, phục hồi tế bào gan tụy sưng, teo do vi khuẩn Vibrio trong bệnh EMS.",
+  "congdung": [
+    "Đặc trị sưng gan, teo gan tụy",
+    "Ức chế vi khuẩn Vibrio parahaemolyticus",
+    "Tái tạo mô gan tụy"
+  ],
+  "lieudung": {
+    "dinh_ky": "5ml/kg thức ăn",
+    "xu_ly_benh": "10-15ml/kg thức ăn (trộn ăn liên tục 5 ngày)"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91007"
-    },
-    "tensanpham": "C Tạt Chống Sốc - Vitamin C 30%",
-    "thuonghieu": "BioPharma",
-    "loaisanpham": "dinh_duong_de_khang",
-    "mota": "Chống sốc môi trường, giảm stress khi thời tiết thay đổi đột ngột. Tăng miễn dịch tự nhiên giúp tôm cầm cự với virus đầu vàng YHV và đốm trắng WSSV.",
-    "congdung": [
-      "Chống sốc nhiệt độ, tụt pH đột ngột",
-      "Hỗ trợ miễn dịch cầm cự Virus Đầu Vàng và WSSV",
-      "Kích thích tôm lột xác và phát triển đồng đều"
-    ],
-    "lieudung": {
-      "dinh_ky": "1kg/3000m³",
-      "xu_ly_benh": "2kg/1000m³ tạt buổi sáng sớm"
-    },
-    "goc_thuoc": "Acid Ascorbic (Vitamin C) 30% + Muối khoáng",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90005"
-      },
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90001"
-      }
-    ],
-    "gia": 120000,
-    "soluong": 300,
-    "daban": 150,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/c-tat-30.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-08T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "phongbenh",
-      "hotro"
-    ]
+  "goc_thuoc": "Thảo dược tổng hợp",
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    }
+  ],
+  "gia": 320000,
+  "soluong": 100,
+  "daban": 80,
+  "trangthai": "dang_ban",
+  "hinhanh": [
+    "https://goovetvn.com/images/stories/virtuemart/product/hepatol-max.jpg"
+  ],
+  "ngaytao": {
+    "$date": "2026-05-02T00:00:00.000Z"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91008"
-    },
-    "tensanpham": "Nano Silver - Kháng Nấm Mang Tôm",
-    "thuonghieu": "AquaNano",
-    "loaisanpham": "dac_tri",
-    "mota": "Hạt nano bạc kích thước siêu nhỏ thẩm thấu trực tiếp vào mang tôm, tiêu diệt nấm và vi khuẩn gây đen mang hiệu quả hơn iodine thông thường.",
-    "congdung": [
-      "Đặc trị nấm bám trên mang gây đen mang",
-      "Diệt khuẩn phổ rộng, không kháng thuốc",
-      "Làm sạch mang và cải thiện hô hấp tôm nhanh chóng"
-    ],
-    "lieudung": {
-      "dinh_ky": "500ml/3000m³",
-      "xu_ly_benh": "500ml/1000m³, tạt 2 lần cách nhau 3 ngày"
-    },
-    "goc_thuoc": "Nano Silver (Bạc keo nano 10ppm)",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90004"
-      }
-    ],
-    "gia": 280000,
-    "soluong": 80,
-    "daban": 35,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/nano-silver.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-10T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "dieutri"
-    ]
+  "muc_dich_su_dung": [
+    "dieutri",
+    "hotro"
+  ]
+},
+{
+  "_id": {
+    "$oid": "60f1a2b3c4d5e6f7a8b91003"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b91009"
-    },
-    "tensanpham": "Immunovit-C Max - Tăng Đề Kháng Virus",
-    "thuonghieu": "BioPharma",
-    "loaisanpham": "dinh_duong_de_khang",
-    "mota": "Kết hợp Vitamin C liều cao + Beta Glucan + Astaxanthin giúp tôm chống chịu các đợt bùng phát virus đầu vàng YHV và stress môi trường.",
-    "congdung": [
-      "Tăng cường miễn dịch chống Virus Đầu Vàng YHV",
-      "Giảm tỷ lệ chết trong đợt bùng phát dịch",
-      "Bổ sung khoáng và chất chống oxy hóa"
-    ],
-    "lieudung": {
-      "dinh_ky": "5g/kg thức ăn",
-      "xu_ly_benh": "10g/kg thức ăn, liên tục 7–10 ngày"
-    },
-    "goc_thuoc": "Vitamin C + Beta Glucan + Astaxanthin + Khoáng",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90005"
-      },
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90001"
-      }
-    ],
-    "gia": 340000,
-    "soluong": 120,
-    "daban": 55,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/immunovit-c-max.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-10T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "phongbenh",
-      "hotro"
-    ]
+  "tensanpham": "Bio-Lactic (Men đường ruột Sống)",
+  "thuonghieu": "MicroBio",
+  "loaisanpham": "vi_sinh",
+  "mota": "Cung cấp Lactobacillus nồng độ cao, tạo môi trường acid trong ruột tôm nhằm cạnh tranh triệt để Vibrio và EHP gây bệnh phân trắng.",
+  "congdung": [
+    "Trị tôm đi phân trắng, lỏng ruột, đứt khúc",
+    "Nong to đường ruột tôm",
+    "Ép khuẩn có hại"
+  ],
+  "lieudung": {
+    "dinh_ky": "5g/kg thức ăn",
+    "xu_ly_benh": "10g/kg thức ăn"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b9100a"
-    },
-    "tensanpham": "Liver Guard Plus - Bảo Vệ Gan Tụy",
-    "thuonghieu": "AquaVet",
-    "loaisanpham": "dac_tri",
-    "mota": "Công thức tiên tiến chứa Choline + Betaine + Methionine giúp phục hồi chức năng gan tụy sau tổn thương do Vibrio, giảm thời gian điều trị EMS.",
-    "congdung": [
-      "Phục hồi gan tụy tổn thương do AHPND/EMS",
-      "Giải độc và thải loại độc tố từ Vibrio",
-      "Cải thiện chuyển hóa lipid trong gan tôm"
-    ],
-    "lieudung": {
-      "dinh_ky": "3g/kg thức ăn",
-      "xu_ly_benh": "7–10g/kg thức ăn liên tục 7 ngày"
-    },
-    "goc_thuoc": "Choline Chloride + Betaine + L-Methionine + Vitamin E",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90002"
-      }
-    ],
-    "gia": 390000,
-    "soluong": 90,
-    "daban": 40,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/liver-guard-plus.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-10T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "dieutri",
-      "hotro"
-    ]
+  "goc_thuoc": "Lactobacillus plantarum, Bacillus subtilis",
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "gia": 250000,
+  "soluong": 15,
+  "daban": 120,
+  "trangthai": "dang_ban",
+  "hinhanh": [
+    "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRtXQZEYDdYj9md-eUssMs658kdsqB9Qwi2sh99VXjbJmHUmCJ1Yt2a3JfWP8qG3Lury4BicUTvqyFESPRL-7xFdK7-ZyQU1Zh_IMN6YKr1GFl1zjT90sPEmpgwNqr-&usqp=CAc"
+  ],
+  "ngaytao": {
+    "$date": "2026-05-02T00:00:00.000Z"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b9100b"
-    },
-    "tensanpham": "AquaZyme - Enzyme Tiêu Hóa Tôm",
-    "thuonghieu": "MicroBio",
-    "loaisanpham": "vi_sinh",
-    "mota": "Hỗn hợp enzyme tiêu hóa (Protease, Amylase, Lipase) giúp tôm hấp thu thức ăn hiệu quả, giảm mùn bã hữu cơ trong ruột — nguyên nhân gây phân trắng và bệnh đường ruột.",
-    "congdung": [
-      "Hỗ trợ phân giải thức ăn, phòng phân trắng",
-      "Giảm mùn bã hữu cơ tích tụ đáy ao",
-      "Cải thiện hệ số chuyển đổi thức ăn (FCR)"
-    ],
-    "lieudung": {
-      "dinh_ky": "4g/kg thức ăn",
-      "xu_ly_benh": "8g/kg thức ăn kết hợp Bio-Lactic"
-    },
-    "goc_thuoc": "Protease + Amylase + Lipase + Phytase",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90003"
-      }
-    ],
-    "gia": 195000,
-    "soluong": 200,
-    "daban": 90,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/aquazyme.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-10T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "phongbenh",
-      "hotro"
-    ]
+  "muc_dich_su_dung": [
+    "dieutri",
+    "phongbenh"
+  ],
+  "capnhat": {
+    "$date": "2026-07-01T10:21:46.764Z"
   },
-  {
-    "_id": {
-      "$oid": "60f1a2b3c4d5e6f7a8b9100c"
+  "donvi": "chai"
+},
+{
+  "_id": {
+    "$oid": "60f1a2b3c4d5e6f7a8b91004"
+  },
+  "tensanpham": "Vibrio-Clear Xử Lý Nước",
+  "thuonghieu": "EcoAqua",
+  "loaisanpham": "vi_sinh_moi_truong",
+  "mota": "Vi sinh cắt tảo, phân hủy thức ăn thừa, ức chế vi khuẩn Vibrio trong nước nền tảng để tránh lây nhiễm Gan tụy và Phân trắng.",
+  "congdung": [
+    "Phân hủy bùn đáy Siphon",
+    "Giảm khí độc NH3, NO2",
+    "Ác chế mầm bệnh Vibrio ngoài môi trường"
+  ],
+  "lieudung": {
+    "dinh_ky": "1 gói(200g)/ 2000m3",
+    "xu_ly_benh": "1 gói/ 1000m3 lúc 8h tối"
+  },
+  "goc_thuoc": "Bacillus sp. nồng độ cao",
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
     },
-    "tensanpham": "GillClear - Xử Lý Mang Khẩn Cấp",
-    "thuonghieu": "EcoAqua",
-    "loaisanpham": "dac_tri",
-    "mota": "Dung dịch tạt ao chuyên biệt giúp phục hồi mang tôm bị đen, cải thiện oxy hòa tan và loại bỏ mảng bám vi khuẩn/nấm trên bề mặt mang trong 24–48 giờ.",
-    "congdung": [
-      "Xử lý mang đen khẩn cấp trong 24–48 giờ",
-      "Tăng oxy hòa tan trong nước tầng đáy",
-      "Loại bỏ mảng bám vi sinh vật trên mang"
-    ],
-    "lieudung": {
-      "dinh_ky": "1L/4000m³",
-      "xu_ly_benh": "1L/1500m³ tạt lúc trời mát, tăng quạt sau khi tạt"
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "gia": 110000,
+  "soluong": 10,
+  "daban": 300,
+  "trangthai": "dang_ban",
+  "hinhanh": [
+    "data:image/jpeg;base64,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"
+  ],
+  "ngaytao": {
+    "$date": "2026-05-02T00:00:00.000Z"
+  },
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "capnhat": {
+    "$date": "2026-07-01T10:11:56.613Z"
+  },
+  "donvi": "chai"
+},
+{
+  "_id": {
+    "$oid": "60f1a2b3c4d5e6f7a8b91005"
+  },
+  "tensanpham": "Trợ lắng Yucca Zeo - Hấp thu khí độc",
+  "thuonghieu": "EcoAqua",
+  "loaisanpham": "vi_sinh_moi_truong",
+  "muc_dich_su_dung": [
+    "phongbenh"
+  ],
+  "mota": "Hấp thu cực nhanh khí độc NH3, H2S dưới đáy ao, làm sạch và thông thoáng mang tôm bị bẩn, giúp tôm thở dễ dàng trong bệnh đen mang.",
+  "congdung": [
+    "Hấp thu khí độc NH3, H2S tức thì",
+    "Cấp cứu tôm ngạt nổi đầu khẩn cấp",
+    "Làm sạch mang — đặc trị bệnh đen mang do môi trường"
+  ],
+  "lieudung": {
+    "dinh_ky": "1kg/2000m³",
+    "xu_ly_benh": "2kg/1000m³ tạt thẳng xuống ao"
+  },
+  "goc_thuoc": "Yucca Schidigera + Zeolite tự nhiên",
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
+    }
+  ],
+  "gia": 180000,
+  "soluong": 100,
+  "daban": 20,
+  "trangthai": "dang_ban",
+  "hinhanh": [
+    "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTSNpAC4XBmE7jI1aRhJN3v4ypA9xn1__PhIaeNmDrZeYSRQAC6-nOe2NU7Mp8fK99QP-a0PDVrigt3x_Fxvkz2YKd7d-fJPPdBFYhBzS6oAqY-t_LSI0YxxuALPIGltg2pLm0q2nNnOHA&usqp=CAc"
+  ],
+  "ngaytao": {
+    "$date": "2026-05-08T00:00:00.000Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-04T04:41:18.318Z"
+  },
+  "donvi": "gói"
+},
+{
+  "_id": {
+    "$oid": "60f1a2b3c4d5e6f7a8b91006"
+  },
+  "tensanpham": "Iodine 90 - Siêu Diệt Khuẩn & Nấm",
+  "thuonghieu": "AquaVet",
+  "loaisanpham": "dac_tri",
+  "muc_dich_su_dung": [
+    "dieutri",
+    "phongbenh"
+  ],
+  "mota": "Dung dịch sát khuẩn phổ rộng cực mạnh. Đặc trị các bệnh do nấm, ký sinh trùng bám trên vỏ tôm - nguyên nhân gây đen mang, đốm đen.",
+  "congdung": [
+    "Đặc trị đen mang do nấm và vi khuẩn",
+    "Trị đốm đen, mòn đuôi",
+    "Sát trùng nguồn nước trị virus đầu vàng"
+  ],
+  "lieudung": {
+    "dinh_ky": "1L/3000m3",
+    "xu_ly_benh": "1L/1500m3"
+  },
+  "goc_thuoc": "Povidone Iodine 90%",
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
     },
-    "goc_thuoc": "Hydrogen Peroxide 35% + Chất hoạt động bề mặt sinh học",
-    "benh_ids": [
-      {
-        "$oid": "60f1a2b3c4d5e6f7a8b90004"
-      }
-    ],
-    "gia": 245000,
-    "soluong": 60,
-    "daban": 28,
-    "trangthai": "dang_ban",
-    "hinhanh": [
-      "/assets/images/gillclear.jpg"
-    ],
-    "ngaytao": {
-      "$date": "2026-05-10T00:00:00.000Z"
-    },
-    "muc_dich_su_dung": [
-      "dieutri"
-    ]
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90005"
+    }
+  ],
+  "gia": 210000,
+  "soluong": 150,
+  "daban": 80,
+  "trangthai": "dang_ban",
+  "hinhanh": [
+    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcR7lZ6XBPLAOaMLScaq56soJ1i018yCB4lI5kpMRA_3aUGNHejRh0qeHpTR0vsg-caMSEOcbziG1rePCn6DO7hZAgvRqiWv2rITAXMWaIzps4ktml1QWlx3HLZsvcvNlhur0Q7SAhhLDQ&usqp=CAc"
+  ],
+  "ngaytao": {
+    "$date": "2026-05-08T00:00:00.000Z"
   }
-]
+},
+{
+  "_id": {
+    "$oid": "60f1a2b3c4d5e6f7a8b91007"
+  },
+  "tensanpham": "C Tạt Chống Sốc - Vitamin C 30%",
+  "thuonghieu": "BioPharma",
+  "loaisanpham": "dinh_duong_de_khang",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "mota": "",
+  "congdung": [
+    "Chống sốc nhiệt, tụt pH",
+    "Hỗ trợ tăng sức đề kháng cầm cự Virus Đầu Vàng và đốm trắng",
+    "Kích thích tôm lột xác"
+  ],
+  "lieudung": {
+    "dinh_ky": "1kg/3000m3",
+    "xu_ly_benh": "2kg/1000m3"
+  },
+  "goc_thuoc": "Acid Ascorbic (Vitamin C)",
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90005"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90001"
+    }
+  ],
+  "gia": 125000,
+  "soluong": 300,
+  "daban": 150,
+  "trangthai": "dang_ban",
+  "hinhanh": [
+    "data:image/jpeg;base64,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"
+  ],
+  "ngaytao": {
+    "$date": "2026-05-08T00:00:00.000Z"
+  },
+  "capnhat": {
+    "$date": "2026-05-15T05:28:22.262Z"
+  },
+  "donvi": "gói"
+},
+{
+  "_id": {
+    "$oid": "6a4894777a4f0a7633c4b161"
+  },
+  "tensanpham": "Khoáng tạt dạng lỏng MINER LIQUID PRO",
+  "thuonghieu": "AquaNutrition",
+  "loaisanpham": "dinh_duong_de_khang",
+  "soluong": 32,
+  "gia": 150000,
+  "donvi": "chai",
+  "mota": "Sản phẩm cung cấp hệ khoáng đa vi lượng dưới dạng ion lỏng dễ hòa tan. Giúp tôm hấp thu trực tiếp và nhanh chóng qua mang hoặc biểu bì, đặc biệt hiệu quả trong điều kiện thời tiết bất lợi hoặc môi trường nuôi có độ mặn thấp",
+  "goc_thuoc": "Chứa các ion khoáng đa vi lượng hòa tan (Ca, Mg, K, Zn, Cu, Mn) và dung môi vừa đủ",
+  "congdung": [
+    "Công dụng 1: Kích thích tôm lột xác đồng loạt và đúng chu kỳ.",
+    "Công dụng 2: Giúp vỏ tôm cứng nhanh, khắc phục tình trạng mềm vỏ, ốp vỏ.",
+    "Công dụng 3: Phòng ngừa hiện tượng cong thân, đục cơ do thiếu hụt khoáng chất.",
+    "Công dụng 4: Cung cấp hệ đệm giúp ổn định môi trường nước ao nuôi.",
+    "Dùng định kỳ: Tạt 1 lít cho 2.000 m3 nước, định kỳ 5-7 ngày/lần. Trộn cho ăn: 3-5 ml/kg thức ăn."
+  ],
+  "lieudung": {
+    "dinh_ky": "Tạt 1 lít cho 2.000 m3 nước, định kỳ 5-7 ngày/lần. Trộn cho ăn: 3-5 ml/kg thức ăn",
+    "xu_ly_benh": "Tạt 2-3 lít cho 2.000 m3 nước ao, dùng liên tục vào lúc 20h-22h đêm trong 2-3 ngày."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTlPzyXFC9viygY-9M8WPVgEHkXfTnSEcQrKRUgeXBMg6d8DyMU4-bfW1dEm1GO4XkFOGS6yuRUAXtibO53U7ClfZaTMK_SjpQsvaUt3inP7dCffF7J9-Zr25vhPUxRI5HyM-Myd9JU&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890767a4f0a7633c4b15f"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T05:04:55.514Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a489c927a4f0a7633c4b162"
+  },
+  "tensanpham": "Aqua-Acid Herb (Hỗn hợp Axit hữu cơ và Tinh dầu thảo dược)",
+  "thuonghieu": "AquaTech",
+  "loaisanpham": "dinh_duong_de_khang",
+  "soluong": 8,
+  "gia": 200000,
+  "donvi": "túi",
+  "mota": "Là sự kết hợp hoàn hảo giữa các loại axit hữu cơ mạch ngắn và tinh dầu thảo dược tự nhiên. Sản phẩm giúp hạ pH đường ruột nhanh chóng, tạo môi trường bất lợi cho vi khuẩn có hại (đặc biệt là Vibrio parahaemolyticus), đồng thời bảo vệ niêm mạc ruột, kích thích hệ tiêu hóa và hệ miễn dịch tự nhiên của tôm/cá. An toàn, không tồn dư, là giải pháp thay thế kháng sinh hiệu quả",
+  "goc_thuoc": "Axit hữu cơ: Formic acid, Lactic acid, Propionic acid, Citric acid.  Tinh dầu thảo dược: Chiết xuất tỏi (Allicin), Oregano (Carvacrol/Thymol), chiết xuất sả",
+  "congdung": [
+    "Là sự kết hợp hoàn hảo giữa các loại axit hữu cơ mạch ngắn và tinh dầu thảo dược tự nhiên. Sản phẩm giúp hạ pH đường ruột nhanh chóng, tạo môi trường bất lợi cho vi khuẩn có hại (đặc biệt là Vibrio parahaemolyticus), đồng thời bảo vệ niêm mạc ruột, kích thích hệ tiêu hóa và hệ miễn dịch tự nhiên của tôm/cá. An toàn, không tồn dư, là giải pháp thay thế kháng sinh hiệu quả"
+  ],
+  "lieudung": {
+    "dinh_ky": "Trộn 3 - 5 ml / 1 kg thức ăn. Cho ăn 2-3 cữ/ngày, liên tục trong suốt vụ nuôi.",
+    "xu_ly_benh": "Trộn 7 - 10 ml / 1 kg thức ăn. Cho ăn tất cả các cữ trong ngày, liên tục 5-7 ngày. (Pha loãng với một lượng nước vừa đủ rồi phun/trộn đều lên thức ăn, để ráo 15 phút trước khi cho ăn)"
+  },
+  "hinhanh": [
+    "https://sumi-japan.com.vn/wp-content/uploads/2023/12/NHOM-9-SUMI-AXIT-HUU-CO-CHANH.jpg"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "dieutri",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890d57a4f0a7633c4b160"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T05:39:30.439Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-05T12:03:17.691Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48c240bcdd29fe9cb8a597"
+  },
+  "tensanpham": "Povidone Iodine 10%",
+  "thuonghieu": "AquaVet",
+  "loaisanpham": "dac_tri",
+  "soluong": 150,
+  "gia": 210000,
+  "donvi": "chai",
+  "mota": "Dung dịch sát trùng chứa Povidone Iodine dùng xử lý nước ao nuôi và sát trùng dụng cụ, giúp giảm mật độ vi khuẩn, nấm và một số tác nhân gây bệnh trong môi trường nuôi thủy sản",
+  "goc_thuoc": "Povidone Iodine 10%",
+  "congdung": [
+    "Sát trùng nước ao nuôi",
+    "Giảm mật độ vi khuẩn gây bệnh",
+    "Hỗ trợ kiểm soát nấm trong môi trường",
+    "Khử trùng dụng cụ và thiết bị nuôi"
+  ],
+  "lieudung": {
+    "dinh_ky": "Theo hướng dẫn trên nhãn của nhà sản xuất.",
+    "xu_ly_benh": "Theo hướng dẫn trên nhãn của nhà sản xuất hoặc cán bộ kỹ thuật thủy sản."
+  },
+  "hinhanh": [
+    "https://goovetvn.com/images/stories/virtuemart/product/povidone-10.jpg"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "dieutri",
+    "hotro",
+    "phongbenh"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90001"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:20:16.988Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48c442bcdd29fe9cb8a598"
+  },
+  "tensanpham": "Yucca Schidigera Extract",
+  "thuonghieu": "EcoAqua",
+  "loaisanpham": "vi_sinh_moi_truong",
+  "soluong": 9,
+  "gia": 180000,
+  "donvi": "chai",
+  "mota": "Chế phẩm xử lý môi trường chứa chiết xuất Yucca schidigera, giúp hấp phụ khí độc trong ao nuôi, cải thiện chất lượng nước và giảm stress cho tôm",
+  "goc_thuoc": "Chiết xuất cây Yucca schidigera (Yucca Schidigera Extract)",
+  "congdung": [
+    "Hấp phụ khí độc NH3",
+    "Giảm H2S trong đáy ao",
+    "Cải thiện chất lượng nước",
+    "Giảm stress cho tôm",
+    "Hỗ trợ ổn định môi trường ao nuôi"
+  ],
+  "lieudung": {
+    "dinh_ky": "Theo hướng dẫn trên nhãn của nhà sản xuất.",
+    "xu_ly_benh": "Theo hướng dẫn trên nhãn của nhà sản xuất khi nồng độ khí độc tăng cao."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcT9YSvpgZAldKPrB5yCgHIb_57YPX6QYDaK_JPzR2c0sd9eSltOvzoOXwRnV9B58T_WM1fTdYqUu7sW6b3BcPEYS45BlqlPkRlNVulLtv7gja3oyegnFQjSuPm_tq9tCcBxF86FdAU&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:28:50.984Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-04T08:29:19.346Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48c587bcdd29fe9cb8a599"
+  },
+  "tensanpham": "BKC 80",
+  "thuonghieu": "AquaVet",
+  "loaisanpham": "dac_tri",
+  "soluong": 85,
+  "gia": 195000,
+  "donvi": "chai",
+  "mota": "BKC 80 là hóa chất sát trùng dùng xử lý môi trường ao nuôi thủy sản, giúp giảm mật độ vi khuẩn, nấm và nguyên sinh động vật trong nước, góp phần cải thiện chất lượng môi trường nuôi",
+  "goc_thuoc": "Benzalkonium Chloride 80%",
+  "congdung": [
+    "Sát trùng nước ao nuôi",
+    "Giảm mật độ vi khuẩn gây bệnh",
+    "Hạn chế nấm và nguyên sinh động vật",
+    "Cải thiện chất lượng nước",
+    "Hỗ trợ giảm nguy cơ lây lan mầm bệnh"
+  ],
+  "lieudung": {
+    "dinh_ky": "Theo hướng dẫn sử dụng trên nhãn sản phẩm.",
+    "xu_ly_benh": "Theo hướng dẫn sử dụng trên nhãn sản phẩm hoặc cán bộ kỹ thuật thủy sản."
+  },
+  "hinhanh": [
+    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAMAAzAMBEQACEQEDEQH/xAAcAAEAAQUBAQAAAAAAAAAAAAAAAwECBAUGBwj/xABAEAABAwMDAAgDBQQIBwAAAAABAAIDBAUREiExBhMiQVFhcZEUMoEHI6Gx0RVCwfAkNFJzgpKT4RYzNlNiY3L/xAAbAQEAAwEBAQEAAAAAAAAAAAAAAQIDBAUGB//EADgRAQABAwIDBAgFAwQDAAAAAAABAgMRBCESMUEUUXGRBRMiUmGBocEyQrHR8CNi4RU0U/EGJDP/2gAMAwEAAhEDEQA/APcUBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQDwg1lwvlrtz9NbX00B8HyAFVm5RTzl0WtHqL29uiZ+TXu6bdG2nBusBPkcrPtFvvdP+k63/jlLD0vsFQ8Miu1KXHga8K1N23PKWdfozWUxmbc+TdQyMlYHxua5p4c05BWmc8nHNM0ziUiIEBAQEBAQEBAQEBAQEBAQEBAQEBBQnY7oPmOepfJWVEsri573kuc45JOfFeV1l+nWoimiIp2jEInO1OJUr9Wbav6zJkZHVOUwrd5Q9U+xeZ7+j1Yx7yWMqiGAnOkaWnbyXTpZnhmHx//AJDTEammYjnH3l6CDnhdTwBAQEBAQEBAQEBAQEBAQEBAQEBAQaPpXf4+jlpNfLA+YawwNaQNznG/0VLlfBTl16HR1au96umcPndzoy5xdyTkDK87nu/RKaOGMZABjIyidu9lUEnVVYGR94NGT3ZSOZXTE083oH2YXmK1XGXo86J8hqZzIyYEdnsDYj/Ct7FfBVw975v05o67tHaYnGI+71hh2812vk1yAgICAgICAgICAgICAgICAgICAg1d8ttLdKVlNXRMljbIH6HcZGf1UVUxVGJaW7ty1MzbnEsKKwWqFobHb6QY/wDQ0n3KiKKY6FV65V+KqZ+cpxaqIcUtLjw6hv6K2I7lMz3ytltFueO3QUjh/cN/RRw09y0XKo5TPmxoLHaKe4wVkdDDDPGTpkjGMbY44UcFOctJ1V+aJomqcT0y6NvHqrMFyAgICAgICAgICAgICAgICAgICCKaQMA8T3IMUnO/J80FMoLgUFSgje0EILqeYxODHbsPHkgzwgICAgICAgICAgICAgICAgICAg1skuuV3kcBBTVkcFBaXYQVbIgvDkDKC1wy0oM2leXwgnkbIJkBAQEBAQEBAQEBAQEBAQEBBTCDVikYXO1SSO3P72PyQX/CQ+Dj6uKAaWH+wPdBp7hdqSlqKaKCKObVMY5yD/ygMA+rsubt4HKzquRGHZZ0lVymqqrbEbfH+b7txS/CVMfWU5ZJHkt1sOQSCQfYghaZid4ctVNVM4qjCfqI+5uPQoqGBnn7oJqeMMacEnJ70EqAgICAgICAgICAgICAgICAgIMEfM71QXoMesqRSxdY5uoZxjw2JOfYoNLV0Noq6yrlkfIJqiPqnFuRocNtQ8HcDPkqTRTmZnq67OruURTRTyif5Hg21ukpYYoaOl1aI26GAA7AA859CpjEREQzvU3Kqpruc5/n3bBWYCCSP5UF6AgICAgICAgICAgICAgICAgINHJebXBK9stwpWua4gtMo2K1ps3ZjMUz5MpvWonE1R5rD0jso5udN9HZV+yX/clTtdj34QT9IrDI3TJcaZw/8gT/AATsl/3JR2yx78IRfLJ+9d6ckg4+78ee5OyX/ck7bY9+E8N9sbCS65U7jnPyYwfZOx3/AHJO3WMY44ZTekdmdxcoPc/onZL/ALknbNP78JG360P4uVL/AKgCidNejnTK0aqxPKuGwo54amHrKeVkrM41McHD8FlVTVTOKoa01U1RmmcwnVVhAQEBAQEBAQEBAQEBAQEBAQeH1bGP6RXAv0aWvmeA4ZBIBI49/p5r6CKpjT08PXEfWHztymmdRVxdMz9FtRb3da9zTGAdZ0sBwzS3ON/HbHqFNu/GIjw+ef238kXNNOZmOuflj9ySzz9oRZke14YW6S0ajngnngqsa23znaOfPPnHRbsdeNt5zjljynq3trsVL+yj8bSn4rMoe7rCHDAyMNzgrztRr7vr/wClV7O2Ntt/0d9jQ2/Uf1ad98777eHNmM6P29sdG99O8iq6pmA89g4Jc7nv2Cz/ANQvTVciKvw8XTwiI+S06CxTFEzTzxHX5tXLSUE96oYYKeaGKU6ZY3asE5/dJ5C9Gm7fp09yqqqJmOU7eO8d7za7VmrU26aYmInnG/TuZl7slFSW+pnp2vbK1zS3L8taMtBHmO0d1ho9bduXqaKsY3+8/ZtrdDZtWaqqc52+0fd1f2d/9NMyMffSfmsfSH/3+UOz0Z/t48Z/V0y4XoCAgICAgICAgICAgICAgICAg8PuUdTFfK9zaSV4fJK0ExvIwcjO3qvoLc0VWqIme6fJ89diqm7VMUzPOOXepLLXSxzsbRTMErw46Yn9kjHGfQewU0WrVM0zM5xmOcdf59Varl6qJiKcZnPKf5/0jqXVlTqcbe9r3O1OeyKTJPiAcgZ52Ctbpoo/Pn4bfXZFdV2v8uPlP8hmUFzu1FRtp4aPIaXFsj6d7nt1ckHP8Fz3dHp7tya66u7rGNmtvVam1b4KaO/pOd2ZBeb0HMDaTADY2AmnedOgnBxnnfdVnQabGczPOecdU063VZxw45dJ6cv8tg6etdN1gdRh0bWdVppZMM0uzhueM538lhRZtxTw+11zvTvmMb+G2G1Vd6auL2enSdvDx6/JFdaiuqrfPE4QuDnNwyKmkDsAjZudsbA/Ra6Wzat3aasT4zMfX4stVcvXLNVM78toifg677P2Pj6ORtexzD1r9nNwefBcuvmJvZic7O70bExp4iYxzdIuJ3iAgICAgICAgICAgICAgICAg0td8Y5oFFJHG7rMvdIcdkHfuPcr2+DPtbqXOLHssGV941l0FdQ6Q841nhuTtxzj8ltTFnERMTljVN2MzEwpK++dY7qqmg0YaAHO4OBq7vEOSIsY5SifX5neF1PNd2xvZUVVCZXNzEWP2znk7d4UVRZzExE4TTN7ExVMZXxy3WOJ/W1lG2XOGguGnPZ428nKZi1M+zEozdiN5j+Y/wArmm9CVhkq6LS0EntYyNt8Y8Mqf6GNolX/ANiJ3mElG+7vqx1tTRSwMf8AeNjPaII27tu4/RVuRZinlOVrc3pq5xhvI/l8Vzw6lyAgICAgICAgICAgICAgICAgINY5rXh7HZw4kEDwTOJRjMME2K3OhkjELsSntdrJPI/ifdbxqLmYnLGdNbmJjHNR1gt0kb43wkteRq7XeDt+aiNRcjE5TOntzmMLR0dtZdkwvzjA7ZVu1XcYyr2W1nOE7uj9tlfJI6B2qRxc7t8n+c+6iNTdiMZOy2pzmEzrNQvcS+Ikuj6sgu5bjH5Kvrq4W7PbmeSehoKahD/ho9GvGd8qLl2q5+Ja3aptx7LOj+VZtFyAgICAgICAgICAgICAgICAgINWHDW7fvKDmemdKy7Mjo5ZJY4IXh7zFJoJdngn+eVz3rvDVDSiMxhpYZfg6iOspxUtELy4NDjpk7uPA+iwi/XFXJb1e2Ieg08rZYmvHDgNidx4g+YOR9F3RVxbspiYnEtP0muT4xHQ0jv6Q/tPawZdp7hjzV4VlhUtwqaWkcYY39eDq0SNP3nuoxk5OntlYK6hgqBjL29oA5w7vChLPj+VBcgICAgICAgICAgICAgICAgICDjukvSOn6PNhfPTyTumkcAyItBAHJOSNtwkzjmRu5jpHdZa+hgutvGmkkY95Ehx1UjNu1ju3BXJfo/M3tT0lp6LpAJbnSUULZf2vUkxHWckY4x4cZOFlTTVn2WtVMUREuyZ0msvRxwtBFTI6EkPlZGXBzycvOfUn8u5dcVU0RiN3LXVNVWZY976m507b7ZyGFx6qfW1xcMcYGcD1x4LS3XTXGYUlqKGqZUSNZHpiaX4e4jtu33H4Y9VrtCruIq6O2U4pqKhklbFKBNhzW6cntOwdzjO/oVnndfDoo/l+qC9AQEBAQEBAQEBAQEBAQEBAQEHkv2oQOFTRVpkwAXRNHi7WNvqD+Ci5GShsvsyoZ6e11b5pNdNNMOqZjIOBguHqfyUUREwmud3WS0zdL3UzIo6ksIZKWAkOI2OVeYnGykTvu8wdQf0oRS0566IHUZDnG5yMA7nK8n26cw6OGMO16FUM8cBmmk+7c1zXwuG3zHTt3dnHuuvTUzz6M63UNhia7LY4wfHSNl2SzeZS1lTS3+ekjNYKoVGmXW0uY/UdnMGwPIGM7b926wmqY2bxHV6vBkRgE5I2JxytWSRAQEBAQEBAQEBAQEBAQEBAQEHOvEE8r4pWRyAOJLXAHT57q0VUzPDE5lnvG88k8DGQxtjijaxjdmtbsApwjMriUwZY0ltoZ5nTS0sbpXY1PxuccKk2qJnOFuOWfTxxwRCOFjWMHDQFNNMUxiDKcFWMrTEwvD+raXjhxbuFGI5mZhlQEFmxyMqJWhIoSICAgICAgICAgICAgICAgICDzl1TTzXGukoq+OWUygGBlQ2OQaSQdj9Vy0W/wCtVXExv9Xo8FdFqim5RMR3zGY38GXm4MY4D9ou1A7gRyYx7c4x9V04qjvY509U78MecM0XYgRh9BcdTsD+rnbfG6tx/CXPOnzMzFdPmkN3ZGMuorhs7G1MSnF8JI0sz+enl3sk3QN1YoLg7S7ThtOff0Ti+Epp00zP46fNlzVMjII5I6SaRzyPuxjLQe8qZmcbQzt0U1VTTNUQ1tyuMhp3xVMcdE0jPWy1TG4IcPPO+FnVVON9vm7bGniK4mieKe6ImecNn0aqoqu0xvgnjnAc5rnxkluc74Pf6pRMTG05Zaq1XauzTVTNPwnm2qs5xAQEBAQEBAQEBAQEBAQEBAQeEllK+a6xz09LI91ZMGPmcWlp1HcHyyFxTic5h9hTNymLdVFUxtH6Jo6GjYJOooHanSNwKWpHyZBON/I7+aiIJv3ds19OsTzTSxRNc2KB94jk2cG/FHduRq31b4GcK0/PzZROYzXFGN+kfsyo44WtaH1PSFrngadUzwAff15UefmpGZ5U2/KP2QQRvlon5mvbqtg0kfEPDdXdyfX2URvG0z5uieGmuJ4aOGf7YzjyVZTUg68XCCueY5NhJV5OCCQDv5fgmI5VfWV+O7in1U0xn+3wXimtFOXxMo6GJ78gPkm1lgx3Ac/7pEURygm7qa4j25mPhHPzdv8AZmc9GicAA1UxAA2HaW+n/A8P03jte3dH6OsC3eQICAgICAgICAgICAgICAgIKFB5/VdEmfF1E1vuE9IZpS98elsjC4nnBGyym1E9Xo2/SVdMRFymJ6Z3/WJ+zXP6FVbXEtfa6gl2SZ6Qh2/mCqepdlPpenaMVR4VfvCP/hG4kRiSC2ymMAB2qRhx9D3qPVT8Fo9K298TVGfCUcnQ+6ywyNjjpYzIc5+JlIA/+cgKPVVfD6tKfS1jO+Z+VLNj6I1zpXOdR2sB3Op7yCceHH4KfU1fBWfS1rGJmr6J6XobWse0yyWx24Jd8M5ziRwc5HGVMWZRX6XtTGKYq88M6PojKXl1RdJcE5LYIWR58N8Eq0We+XPPpfbFFqPnMz9Mw6SwWuCz0HwtKHCLUXDU4uJJ5OStKaYpjEPNv6i5qK+O5OZ8MNoFZiICAgICAgICAgICAgICAgIKFBqNPbd6lBXCCmEFzQglaEEjQguAQTw/KgkQEBAQEBAQEBAQEBAQEBAQEBBrqiF8b9TWOe097RkhBD1sY2LsHzQXamnhw90FQR4hBIHN8R7oLusZ/aHugvbl3yNJ8+5BkxjS3BQXICAgICAgICAgICAgICAgICAgILXMDhhzQfUIIzTQnmJn+VBT4SD/ALTUFwp4W8Rt9kFwjaOGtHoEF6AgICAgICAgICAg/9k="
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "dieutri",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90001"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
+    },
+    {
+      "$oid": "6a4890d57a4f0a7633c4b160"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:34:15.200Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48c5edbcdd29fe9cb8a59a"
+  },
+  "tensanpham": "Zeolite Natural",
+  "thuonghieu": "EcoAqua",
+  "loaisanpham": "vi_sinh_moi_truong",
+  "soluong": 120,
+  "gia": 185000,
+  "donvi": "bao",
+  "mota": "Zeolite Natural là khoáng tự nhiên giàu Clinoptilolite, được sử dụng để hấp phụ khí độc và các chất ô nhiễm trong ao nuôi, giúp ổn định môi trường nước và đáy ao",
+  "goc_thuoc": "Zeolite tự nhiên (Clinoptilolite)",
+  "congdung": [
+    "Hấp phụ khí độc NH3",
+    "Giảm H2S trong đáy ao",
+    "Làm sạch đáy ao",
+    "Ổn định chất lượng nước",
+    "Hỗ trợ giảm stress cho tôm"
+  ],
+  "lieudung": {
+    "dinh_ky": "10–20 kg/1.000 m³ nước hoặc theo hướng dẫn của nhà sản xuất.",
+    "xu_ly_benh": "20–30 kg/1.000 m³ nước khi môi trường ao có khí độc cao hoặc đáy ao ô nhiễm."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRgh3qvivKK2oYYQG3XWuvsNUQCY6Y6yPDF47fqJ0mLIF0Mmm9GkHIM1pFfhzczVGdEYk1ZwUySBYsRquaOMH-P1Dpet4JW&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro",
+    "dieutri"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:35:57.787Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-04T08:37:24.234Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48c6dbbcdd29fe9cb8a59b"
+  },
+  "tensanpham": "EDTA 99%",
+  "thuonghieu": "AquaNutrition",
+  "loaisanpham": "vi_sinh_moi_truong",
+  "soluong": 80,
+  "gia": 100000,
+  "donvi": "kg",
+  "mota": "EDTA là chất tạo phức (chelating agent) được sử dụng trong nuôi trồng thủy sản để liên kết các ion kim loại nặng trong nước, góp phần cải thiện chất lượng nước và giảm tác động bất lợi của kim loại đối với tôm",
+  "goc_thuoc": "Ethylenediaminetetraacetic Acid (EDTA) 99%",
+  "congdung": [
+    "Khử độc kim loại nặng trong nước",
+    "Giảm độc tính của sắt, đồng và mangan",
+    "Cải thiện chất lượng nước ao",
+    "Hỗ trợ ổn định môi trường nuôi",
+    "Giảm stress cho tôm sau xử lý nước"
+  ],
+  "lieudung": {
+    "dinh_ky": "1–2 kg/1.000 m³ nước hoặc theo hướng dẫn của nhà sản xuất.",
+    "xu_ly_benh": "2–3 kg/1.000 m³ nước khi nguồn nước có hàm lượng kim loại cao hoặc sau mưa lớn."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcR95CEyDV3qqAwVuIW1FultxpzRZtFYME6KaBF779fryNMfHxXNY_CK_y8CWO0z1e-xRcyMOOymRlAtKqYRDqYaRxJEaSH3Zv4PbZzDMMTSanXimfJ7ckJ20jtHhJaXa7oCg8dDrCk&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "dieutri"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:39:55.966Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48c753bcdd29fe9cb8a59c"
+  },
+  "tensanpham": "Vitamin C 35%",
+  "thuonghieu": "AquaNutrition",
+  "loaisanpham": "dinh_duong_de_khang",
+  "soluong": 50,
+  "gia": 165000,
+  "donvi": "kg",
+  "mota": "Vitamin C 35% là sản phẩm bổ sung vitamin C cho tôm, giúp tăng cường sức đề kháng, giảm stress do biến động môi trường và hỗ trợ quá trình sinh trưởng",
+  "goc_thuoc": "Vitamin C (L-Ascorbic Acid) 35%",
+  "congdung": [
+    "Tăng sức đề kháng",
+    "Giảm stress do thời tiết và môi trường",
+    "Hỗ trợ quá trình lột xác",
+    "Tăng khả năng phục hồi sau khi bệnh",
+    "Giúp tôm sinh trưởng khỏe mạnh"
+  ],
+  "lieudung": {
+    "dinh_ky": "2–3 g/kg thức ăn.",
+    "xu_ly_benh": "4–6 g/kg thức ăn hoặc theo hướng dẫn của nhà sản xuất."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQHfRyI6H7yxBDpo5Oij4JvybvBV8caV9ZWa6YuReBGnlXJ61ACsyQIQxzxd3yY1mttCgN6jAZ8avTCuUxmjiWNBBzgG3yI1YDHO87ywuQaNcHAOTcYHQGdnYSgUfcAIQMgO_W6ydsRYJU&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890767a4f0a7633c4b15f"
+    },
+    {
+      "$oid": "6a4890d57a4f0a7633c4b160"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90001"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:41:55.138Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-04T08:42:20.044Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48c808bcdd29fe9cb8a59d"
+  },
+  "tensanpham": "Beta-Glucan 80%",
+  "thuonghieu": "Không áp dụng (hoạt chất, có nhiều nhà sản xuất)",
+  "loaisanpham": "dinh_duong_de_khang",
+  "soluong": 50,
+  "gia": 510000,
+  "donvi": "kg",
+  "mota": "Beta-Glucan là polysaccharide tự nhiên được chiết xuất chủ yếu từ thành tế bào nấm men (Saccharomyces cerevisiae), được sử dụng trong nuôi tôm để tăng cường đáp ứng miễn dịch không đặc hiệu và nâng cao sức khỏe vật nuôi",
+  "goc_thuoc": "β-1,3/1,6-D-Glucan (Beta-Glucan) 80%",
+  "congdung": [
+    "Tăng cường hệ miễn dịch tự nhiên",
+    "Nâng cao sức đề kháng",
+    "Giảm stress khi thời tiết thay đổi",
+    "Hỗ trợ phục hồi sau bệnh",
+    "Tăng tỷ lệ sống của tôm"
+  ],
+  "lieudung": {
+    "dinh_ky": "1–3 g/kg thức ăn.",
+    "xu_ly_benh": "3–5 g/kg thức ăn hoặc theo hướng dẫn của nhà sản xuất."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQ299mBZ7vnUpnaz1RvGKcLeJIT35yx57vwmuHLTmKl0NGnH1L-5odjnNSL3lpmCqXn27vMryX3XWpasV2rGWGbIpnhqQRQxdlLc1v_CeuS378CdMUog_DI1adMPTBWXME7Vrsu8ew&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "dieutri",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890767a4f0a7633c4b15f"
+    },
+    {
+      "$oid": "6a4890d57a4f0a7633c4b160"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:44:56.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48c9e0bcdd29fe9cb8a59e"
+  },
+  "tensanpham": "Dolomite (CaMg(CO₃)₂)",
+  "thuonghieu": "Không áp dụng (khoáng tự nhiên – nhiều nhà cung cấp)",
+  "loaisanpham": "vi_sinh_moi_truong",
+  "soluong": 200,
+  "gia": 90000,
+  "donvi": "bao",
+  "mota": "Dolomite là khoáng tự nhiên dùng để cải thiện độ kiềm, ổn định pH và bổ sung khoáng Ca-Mg cho ao nuôi tôm, giúp môi trường nước ổn định hơn trong quá trình nuôi.",
+  "goc_thuoc": "Canxi Carbonate + Magie Carbonate (CaCO₃ + MgCO₃)",
+  "congdung": [
+    "Ổn định pH nước ao nuôi",
+    "Tăng độ kiềm (alkalinity)",
+    "Bổ sung Ca và Mg cho tôm",
+    "Giảm biến động môi trường sau mưa",
+    "Hỗ trợ quá trình lột xác của tôm"
+  ],
+  "lieudung": {
+    "dinh_ky": "10–20 kg/1.000 m³ nước hoặc rải xuống ao định kỳ theo điều kiện môi trường.",
+    "xu_ly_benh": "20–30 kg/1.000 m³ nước khi pH thấp hoặc môi trường mất ổn định."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSoj7GcRv8I7yfN_UWbEnQEtNGGGmOpuxT6C5Z6v2mD8YpTJ_ieyrH6AzG2bZmw0cB9-hlrV0xvIjdg0Owi1bXhMEq-Z2GZj3_L8sScqfA8hN28hpEhyhHpCIeaZXLP3UOkTJ2nrA&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890767a4f0a7633c4b15f"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:52:48.923Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48cab4bcdd29fe9cb8a59f"
+  },
+  "tensanpham": "Calcium Chloride (CaCl₂)",
+  "thuonghieu": "Nhiều nhà sản xuất (hóa chất công nghiệp & thủy sản)",
+  "loaisanpham": "dinh_duong_de_khang",
+  "soluong": 180,
+  "gia": 120000,
+  "donvi": "chai",
+  "mota": "Calcium Chloride là nguồn cung cấp Canxi dễ tan trong nước, được sử dụng trong nuôi tôm để tăng cường khoáng, hỗ trợ quá trình lột xác và cải thiện độ cứng vỏ.",
+  "goc_thuoc": "Calcium Chloride ≥ 94–98%",
+  "congdung": [
+    "Bổ sung canxi hòa tan nhanh trong nước",
+    "Hỗ trợ quá trình lột xác của tôm",
+    "Tăng độ cứng vỏ tôm sau lột",
+    "Giảm hiện tượng mềm vỏ",
+    "Ổn định khoáng trong môi trường nước"
+  ],
+  "lieudung": {
+    "dinh_ky": "2–4 kg/1.000 m³ nước hoặc theo điều kiện ao nuôi.",
+    "xu_ly_benh": "4–6 kg/1.000 m³ nước khi tôm lột xác nhiều hoặc thiếu khoáng."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcS-7KbQgJQJCybgC0gZKTFrrGKuVS56QZzipET97BuWBKHpSGi7cUzwpqTS__oa1jmiryzRiOt1lHjXrlMxZzRaglAhpMhsHt_a4rCM6yY9AbK4RerZvt1KkLMsGV6YWfspqzJWzBCPsQ&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890767a4f0a7633c4b15f"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:56:20.324Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48cb64bcdd29fe9cb8a5a0"
+  },
+  "tensanpham": "Magnesium Chloride (MgCl₂)",
+  "thuonghieu": "Nhiều nhà sản xuất (hóa chất công nghiệp / thủy sản)",
+  "loaisanpham": "dinh_duong_de_khang",
+  "soluong": 160,
+  "gia": 135000,
+  "donvi": "kg",
+  "mota": "Magnesium Chloride là nguồn cung cấp magie hòa tan nhanh trong nước, giúp cân bằng khoáng chất, ổn định môi trường ao nuôi và hỗ trợ quá trình sinh lý của tôm.",
+  "goc_thuoc": "Magnesium Chloride ≥ 46%",
+  "congdung": [
+    "Bổ sung magie (Mg) hòa tan nhanh",
+    "Ổn định khoáng nước ao nuôi",
+    "Hỗ trợ quá trình lột xác của tôm",
+    "Giảm stress do biến động môi trường",
+    "Cải thiện chất lượng nước ao"
+  ],
+  "lieudung": {
+    "dinh_ky": "2–3 kg/1.000 m³ nước hoặc theo tình trạng khoáng trong ao.",
+    "xu_ly_benh": "3–5 kg/1.000 m³ nước khi ao thiếu khoáng hoặc sau mưa lớn."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRgMhm2dCSFWe3XsVHVNyfG7rmwv8JBHW6UC1A9H3BwoHNJV3jgX-2xdSIgwEM81s1tGyXkQW88LlbInVAIRzVFcpkXvb2EHvNqaIITMWiegIESFNNY3HvaVN4YqXxJ5Scimi85SQ&usqp=CAc"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890767a4f0a7633c4b15f"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90001"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T08:59:16.376Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-04T08:59:32.679Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a48ccacbcdd29fe9cb8a5a1"
+  },
+  "tensanpham": "EM gốc (Effective Microorganisms)",
+  "thuonghieu": "Nhiều nhà sản xuất (EMRO, Bio, Vemedim, chế phẩm nội địa)",
+  "loaisanpham": "vi_sinh",
+  "soluong": 140,
+  "gia": 109999,
+  "donvi": "lít",
+  "mota": "EM gốc là chế phẩm vi sinh chứa hỗn hợp các vi sinh vật có lợi, giúp cải thiện môi trường nước, phân hủy chất hữu cơ và ổn định hệ sinh thái ao nuôi.",
+  "goc_thuoc": "Hỗn hợp vi sinh: Lactobacillus spp., Saccharomyces spp., Rhodopseudomonas spp.",
+  "congdung": [
+    "Phân hủy chất hữu cơ đáy ao",
+    "Giảm khí độc NH3, H2S",
+    "Ổn định hệ vi sinh trong ao",
+    "Hạn chế vi khuẩn gây bệnh",
+    "Cải thiện chất lượng nước"
+  ],
+  "lieudung": {
+    "dinh_ky": "1–3 lít/1.000 m³ nước (tùy mật độ nuôi và chất lượng nước).",
+    "xu_ly_benh": "3–5 lít/1.000 m³ nước khi ao có nhiều chất hữu cơ hoặc nước xấu."
+  },
+  "hinhanh": [
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE6JTzpFw5zM9k27Y_OAnXI9L3xT9_Nv3XSJWvp4PJgg&s=10"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890767a4f0a7633c4b15f"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-04T09:04:44.304Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a4a134abc93ff8ccc70c2e1"
+  },
+  "tensanpham": "Vi Sinh Đường Ruột Probiotic Aqua",
+  "thuonghieu": "AquaBio",
+  "loaisanpham": "vi_sinh",
+  "soluong": 23,
+  "gia": 320000,
+  "donvi": "gói",
+  "mota": "Chế phẩm vi sinh giúp cân bằng hệ vi sinh đường ruột, hỗ trợ tiêu hóa, tăng khả năng hấp thu dinh dưỡng và cải thiện sức khỏe tôm nuôi.",
+  "goc_thuoc": "Bacillus subtilis, Bacillus licheniformis, Lactobacillus spp. (≥ 1×10⁹ CFU/g)",
+  "congdung": [
+    "Cân bằng hệ vi sinh đường ruột",
+    "Hỗ trợ tiêu hóa và hấp thu thức ăn",
+    "Giảm hiện tượng phân trắng",
+    "Tăng sức đề kháng tự nhiên",
+    "Ổn định đường ruột sau khi sử dụng kháng sinh"
+  ],
+  "lieudung": {
+    "dinh_ky": "2-3g/kg thức ăn, 2-3 lần/tuần",
+    "xu_ly_benh": "4-5g/kg thức ăn, liên tục 5-7 ngày"
+  },
+  "hinhanh": [
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdNZDD55qUrbo3R0HsfWvIWR0hhP2htdg3MydSvgEDbw&s=10"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "6a4890767a4f0a7633c4b15f"
+    },
+    {
+      "$oid": "6a4890d57a4f0a7633c4b160"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-05T08:18:18.850Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a4a13ebbc93ff8ccc70c2e2"
+  },
+  "tensanpham": "Vi Sinh Xử Lý Nước Aqua Clean",
+  "thuonghieu": "AquaBio",
+  "loaisanpham": "vi_sinh",
+  "soluong": 50,
+  "gia": 580000,
+  "donvi": "chai",
+  "mota": "Chế phẩm vi sinh xử lý môi trường ao nuôi, giúp phân hủy chất hữu cơ, giảm khí độc và ổn định chất lượng nước, tạo môi trường thuận lợi cho tôm phát triển.",
+  "goc_thuoc": "Bacillus subtilis, Bacillus megaterium, Nitrosomonas spp., Nitrobacter spp. (≥ 5×10⁹ CFU/g)",
+  "congdung": [
+    "Phân hủy bùn đáy và chất hữu cơ",
+    "Giảm khí độc NH₃, NO₂, H₂S",
+    "Ổn định màu nước",
+    "Hạn chế vi khuẩn có hại phát triển",
+    "Cải thiện môi trường ao nuôi"
+  ],
+  "lieudung": {
+    "dinh_ky": "500 g/1.000–2.000 m³ nước, 7 ngày/lần",
+    "xu_ly_benh": "1 kg/1.000 m³ nước, sử dụng 2–3 lần, cách nhau 3 ngày"
+  },
+  "hinhanh": [
+    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxISEhUSEhIVFRUVFRUVFhUXGBUXFRUVFRUWFhUVFxUYHSggGBolHhUXITEhJSkrLi4uFx8zODMsNygtLisBCgoKDg0OGhAQGi0dHR8uLS0tLS0rKy0tLS0tLSstLS0tLS01LS0tLS0tLS0tLS0tLS0tLS0tKystLS0tLS0tLf/AABEIATsAoAMBIgACEQEDEQH/xAAbAAABBQEBAAAAAAAAAAAAAAAAAQIDBAUHBv/EAEgQAAEDAgIFBwgFCwQCAwAAAAEAAhEDIQQxBRJBUWEGEyJCUnGRFCMygZKhscFTYnPR4RUWM0NygqKy0uLwJGOz8QfCNJOj/8QAGAEBAQEBAQAAAAAAAAAAAAAAAAECAwT/xAAlEQEAAwABAwMEAwAAAAAAAAAAAQIREgMhMVFh8BNBgbEiccH/2gAMAwEAAhEDEQA/AO4oQhAIQhAIQhAIQhBEcSztDxQMSztBeVpvue8/FVdPyaUSR0mG3BwMetI7zjOvais3eEvOjeFz9lWWC515brCCIOuARfvXqNZatXGKdTlraDgckqz9GOu7uHzWgsuoQhCAQhCAQhCAQhCAQhCAQhCATXugE7gSnLG09jIHNA3N3d2wev8AzNB5uSb3E3gEwJ2BDqRcDcm7c5PWVmEuqY6MTLc9wN44q18uaizDk1XWjp5kHtBXTrhx6TsztO9XnttYiZB8CCon5nvPxXXq2i2OPRrNYlo8nqh6YNzYyc+7/N62l5nDVixwcNmY3jaF6RjwQCLgiQuL0wchCEUIQhAIQhAIQhAIQhAIQhBXx2KFJhce4DedgXk3VC4lxMkmSeKs6Xx3Ovseg2zeJ2u/z5qkCjMpArGHCqtVvDKsrZb8FUqK3N/UqtZAwFauhcV+rPe35j5+Kx5TmvIggwRcHiosPXIUGCxIqMDh3EbjtCnRsIQhAIQhAIQhAIQhALA5UaZbSaKQPTeLxm1mRPry8Vq6TxraNJ1R+TR6ycgBxJgLnNQms51V/pPMncBsA4AWRJlY/KTeKUaSbxVU4MJvkiYyvs0i3cVewuNHFYbMOruHbCo3PKxxyHxKp4jGt4pg29w+ao4oIYsHSDeKUaQasV5TQ5DHrND6XYyoAT0XwDwOw/L/AKXrVykGV7zkvpPnqWq49OnDXcR1Xe7xBUahtIQhFCEIQCEIQCELz3LTTPk9HVYYq1Ja3e0dZ/qyHEhB5nlrpvnqnMsPm6TjJ7bxY+oXHjwWRQxJaM1n07KdoWmGjTx/BTsxQ2rJpuhPL5zUGyKgT+d1bxKpYUSrrmzZBYo154KDFKxh6YhQ4lFZVVRhymqqsVUStcruitImhVbUGWThvacx8+8LNTXOKiuvUqgc0OaZBAIO8G4KevH8htLTOHed7qfdm5vz8dy9go0EIQgEIQghxeJbSY6o8w1oJJ4Bcj0zpJ2JrOqutNmt7LBk35niSvQ8vtNa7xhmHosvUjrP2N7m/E8F5IBVD2NUzAo2uSyiHFOGaYntbKDQwhWnQWZhQtWgEROxqq4kK43NV8QEVj1lWVzEhUyqhCmJxKain0KzmOD2mHNIIPELqeh9INxFJtRu2zh2XDMf5shcqa1b/JHSnMVdRx83UgHc13Vd8j+ChDoaEIUaCyOU+mBhaJePTd0aY3uIzjcMz4bVrrlHLPSZq4p4Po0iabBuj0j3k+4DcgyJ2kyTck5km5J4pJUXPBJziIsBKCoQ9OD1UThympFUw9T0qg3oNXCrVoLGwtVu8LVoYhnaHiiLZUVdKa7e0PFR1aze0PEIrKxxVQqxpKq2RcbdqonEN3oHuSKPnhvQKoTRMHJQVDzoUrHApo6HyR0tz1LUcZqU4B3ub1XfI8RxW8uWaIx5oVW1G7LOHaacx8+8BdQo1Q5oc0yHAEHeCJCSsHrifKeRisRP01Tw1zHuXbFyX/yKwNxriLSxhPF0ET4AeCzbwrybnpBUUdapwUXO8PesKuCqnc8VS5zgUnOHcU0xfFYpefKzudO4pOfO5XTGkMQd6d5Sd6yvKDuSeUHcrpjV8rO9PbXO9Y4xB3KVmJO5NMauunByzW4k7lI3EHcmmNAPTw9UW1juUjaqamLgensqKm2qpWVEF9j11vRJ8xS+yp/yhchwY1nsbFi9oPcXAFdnpsDQGtEAAADcBYBWA5c75ZgHFOBAPRZmPqroi57yvZOJqXIszI/UbsW6pLy1fD0RdzWXysO/5JGYPDnqt8SPnxU1agT1ye8NI+CG4Z29nsHeDsdwC6RWGNkjdFUDkz+J33pfyNR7B9p33qamx4y1PBw+ZUlNrxk1lySekczmfRTiarDQdHc72ij836P1/H8FMMJ9Rv8A9jt+t2d6eMKewMo9M/WylufSKvCDlKsOTlHe/wAR/Sj82qPaf4t/pVoYc9k7OvuBAzHFK3DG/RffV67eqNUWNu/erwg5SqfmzR7VTxb/AEqRvJqj2n+Lf6VfLnW6DrbnNvaL3vmmupuJJ1X3jJzbQItdOEHJVbydo73+Lf6U8cn6O9/iPuVjmTJ6L8yfSbtIPyQ2gRFn2jrjYSf/AGPuThCcpQjQNLe/xH3JfyJS+t4/gpm4c9k7Bd+6I2fVCmfrEEFouI9MjPiG2U4QclT8kURsPtFPbgaI6o9ZJ+JUtam51nNb7TtxGxvEpjcMdzBn2jnntCvGDVrDUWNcyGtHTZsG1whdIXOsGx2uyXD9IzIR1xvldFXK8N1C55ytd/qalp9D/jauhrnHK2+Kq5Zs4H9ExSvksxecBMQfBPpVmm0qJ7D9YdxBTmbLuz2gbxnuXaIYWwngJAE8BEKAvHaI09U8qq849xpNFdwbbKmdYRbshezJgTuv4LlmArGQS0gGniul2i6i+Y7jC7dKsTupL1beVzhTqPdQAc1jKjW68hzHvDLmLEaw/BWK3KnVZWfzQ81VbSA1vS1ta86tvR4ryuJvSfwwdAf/ALUipsW8ecBBIOOaSBckNFSQBtPSXb6VfQ1s6V07WqGg2i7mucourE2cei2o7VkjLzZ2bVpaC0+6rzTHtGs+k95dMXY9zPRjbqz615bRmIAqYV7gCGYWvIOR1fKrHgcvWtnReLY/E0XhjKQdhXwwQGg89UECwuYn1qXpERmfO4uM5Vu5o1jhyG6zWtl1nTrzB1dmr71NieU+qJ5sf/Hp1h0sy9zWlmWzWmeC8zh3RhGaz9dprtPNCCWBoqTaetM7MlBjQXNpOGTaNNp9p7R72rX0qb4TXTGzeYzOW7YlTyEhC8bRiidiWDrC2anhUxWpyQG3vNhmmDQwf6Sn9pT/AJ2roC57gHk1aXRIBqU8/wBsW/zeuhLjd0qFzrlU4eVVp3s2f7TF0Vc35Tz5VWz9JuV/1bBkpXyW8MwPG8KRirOAykSd4zvvTsOMrNzGROY4HvXRhdaE9oSAJ4CuoR7ZEb7HuOawsThqVIt1aNPzc6lj0dbPbtXoCFQxejDU64Hq/FdOnaInulvHZ4yjiG0DVAptdTqzrUjZovIgjpW2CbSr+A6NGlVpYNhAxAbTHOVNbnHw0PM5iQG32hX6/JFzv1wH7h/qV+lomu2m2k2rTDGNYGjmzaoyoKoqzrSTrDLK69V+p08/j/rNd+7IOjKVSKIpYdzKTXO1mVqx1TzgY9hhhf6RnKNoUej61PEOLm4elOGZ0fPVBLaZc4arQL5Ey7eJzWzW0HV6fMvp0C9mqXU2vDw41RVc7X1pMxEbASnaO0LXpth1WnUIp83TcWEGm2CCLHpAzk6bgHYucXjJ7/tuYhRp4SlRLSKVESC9pFWq4FzZaQJsSJI3KbA4ei4aoosAIAiXmwdrjN28yruP0GarmmWM1WhgDQ4jVGQubRw3qbCaILOuD6vxV504+e/5c5i2+zSbO3alhK1pSwvK6GEKCD9b4bVZIVQNvkBnmZVhFnR7RztL7Wltk+m1dCXgNHDztKPpGZD64Xv1xu6UC5xykafKapjrDgfRaujrnOnn/wCpq36+0cBkVKrZkOBmJcL7pCfRMuEEZ5avz3/cpQ87ge4jwhPpvnqnOMvf3LesJgE4BACcAmoAE8BNc2RYxxET70wUXfSO8GfcqK2PrVm1KYptDmEjXMGw12AwdnRLzfd6iuExdUkNfRI6LSXAjMhk52zc+0z5s7xNrmn/AEn8IRzVTtj2fxWtjBSw+LrhtPXpS54l2rIDLNsRBvcm52QJKkGMrSBzFouQ456rTF273EfulWubqdtvsf3Jwp1O232P7ldj5optx1abUTqksAkEEAvqNc422Nax0R1lqQo20H/SDu1fxRzTu2fZaszMT4EkIhJTaRmSe+PkE5QMIULKR+qO4fepyq9N9iOkeMR71YRd0dT87Tk/rGfzBe5XhdFjz1P7RuZk5r3S538utfAXNtOO/wBRW2dM8fcukrmWmao8prDbzjvipUsquaMxqyPVv/BOpMuIFpFw6bcQmlySmADIF1uIYaACcAoWVxtQcRuCz3MWAq5r1QT5qRJghzbi8WO3LxVd2koJBa8QY9AkHiI2fcq+I0k4nouIEGxpvMwCbWzgf5K3ESiy5rySYqsuDZ7IOQyvv9yGioAXRWkEEN12HX6QkTq291pWf+UTcmo0AzEseIMCM87lS09JvgE1KUGwMPG0ePpNV/l6LGLTGVTEc6AHCekwkyWybjIX7/BSS8AS2tIcTZzL3gerbdVBpZ0enSJGYAdkXNbI7iT7kn5TfHp0uNqgjPh3K9/Q7LLHVCTIrEOaR6VMFpPH7lediKmXMk3iddokTAPzWR5e4yW1GC0+i7ZmQDnsU9PGklutUbd2xjxIMgNk5GSPBSY9v2Nlrt9ju3Jyyxjgdj/ZKsGsWrEznlcWSqjbdU+t3ySOrEqvSrPc6C0ADO9/UsfU9Di1tEE89SFh0xkvdrweiHefo8X/ACK94sxMz3luAuXafpB1erJvzj49o7V1Fcw0u7z1b7WrxHpuSSWYaDgIki+YOyD93vTBiHSAD7QA45q5F5EG11DToDW9F2e+WqR1JZxYpEm2R7wlebxado2p3NDaE8UGbQpPU2Fxn4iriAejTkW2wePy2JGYyrF6V4tDhBOwXv8A9rXpU2DKyixlVjfS1jOwAnKNg71Iv9ogxRwuMe8w6iRvMtIEX3oGPP0TvFmcxBurTa9AA9LZJPSFu+FUr4PCkA2GtIB2HIwTsPSGecrrF/ZMSuxjhIFJ8xIEtE5wM+Ckbi362rzT4mA6WwRvz/yFUbTw4AOs3INmS3ogOI27i7xT/JcOJEtEOIM60yDB9XuWuUehiejjKhiaLheLlhgHbmpOfqW8139JtktI02tEPAAkCNaBEcOIU+He15Ia8EgXEEZEDMhZm/t+zENKq8m7AB+0Cct0b1JnMq0cON4TG4feSVznqauKlSrlG5RYRrjrekeJsFojDtGTQomM3i/EypEwSu6DpefpTE6xMC/VdtXvV4jQZ8/S29I8B6D17dbhYC5npOlNars87Vy+0cumLmOkXu52rb9bV/5HJMTJKEt3opsAyHFNFQxcZppcRt8Vzmkpqxr8FI1wVZrzNhKUV2zBF1nhK6skhQYrEFlwzWG0gtEX4lONZkEwTqgkgC9hNhtKgfj6BBa4Hi1zXXvbZBVrWfQ08Y51vNPPcW5HvKl8qIMCk/fI1doBuJzkkfulUnVcHadXpTBIPVAmTs9IeKUVMIOxPedkm/gfBa4x6T8/KLz8Y4Ojm3ETmI8Yz/z1IOLcCfNPMGJGrcb7kKgMXhYjoxZwzyfDgb7DATjicIATawkxNgLK8PY1fbjHW82QSCYJaDYiBAJzk+ypMPiHON6Zbx1mkd1lmjFYQgWbAmLbjJHirNDSFFvRY0iTsaQJMCTbuupw7eBoIlQU8YHNDgDfYbHwTfKTuWeMqslVWO4tHAAn3lJ5UeylZWzsLKx2RpaCviKWfpOz+zfsXuF4fQbz5TR/af8A8VRe4XSvhYC5tjmzUqfaVP53LpK5tiah13xB6b7ZH0it1SytqpCycwpeeHWBHeLeIUjA03F10/thWAhI4K7qjcmOo7lmY01nkVBkU8tdtJlWquHkQQCFH5C0dWO4kfArP04XVVuDJJOu5togRG28EHf7gmfk4/Suj937larUWNEnXi2TqhztkCmA08taps21tq3FfmGo/IHSCarjGyGZbrBS+SO+kd3dE/EJQafafu9Krs9aNenGdTxrK58wPZhDrTruN5i0d2Ss6qipUWnLX9bqnzKlGEZ2Z75PxUmICc2mFqsU6QaIaABuAhPFGVmamq2ohrM1bFEJDRXOenK6scnmnyiiSRYvsPsnr3K8ZoFv+opmCPSibT0HbF7NXMagLkWPw9ZrnGnq1BrvOo8lrhLjZrx37V1jF4htJj6jzDWNc9x3NaCSfALklPTQkl7TBJIIzgmbhaqllU6bNP8AS0q1KBmWc5TFoHTYr+itN0Kx1WVmOccmiWuMNE9F19h9SsUMfSdk8TuNj4FTtw7CQ/VbrDJ0CRIgwV0YlMUoQUBMQ4JKlIOEEkdxI94ShOCorHACI1n9+sZ27fWonUHCQBWcN+uzhlrGVoJQmqz6LHwZFY8C6n7iO/3J3MOIgCt361PuVktfscNuzvjbst4cVOFRWZgNhc/Z1js7lYZQDd57yT8VJrJFnvISEqEKoE1yHGM7d6qVtJUm9aTubf8ABBq8n2nn2E/WzufQPh6l7JeE5L4/nMUwAQNV+eZ6K92uVp2XSvhm8pROExA30ag8WFcXeyLLtmnmF2GrgZmlUjv1DC4rUUhZQObwS03EeiS3uJHwTpUjStaykZpCsMqrvXB+KmbpmuOsD3tHyVeBuRzYV1Fxunq3ZYfUfvUzeUVTbTb4kLO5ob04UBvV0abeUh20f4/7U8cpP9k+1/as1mGHa9ylGDb2/cmi9+cv+z/H/al/OI/Rfx/2qj5Ezt+78Uvkw7XuTRdPKB/0bfEn5JjtPVdjWD1E/NUzR4pOa4ppi07TFc9Zo7mj5qF+PrHOo71QPgo+bCNUKaI3Gbkk95n4p7EAJwKmq0dBk+UUCDHnafgXAH3ErrK5XybZOJoj/cafC/yXVFmWoC5Vyw5Ouw7y9omi49EjqE9Q7uG9dVTatMOBa4AgiCCJBG4g5qK4MWpzQuhab5AtdLsM7UP0b5LP3XZt7jPqXjdIaExND9JReAOsBrM9psjxV1nFIBOAUbHqVpWkKAnAIapWhAjQngJ7ApW000QBOAU4w5QWQmiAhNIUzlGSgYkhKXJjnKBShoVvR2ia9c+apOcO1kz2jZe00JyLYyH4gio7sD9GO/a73DgmrinyG0S4u8ocIa0EMnrONiRwAkevgvcJGiLDJKstBCEIBCEIKGN0Lhq16lCm49otGt7QusmvyGwZ9EPZ+y8n+eV6VCDx1T/x/S6teoP2g13wAUDuQLtmJHrpn4669whDHhfzHqjKqw+pw+9KOR+IGT6Xi/8ApXuUImPDjkjie3S8X/0pTyNrHOpTHtH5L26EMeIHIV5zxDR3MJ/9gpafIJvWxDj3MA+JK9khDHmqHIjCt9I1H97oH8IC1cJoPDUvQosBG0jWd7TpK0EIoQhCAQhCD//Z"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "hotro",
+    "phongbenh"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
+    },
+    {
+      "$oid": "6a4890d57a4f0a7633c4b160"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-05T08:20:59.837Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-05T08:24:13.501Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a4a15d8bc93ff8ccc70c2e4"
+  },
+  "tensanpham": "Vi Sinh Xử Lý Đáy Bio Bottom",
+  "thuonghieu": "AquaBio",
+  "loaisanpham": "vi_sinh",
+  "soluong": 112,
+  "gia": 720000,
+  "donvi": "gói",
+  "mota": "Chế phẩm vi sinh chuyên xử lý đáy ao, thúc đẩy phân hủy bùn hữu cơ, giảm khí độc và cải thiện nền đáy, giúp môi trường nuôi ổn định.",
+  "goc_thuoc": "Bacillus subtilis, Bacillus amyloliquefaciens, Bacillus pumilus, enzyme phân hủy hữu cơ",
+  "congdung": [
+    "Phân hủy bùn đáy ao",
+    "Giảm khí độc NH₃, H₂S và NO₂",
+    "Hạn chế hình thành bùn đen",
+    "Cải thiện chất lượng nền đáy",
+    "Ổn định môi trường nuôi tôm"
+  ],
+  "lieudung": {
+    "dinh_ky": "1 kg/2.000–3.000 m³ nước, định kỳ 7–10 ngày/lần",
+    "xu_ly_benh": "1 kg/1.000–1.500 m³ nước, sử dụng 2–3 lần tùy mức độ ô nhiễm"
+  },
+  "hinhanh": [
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRD2Vkmgglz5Mu4kUIvqyUKJCyyrvYZl3JDFGxhQXKT6g&s=10"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-05T08:29:12.148Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-05T08:29:23.880Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a4a17d5bc93ff8ccc70c2e5"
+  },
+  "tensanpham": "Iodine 10% - Sát Khuẩn Ao Nuôi",
+  "thuonghieu": "AquaVet",
+  "loaisanpham": "dac_tri",
+  "soluong": 123,
+  "gia": 2000,
+  "donvi": "chai",
+  "mota": "Dung dịch sát khuẩn giúp tiêu diệt vi khuẩn, nấm và một số tác nhân gây bệnh trong môi trường ao nuôi.",
+  "goc_thuoc": "Povidone Iodine 10%",
+  "congdung": [
+    "Sát khuẩn nước ao",
+    "Giảm mật độ vi khuẩn gây bệnh",
+    "Hỗ trợ xử lý sau mưa",
+    "Giảm nguy cơ lây lan dịch bệnh"
+  ],
+  "lieudung": {
+    "dinh_ky": "1 lít/2.000–3.000 m³ nước",
+    "xu_ly_benh": "1 lít/1.000–1.500 m³ nước"
+  },
+  "hinhanh": [
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCmZJFY7oupVb8CcZhQ6rCYQMFwIqEdE9s11wvztICPw&s=10"
+  ],
+  "trangthai": "dang_ban",
+  "muc_dich_su_dung": [
+    "phongbenh",
+    "dieutri",
+    "hotro"
+  ],
+  "benh_ids": [
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90003"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90004"
+    },
+    {
+      "$oid": "60f1a2b3c4d5e6f7a8b90002"
+    }
+  ],
+  "daban": 0,
+  "ngaytao": {
+    "$date": "2026-07-05T08:37:41.457Z"
+  },
+  "capnhat": {
+    "$date": "2026-07-06T03:08:16.529Z"
+  }
+}]

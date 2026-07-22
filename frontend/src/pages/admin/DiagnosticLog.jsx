@@ -368,7 +368,6 @@ export default function DiagnosticLog() {
         <div>
           <h1 className="text-[32px] font-bold text-[#191c1d] leading-tight">
             Nhật ký chẩn đoán AI
-            <span className="text-lg font-semibold text-[#707881] ml-3">({totalCount})</span>
           </h1>
           <p className="text-[#404850] text-base mt-1">
             Tổng cộng <span className="font-bold text-[#005d90]">{totalCount.toLocaleString('vi-VN')}</span> lượt chẩn đoán.
@@ -508,8 +507,8 @@ export default function DiagnosticLog() {
               <table className="w-full text-left">
                 <thead className="bg-[#f3f4f5]/80 border-b border-[#bfc7d1]/30">
                   <tr>
-                    {['ID', 'Ảnh Ao', 'Thời gian', 'Kết Quả Bệnh', 'Tỷ lệ chính xác', 'Trạng thái', 'Hành động'].map((h, i) => (
-                      <th key={h} className={`px-6 py-4 text-xs font-semibold text-[#707881] uppercase tracking-wider${i === 6 ? ' text-right' : ''}`}>{h}</th>
+                    {['ID', 'Ảnh Ao', 'Thời gian', 'Kết Quả Bệnh', 'Tỷ lệ chính xác', 'Trạng thái'].map((h) => (
+                      <th key={h} className="px-6 py-4 text-xs font-semibold text-[#707881] uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -540,9 +539,7 @@ export default function DiagnosticLog() {
                           <div className={`text-[11px] font-bold mt-1 ${text}`}>{log.confidence}%</div>
                         </td>
                         <td className="px-6 py-4"><StatusCell status={log.status} /></td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="text-[#005d90] hover:underline font-semibold text-xs whitespace-nowrap">Xem chi tiết</button>
-                        </td>
+
                       </tr>
                     );
                   })}

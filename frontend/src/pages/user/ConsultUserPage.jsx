@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
-  ShieldCheck, Send, ImageIcon, MapPin, Plus, Clock,
-  CheckCircle2, X, AlertCircle, RefreshCw, MessageCircle,
+  ShieldCheck, Send, MapPin, Plus, Clock,
+  CheckCircle2, X, AlertCircle, RefreshCw, MessageCircle, Loader2, AlertTriangle,
 } from 'lucide-react';
 
 const API = 'http://localhost:5000/api';
+const GEO = 'https://provinces.open-api.vn/api/v2';
 import { authFetch } from '../../utils/authFetch';
 
 const STATUS_CFG = {
@@ -13,7 +14,6 @@ const STATUS_CFG = {
   dang_tu_van:  { label: 'Đang tư vấn',  cls: 'bg-[#cde5ff] text-[#0077b6]' },
   da_dong:      { label: 'Đã đóng',      cls: 'bg-[#aeeecb] text-[#2c694e]' },
 };
-const TINH = ['An Giang','Bạc Liêu','Bến Tre','Cà Mau','Cần Thơ','Đồng Tháp','Hậu Giang','Kiên Giang','Long An','Sóc Trăng','Tiền Giang','Trà Vinh','Vĩnh Long','TP. Hồ Chí Minh','Khác'];
 
 const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}) : '';
 const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('vi-VN') : '';
@@ -21,6 +21,22 @@ const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('vi-VN') : '';
 function NewModal({ onClose, onDone, user }) {
   const [form, setForm] = useState({ noidung:'', vitri_tinh:'', vitri_ao:'' });
   const [err, setErr] = useState(''); const [saving, setSaving] = useState(false);
+
+  // Tải danh sách tỉnh/thành từ API (giống trang thanh toán)
+  const [provinces, setProvinces] = useState([]);
+  const [loadingProv, setLoadingProv] = useState(true);
+  const [provError, setProvError] = useState(false);
+
+  useEffect(() => {
+    setLoadingProv(true);
+    setProvError(false);
+    fetch(`${GEO}/`)
+      .then(r => r.json())
+      .then(d => setProvinces(Array.isArray(d) ? d : []))
+      .catch(() => setProvError(true))
+      .finally(() => setLoadingProv(false));
+  }, []);
+
   const IC = 'w-full px-4 py-3 border border-[#dde1e7] rounded-xl text-sm focus:ring-2 focus:ring-[#0077b6]/30 focus:border-[#0077b6] outline-none bg-white';
   const submit = async () => {
     if (!form.noidung.trim()) return setErr('Vui lòng mô tả vấn đề');
@@ -55,10 +71,32 @@ function NewModal({ onClose, onDone, user }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#707881] mb-1.5 uppercase">Tỉnh / Thành *</label>
-              <select className={IC + ' appearance-none'} value={form.vitri_tinh} onChange={e=>setForm(p=>({...p,vitri_tinh:e.target.value}))}>
-                <option value="">-- Chọn --</option>
-                {TINH.map(t=><option key={t} value={t}>{t}</option>)}
-              </select>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#707881] z-10 pointer-events-none"/>
+                {loadingProv ? (
+                  <div className={IC + ' pl-10 flex items-center gap-2 text-[#707881]'}>
+                    <Loader2 className="w-4 h-4 animate-spin"/>
+                    <span className="text-xs">Đang tải...</span>
+                  </div>
+                ) : provError ? (
+                  <div className={IC + ' pl-10 text-red-500 text-xs flex items-center gap-2'}>
+                    <AlertTriangle className="w-4 h-4"/>
+                    <button className="underline" onClick={() => { setProvError(false); setLoadingProv(true); fetch(`${GEO}/`).then(r=>r.json()).then(d=>setProvinces(Array.isArray(d)?d:[])).catch(()=>setProvError(true)).finally(()=>setLoadingProv(false)); }}>Thử lại</button>
+                  </div>
+                ) : (
+                  <select
+                    className={IC + ' pl-10 appearance-none'}
+                    value={provinces.find(p => p.name === form.vitri_tinh)?.code || ''}
+                    onChange={e => {
+                      const prov = provinces.find(p => p.code === Number(e.target.value));
+                      setForm(f => ({ ...f, vitri_tinh: prov?.name || '' }));
+                    }}
+                  >
+                    <option value="">-- Chọn tỉnh/thành --</option>
+                    {provinces.map(p => <option key={p.code} value={p.code}>{p.name}</option>)}
+                  </select>
+                )}
+              </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-[#707881] mb-1.5 uppercase">Vị trí ao</label>
@@ -179,14 +217,21 @@ export default function ConsultUserPage() {
   const selectTicket = (t) => { setActive(t); fetchDetail(t._id); };
 
   const handleSend = async () => {
-    if (!input.trim() || !active || active.status === 'da_dong') return;
+    if (!input.trim() || !active) return;
+    const wasClosed = active.status === 'da_dong';
     const text = input.trim(); setInput(''); setSending(true);
     setMessages(prev => [...prev, { vai_tro:'nguoidung', noi_dung:text, thoigian:new Date().toISOString() }]);
     try {
-      await authFetch(`${API}/consultations/${active._id}/reply-user`, {
+      const res = await authFetch(`${API}/consultations/${active._id}/reply-user`, {
         method:'POST',
         body: JSON.stringify({ noi_dung: text }),
       });
+      const data = await res.json();
+      // Nếu tư vấn đã được mở lại, cập nhật trạng thái local
+      if (wasClosed && data.reopened) {
+        setActive(prev => ({ ...prev, status: 'cho_phan_hoi' }));
+        setTickets(prev => prev.map(t => t._id === active._id ? { ...t, status: 'cho_phan_hoi' } : t));
+      }
       await fetchDetail(active._id);
     } catch {}
     finally { setSending(false); }
@@ -371,34 +416,31 @@ export default function ConsultUserPage() {
                 )}
               </div>
 
-              {/* Input */}
+              {/* Input — luôn hiển thị kể cả da_dong để user có thể nhắn lại */}
               <footer className="p-4 bg-white border-t border-[#e7edf3] shrink-0">
-                {active.status === 'da_dong' ? (
-                  <div className="text-center text-sm text-[#707881] font-semibold py-2">
-                    Phiên đã đóng. <button onClick={()=>setShowNew(true)} className="text-[#0077b6] underline">Tạo yêu cầu mới</button>
-                  </div>
-                ) : (
-                  <div className="flex items-end gap-3">
-                    <div className="flex gap-1 pb-1">
-                      <button className="p-2 hover:bg-[#f3f4f5] text-[#2c694e] rounded-full transition-all" title="Gửi ảnh ao tôm"><ImageIcon className="w-5 h-5"/></button>
-                      <button className="p-2 hover:bg-[#f3f4f5] text-[#2c694e] rounded-full transition-all" title="Vị trí ao"><MapPin className="w-5 h-5"/></button>
-                    </div>
-                    <div className="flex-1 bg-[#f3f4f5] rounded-2xl px-4 py-3 flex items-center border border-transparent focus-within:border-[#0077b6] focus-within:bg-white transition-all">
-                      <textarea rows={1} value={input} onChange={e=>setInput(e.target.value)}
-                        onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();} }}
-                        placeholder="Nhập tin nhắn... (Enter để gửi)"
-                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm resize-none max-h-28 outline-none"/>
-                    </div>
-                    <button onClick={handleSend} disabled={sending||!input.trim()}
-                      className="h-12 w-12 shrink-0 flex items-center justify-center bg-[#ff8c00] text-white rounded-full shadow-md hover:brightness-110 active:scale-95 transition-all disabled:opacity-40">
-                      {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/> : <Send className="w-5 h-5 ml-0.5"/>}
-                    </button>
+                {active.status === 'da_dong' && (
+                  <div className="mb-2 flex items-center gap-2 text-xs font-medium text-[#2c694e] bg-[#f0fdf4] border border-[#aeeecb] rounded-xl px-3 py-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0"/>
+                    Tư vấn đã đóng. Nhắn tin dưới đây để mở lại cuộc hội thoại.
                   </div>
                 )}
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 bg-[#f3f4f5] rounded-2xl px-4 py-3 flex items-center border border-transparent focus-within:border-[#0077b6] focus-within:bg-white transition-all">
+                    <textarea rows={1} value={input} onChange={e=>setInput(e.target.value)}
+                      onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();} }}
+                      placeholder={active.status === 'da_dong' ? 'Nhắn để mở lại cuộc tư vấn...' : 'Nhập tin nhắn... (Enter để gửi)'}
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-sm resize-none max-h-28 outline-none"/>
+                  </div>
+                  <button onClick={handleSend} disabled={sending||!input.trim()}
+                    className="h-12 w-12 shrink-0 flex items-center justify-center bg-[#ff8c00] text-white rounded-full shadow-md hover:brightness-110 active:scale-95 transition-all disabled:opacity-40">
+                    {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/> : <Send className="w-5 h-5 ml-0.5"/>}
+                  </button>
+                </div>
               </footer>
             </section>
           )}
         </div>
+
       </div>
     </div>
   );

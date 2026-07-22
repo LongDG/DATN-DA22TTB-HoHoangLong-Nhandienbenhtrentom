@@ -4,17 +4,58 @@ const axios   = require('axios');
 const mongoose = require('mongoose');
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-// Thứ tự ưu tiên dựa trên quota thực tế của tài khoản:
-// gemini-2.0-flash-lite = Gemini 3.1 Flash Lite → 500 RPD (ổn định nhất)
-// gemini-2.5-flash-lite = Gemini 2.5 Flash Lite → 20 RPD
-// gemini-2.5-flash      = Gemini 3.5 Flash      → 20 RPD
-// gemini-1.5-flash      = Gemini 3 Flash         → 20 RPD
+// Thứ tự ưu tiên — trạng thái tháng 7/2026:
+// gemini-3.1-flash-lite = Gemini 3.1 Flash Lite → ACTIVE, khuyên dùng cho task nhanh/khối lượng lớn
+// gemini-2.5-flash-lite = Gemini 2.5 Flash Lite → ACTIVE, retire 16/10/2026
+// gemini-2.5-flash      = Gemini 2.5 Flash      → ACTIVE, retire 16/10/2026
+// gemini-1.5-flash      = ĐÃ BỊ TẮT (shutdown) → KHÔNG DÙNG
+// gemini-1.5-flash-8b   = ĐÃ BỊ TẮT (shutdown) → KHÔNG DÙNG
 const GEMINI_MODELS = [
-  'gemini-2.0-flash-lite',   // ← Chính: 500 req/ngày, 15 req/phút
-  'gemini-2.5-flash-lite',   // ← Dự phòng 1
-  'gemini-2.5-flash',        // ← Dự phòng 2
-  'gemini-1.5-flash',        // ← Dự phòng cuối
+  'gemini-3.1-flash-lite',   // ← Chính: Gemini 3.1 Flash Lite — ACTIVE, tốc độ cao, chi phí thấp nhất
+  'gemini-2.5-flash-lite',   // ← Dự phòng 1: Gemini 2.5 Flash Lite — ACTIVE, retire 16/10/2026
+  'gemini-2.5-flash',        // ← Dự phòng 2: Gemini 2.5 Flash — ACTIVE, retire 16/10/2026
 ];
+
+/**
+ * Gọi Gemini API với cơ chế fallback API key.
+ * Nếu key chính bị rate limit (RESOURCE_EXHAUSTED) → tự động thử key dự phòng.
+ *
+ * @param {string} model   - Tên model Gemini
+ * @param {object} payload - Request body
+ * @returns {Promise<object>} - Response từ axios
+ */
+async function callGeminiWithFallback(model, payload) {
+  const primaryKey  = process.env.GEMINI_API_KEY;
+  const backupKey   = process.env.GEMINI_API_KEY_BACKUP;
+  const apiKeys     = [primaryKey, backupKey].filter(Boolean); // Bỏ key nếu chưa set
+
+  let lastError;
+  for (let ki = 0; ki < apiKeys.length; ki++) {
+    const key = apiKeys[ki];
+    const url = `${GEMINI_BASE}/${model}:generateContent?key=${key}`;
+    try {
+      const result = await axios.post(url, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 30000,
+      });
+      if (ki > 0) {
+        console.log(`[CHATBOT] Rate limit key chính → đang dùng API key dự phòng (key #${ki + 1})`);
+      }
+      return result;
+    } catch (err) {
+      const status = err.response?.data?.error?.status;
+      lastError = err;
+      // Chỉ fallback sang key dự phòng khi bị rate limit
+      if (status === 'RESOURCE_EXHAUSTED' && ki < apiKeys.length - 1) {
+        console.warn(`[CHATBOT] Key #${ki + 1} bị rate limit (${status}), thử key dự phòng...`);
+        continue; // Thử key tiếp theo
+      }
+      // Lỗi khác (UNAVAILABLE, INVALID_ARGUMENT...) hoặc đã hết key → ném ra ngoài
+      throw err;
+    }
+  }
+  throw lastError;
+}
 
 
 /* ── Cache đơn giản — tránh gọi Gemini lặp lại (tiết kiệm quota 30/ngày) ── */
@@ -38,6 +79,13 @@ function setCache(key, data) {
 }
 
 
+/* ── GET /api/chatbot/clear-cache — Xóa cache thủ công (dùng khi test) ── */
+router.get('/clear-cache', (_req, res) => {
+  const size = responseCache.size;
+  responseCache.clear();
+  res.json({ ok: true, cleared: size });
+});
+
 /* ── GET /api/chatbot/test — Kiểm tra API key + DB ── */
 router.get('/test', async (req, res) => {
   try {
@@ -50,7 +98,7 @@ router.get('/test', async (req, res) => {
     // Test Gemini
     const apiKey = process.env.GEMINI_API_KEY;
     const geminiRes = await axios.post(
-      `${GEMINI_URL}?key=${apiKey}`,
+      `${GEMINI_BASE}/${GEMINI_MODELS[0]}:generateContent?key=${apiKey}`,
       { contents: [{ role: 'user', parts: [{ text: 'Xin chào, trả lời 1 từ.' }] }] },
       { timeout: 10000 }
     );
@@ -116,7 +164,13 @@ ${JSON.stringify(sanpham.map(s => ({
 === QUY TẮC TRẢ LỜI ===
 Chỉ trả về JSON hợp lệ, KHÔNG có markdown, KHÔNG có backtick, KHÔNG có text thêm ngoài JSON.
 
-Có 3 dạng response:
+Có 4 dạng response:
+
+0. Lời chào / hỏi thăm / câu hỏi không liên quan triệu chứng (ví dụ: "hi", "xin chào", "bạn là ai", "cảm ơn"):
+{
+  "type": "greeting",
+  "message": "<lời chào thân thiện, giới thiệu bản thân là trợ lý AI AquaVet chuyên chẩn đoán bệnh tôm, mời người dùng mô tả triệu chứng>"
+}
 
 1. Tìm được bệnh (confidence >= 60%):
 {
@@ -164,12 +218,40 @@ Có 3 dạng response:
 Luôn trả lời bằng tiếng Việt. Thân thiện, chuyên nghiệp.`;
 }
 
+/* ── Phát hiện lời chào — trả ngay, không gọi Gemini ── */
+const GREETING_PATTERNS = [
+  /^(hi|hello|hey|howdy)\b/i,
+  /^(xin ch[àa]o|ch[àa]o)/i,
+  /^(c[aả]m [oơ]n|thank)/i,
+  /^(b[aạ]n l[àa] ai|ban la ai)/i,
+  /^(ok|okay|oke|v[aâ]ng)\b/i,
+];
+const GREETING_REPLIES = [
+  'Xin chào! Tôi là trợ lý AI AquaVet 🦐\n\nTôi chuyên hỗ trợ chẩn đoán bệnh tôm và tư vấn sản phẩm. Hãy mô tả triệu chứng tôm đang gặp để tôi giúp bạn nhé!',
+  'Chào bạn! Rất vui được gặp bạn 😊\n\nTôi là AI chuyên gia bệnh tôm của AquaVet. Bạn đang gặp vấn đề gì với ao nuôi? Hãy mô tả để tôi hỗ trợ ngay!',
+  'Hi bạn! 👋 Tôi là trợ lý AI AquaVet, chuyên chẩn đoán bệnh tôm.\n\nBạn có thể mô tả triệu chứng tôm đang gặp phải không? Tôi sẵn sàng giúp!',
+];
+function detectGreeting(messages) {
+  const lastMsg = (messages.filter(m => m.role === 'user').at(-1)?.content || '').trim();
+  if (lastMsg.length > 25) return null; // Tin dài thì không phải chào
+  const matched = GREETING_PATTERNS.some(p => p.test(lastMsg));
+  if (!matched) return null;
+  return GREETING_REPLIES[Math.floor(Math.random() * GREETING_REPLIES.length)];
+}
+
 /* ── POST /api/chatbot/chat ── */
 router.post('/chat', async (req, res) => {
   try {
     const { messages } = req.body;
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ message: 'Thiếu nội dung tin nhắn' });
+    }
+
+    // Phát hiện lời chào — trả ngay, không tốn quota Gemini
+    const greetingReply = detectGreeting(messages);
+    if (greetingReply) {
+      console.log('[CHATBOT] Greeting detected → skip Gemini');
+      return res.json({ result: { type: 'greeting', message: greetingReply } });
     }
 
     // Kiểm tra cache trước — tiết kiệm quota
@@ -198,35 +280,35 @@ router.post('/chat', async (req, res) => {
       },
     };
 
-    // Gọi Gemini với fallback model tự động
+    // Gọi Gemini với fallback: key dự phòng (rate limit) + model dự phòng (unavailable)
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     let geminiRes;
     for (let mi = 0; mi < GEMINI_MODELS.length; mi++) {
       const model = GEMINI_MODELS[mi];
-      const url   = `${GEMINI_BASE}/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
       let success = false;
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
-          geminiRes = await axios.post(url, payload,
-            { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
-          );
+          // callGeminiWithFallback tự thử key dự phòng nếu key chính bị rate limit
+          geminiRes = await callGeminiWithFallback(model, payload);
           success = true;
           if (mi > 0) console.log(`[CHATBOT] Dùng model dự phòng: ${model}`);
           break;
         } catch (e) {
           const status = e.response?.data?.error?.status;
-          if ((status === 'UNAVAILABLE' || status === 'RESOURCE_EXHAUSTED') && attempt < 2) {
-            console.log(`[CHATBOT] ${model} lỗi (${status}), thử lại...`);
+          // UNAVAILABLE: server Gemini bận → thử lại sau 2s
+          if (status === 'UNAVAILABLE' && attempt < 2) {
+            console.log(`[CHATBOT] ${model} không khả dụng (${status}), thử lại sau 2s...`);
             await sleep(2000);
           } else {
+            // RESOURCE_EXHAUSTED (cả 2 key đều hết quota) hoặc lỗi khác → thử model tiếp
             console.log(`[CHATBOT] ${model} thất bại: ${status || e.message}`);
-            break; // Thử model tiếp theo
+            break;
           }
         }
       }
       if (success) break;
       if (mi === GEMINI_MODELS.length - 1) {
-        // Tất cả model đều lỗi
+        // Tất cả model + key đều lỗi
         return res.json({
           result: {
             type: 'transfer_admin',
@@ -256,8 +338,8 @@ router.post('/chat', async (req, res) => {
       };
     }
 
-    // Lưu vào cache (chỉ cache diagnosis và ask_more, không cache transfer_admin)
-    if (parsed.type !== 'transfer_admin') {
+    // Lưu vào cache (chỉ cache diagnosis và ask_more, không cache transfer_admin và greeting)
+    if (parsed.type !== 'transfer_admin' && parsed.type !== 'greeting') {
       setCache(cacheKey, parsed);
     }
 

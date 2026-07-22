@@ -8,6 +8,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import UserDashboard from './pages/user/UserDashboard';
 import StorePage from './pages/user/StorePage';
 import UserLayout from './layouts/UserLayout';
+import PhoneSetupModal from './components/PhoneSetupModal';
 import AdminLayout from './layouts/AdminLayout';
 import DashboardOverview from './pages/admin/DashboardOverview';
 import DiagnosticLog from './pages/admin/DiagnosticLog';
@@ -25,6 +26,7 @@ import ConsultUserPage from './pages/user/ConsultUserPage';
 import MyOrdersPage from './pages/user/MyOrdersPage';
 import CategoryPage from './pages/admin/CategoryPage';
 import ShrimpPricePage from './pages/admin/ShrimpPricePage';
+import DiseaseManagePage from './pages/admin/DiseaseManagePage';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -47,6 +49,7 @@ function isAdmin(user) {
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
 
   useEffect(() => {
     // Bắt token từ Google OAuth redirect
@@ -55,6 +58,18 @@ export default function App() {
     if (oauthToken) {
       localStorage.setItem('token', oauthToken);
       window.history.replaceState({}, document.title, '/');
+
+      // Kiểm tra user Google có SĐT chưa → nếu chưa thì hiện modal
+      const payload = decodeToken(oauthToken);
+      if (payload) {
+        setUser(payload);
+        // Chỉ hiện modal nếu đăng nhập Google (có googleId hoặc không có sodienthoai)
+        if (!payload.sodienthoai || payload.sodienthoai === '') {
+          setShowPhoneModal(true);
+        }
+      }
+      setLoading(false);
+      return;
     }
 
     const token = localStorage.getItem('token');
@@ -65,6 +80,18 @@ export default function App() {
     }
     setLoading(false);
   }, []);
+
+  /** Khi user lưu SĐT thành công từ modal */
+  const handlePhoneSetupSuccess = (updatedUser, newToken) => {
+    localStorage.setItem('token', newToken);
+    setUser(updatedUser);
+    setShowPhoneModal(false);
+  };
+
+  /** Khi user bỏ qua modal (không nhập SĐT) */
+  const handlePhoneSetupSkip = () => {
+    setShowPhoneModal(false);
+  };
 
   const handleGoogleLogin = () => {
     window.location.href = `${API_URL}/auth/google`;
@@ -83,11 +110,11 @@ export default function App() {
     return data;
   };
 
-  const handleRegister = async (formData) => {
+  const handleRegister = async ({ sodienthoai, otp }) => {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({ sodienthoai, otp }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
@@ -110,6 +137,15 @@ export default function App() {
   }
 
   return (
+    <>
+      {/* Modal nhập SĐT sau Google Login */}
+      {showPhoneModal && (
+        <PhoneSetupModal
+          onSuccess={handlePhoneSetupSuccess}
+          onSkip={handlePhoneSetupSkip}
+        />
+      )}
+
     <Routes>
       {/* Auth routes — redirect nếu đã đăng nhập */}
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage onGoogleLogin={handleGoogleLogin} onLogin={handleLogin} />} />
@@ -174,6 +210,7 @@ export default function App() {
         <Route index element={<DashboardOverview />} />
         <Route path="diagnostics" element={<DiagnosticLog />} />
         <Route path="inventory" element={<InventoryPage />} />
+        <Route path="diseases" element={<DiseaseManagePage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="consult" element={<ConsultationPage />} />
         <Route path="users" element={<UserManagementPage />} />
@@ -245,5 +282,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

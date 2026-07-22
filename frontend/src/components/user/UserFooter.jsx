@@ -1,18 +1,18 @@
-import { Share2, Play, Send, PhoneCall } from 'lucide-react';
+import { PhoneCall, Mail, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FOOTER_LINKS = {
   'Dịch vụ': [
-    { label: 'Chẩn đoán AI',      to: '/home' },
-    { label: 'Cửa hàng thuốc',    to: '/store' },
-    { label: 'Theo dõi giá tôm',  to: '#' },
-    { label: 'Tư vấn chuyên gia', to: '#' },
+    { label: 'Chẩn đoán AI',       to: '/home' },
+    { label: 'Cửa hàng thuốc',     to: '/store' },
+    { label: 'Sổ tay bệnh học',    to: '/handbook' },
+    { label: 'Tư vấn chuyên gia',  to: '/consult-user' },
   ],
-  'Hỗ trợ': [
-    { label: 'Hướng dẫn sử dụng', to: '#' },
-    { label: 'Báo cáo sự cố',     to: '#' },
-    { label: 'Thư viện bệnh học', to: '#' },
-    { label: 'Chính sách hoàn tiền', to: '#' },
+  'Khám phá': [
+    { label: 'Trang chủ',          to: '/home' },
+    { label: 'Sản phẩm nổi bật',   to: '/store' },
+    { label: 'Đơn hàng của tôi',   to: '/my-orders' },
+    { label: 'Tư vấn trực tuyến',  to: '/consult-user' },
   ],
 };
 
@@ -42,13 +42,6 @@ export function UserFooter() {
           <p className="text-slate-400 text-sm leading-relaxed">
             Tiên phong ứng dụng trí tuệ nhân tạo trong chẩn đoán và quản lý sức khỏe thủy sản tại Việt Nam.
           </p>
-          <div className="flex gap-3">
-            {[Share2, Play, Send].map((Icon, i) => (
-              <a key={i} href="#" className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center hover:bg-[#0077b6] transition-colors">
-                <Icon className="w-4 h-4" />
-              </a>
-            ))}
-          </div>
         </div>
 
         {/* Links */}
@@ -70,23 +63,48 @@ export function UserFooter() {
         {/* Contact */}
         <div>
           <h5 className="font-bold text-base mb-5">Liên hệ</h5>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-lg bg-[#0077b6]/20 flex items-center justify-center text-[#0077b6]">
+
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-[#0077b6]/20 flex items-center justify-center text-[#0077b6] shrink-0 mt-0.5">
               <PhoneCall className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Hotline 24/7</p>
-              <p className="text-white font-bold">1900 6789</p>
+              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Điện thoại</p>
+              <a href="tel:0383277120" className="text-white font-bold hover:text-[#38bdf8] transition-colors">
+                0383 277 120
+              </a>
             </div>
           </div>
-          <p className="text-slate-400 text-xs leading-relaxed">
-            Trụ sở: Tòa nhà TechHub, Quận 1, TP. Hồ Chí Minh, Việt Nam.
-          </p>
+
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-[#0077b6]/20 flex items-center justify-center text-[#0077b6] shrink-0 mt-0.5">
+              <Mail className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Email</p>
+              <a href="mailto:longho.28112003@gmail.com" className="text-white font-bold hover:text-[#38bdf8] transition-colors text-sm break-all">
+                longho.28112003@gmail.com
+              </a>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#0077b6]/20 flex items-center justify-center text-[#0077b6] shrink-0 mt-0.5">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Địa chỉ</p>
+              <p className="text-slate-300 text-sm leading-relaxed">
+                Số 126, Nguyễn Thiện Thành,<br />
+                Phường Hòa Thuận, Tỉnh Vĩnh Long
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto pt-6 border-t border-white/5 text-center text-slate-500 text-xs">
-        © 2026 AquaHealth AI (Aquatic Health Intelligence). Bảo lưu mọi quyền.
+        © 2026 Nhận Diện Bệnh Tôm Sú. Bảo lưu mọi quyền.
       </div>
     </footer>
   );

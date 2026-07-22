@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Search, CircleAlert, ListFilter, Plus, Pencil,
   Trash2, ImageOff, ChevronLeft, ChevronRight,
-  X, Package, Save, AlertTriangle,
+  X, Package, Save, AlertTriangle, Bug,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
@@ -19,7 +19,14 @@ const CATEGORIES = [
 const STATUS_CONFIG = {
   con_hang: { label: 'Còn hàng', cls: 'bg-[#aeeecb]/60 text-[#316e52] border-[#2c694e]/10' },
   sap_het:  { label: 'Sắp hết',  cls: 'bg-[#ffdbc8] text-[#743500] border-[#904300]/10'    },
-  het_hang: { label: 'Hết hàng', cls: 'bg-[#ffdad6] text-[#93000a] border-[#ba1a1a]/10'    },
+  nguy_cap: { label: 'Nguy cấp',  cls: 'bg-[#ffdad6] text-[#93000a] border-[#ba1a1a]/20'    },
+  het_hang: { label: 'Hết hàng', cls: 'bg-[#f3f4f5] text-[#404850] border-[#bfc7d1]/30'    },
+};
+
+const TRANGTHAI_CONFIG = {
+  dang_ban:   { label: 'Đang bán',   cls: 'bg-[#d1fae5] text-[#065f46] border-[#059669]/20' },
+  ngung_ban:  { label: 'Ngừng bán',  cls: 'bg-[#fee2e2] text-[#991b1b] border-[#dc2626]/20' },
+  sap_ra_mat: { label: 'Sắp ra mắt', cls: 'bg-[#e0f2fe] text-[#0369a1] border-[#0284c7]/20' },
 };
 
 const MUC_DICH = [
@@ -38,6 +45,7 @@ const EMPTY_FORM = {
   hinhanh: '',           // URL ảnh đầu tiên
   trangthai: 'dang_ban',
   muc_dich_su_dung: [],
+  benh_ids: [],          // ObjectId[] liên kết bệnh
 };
 
 /* ── Modal Thêm / Sửa ── */
@@ -57,9 +65,26 @@ function ProductModal({ mode, product, categories, onClose, onSave }) {
     hinhanh:           product.image       || '',
     trangthai:         product.trangthai   || 'dang_ban',
     muc_dich_su_dung:  product.muc_dich    || [],
+    benh_ids:          product.benh_ids    || [],
   } : EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
-  const [error, setError]   = useState('');
+  const [saving, setSaving]     = useState(false);
+  const [error, setError]       = useState('');
+  const [diseases, setDiseases] = useState([]);   // danh sách bệnh tờ khai
+
+  // Lấy danh sách bệnh khi mở modal
+  useEffect(() => {
+    authFetch(`${API_BASE}/admin/diseases`)
+      .then(r => r.json())
+      .then(d => setDiseases(d.diseases || []))
+      .catch(() => setDiseases([]));
+  }, []);
+
+  const toggleBenh = (id) => setForm(prev => ({
+    ...prev,
+    benh_ids: prev.benh_ids.includes(id)
+      ? prev.benh_ids.filter(b => b !== id)
+      : [...prev.benh_ids, id],
+  }));
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
   const toggleMucDich = (key) => setForm(prev => ({
@@ -92,6 +117,7 @@ function ProductModal({ mode, product, categories, onClose, onSave }) {
           xu_ly_benh: form.lieudung_xu_ly.trim(),
         },
         hinhanh: form.hinhanh.trim() ? [form.hinhanh.trim()] : [],
+        benh_ids: form.benh_ids,   // string[] → backend tự chuyển ObjectId
       };
       const url    = mode === 'edit' ? `${API_BASE}/admin/inventory/${product.id}` : `${API_BASE}/admin/inventory`;
       const method = mode === 'edit' ? 'PUT' : 'POST';
@@ -225,6 +251,33 @@ function ProductModal({ mode, product, categories, onClose, onSave }) {
             </div>
           </div>
 
+          {/* ─ Bệnh liên kết (bệnh nào thuốc này chữa được) ─ */}
+          <div>
+            <p className="text-xs font-bold text-[#ba1a1a] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Bug className="w-3.5 h-3.5" /> Bệnh liên kết
+              <span className="normal-case font-normal text-[#707881] ml-1">(thuốc điều trị bệnh nào?)</span>
+            </p>
+            {diseases.length === 0 ? (
+              <p className="text-xs text-[#9aa5b4] italic">Chưa có bệnh nào. Thêm bệnh trong trang Quản lý Bệnh trước.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {diseases.map(d => (
+                  <label key={d.id}
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm
+                      ${form.benh_ids.includes(d.id)
+                        ? 'bg-[#ffdad6]/60 border-[#ba1a1a]/40 text-[#ba1a1a] font-semibold'
+                        : 'bg-[#f8f9fa] border-[#e1e3e4] text-[#404850] hover:border-[#ba1a1a]/30'}`}>
+                    <input type="checkbox" className="accent-[#ba1a1a] w-3.5 h-3.5"
+                      checked={form.benh_ids.includes(d.id)}
+                      onChange={() => toggleBenh(d.id)} />
+                    <Bug className="w-3 h-3 shrink-0 opacity-60" />
+                    <span className="truncate">{d.tenbenh}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* ─ Hình ảnh ─ */}
           <div>
             <p className="text-xs font-bold text-[#0077b6] uppercase tracking-wider mb-3">Hình ảnh</p>
@@ -266,6 +319,15 @@ function StatusBadge({ status, label }) {
   );
 }
 
+function SaleBadge({ trangthai }) {
+  const cfg = TRANGTHAI_CONFIG[trangthai] || TRANGTHAI_CONFIG.dang_ban;
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cfg.cls}`}>
+      {cfg.label}
+    </span>
+  );
+}
+
 /* ── Modal Xác nhận Xóa ── */
 function DeleteModal({ product, onClose, onConfirm }) {
   const [deleting, setDeleting] = useState(false);
@@ -298,10 +360,13 @@ function DeleteModal({ product, onClose, onConfirm }) {
 
 /* ── Main Page ── */
 export default function InventoryPage() {
-  const [products, setProducts]   = useState([]);
-  const [total, setTotal]         = useState(0);
-  const [lowStock, setLowStock]   = useState(0);
+  const [products, setProducts]       = useState([]);
+  const [total, setTotal]             = useState(0);
+  const [lowStock, setLowStock]       = useState(0);     // sắp hết (6–15)
+  const [criticalCount, setCritical]  = useState(0);     // nguy cấp (1–5)
+  const [outOfStock, setOutOfStock]   = useState(0);     // hết hàng (0)
   const [loading, setLoading]     = useState(true);
+  const [editLoading, setEditLoading] = useState(null);  // id sản phẩm đang fetch chi tiết
   const [page, setPage]           = useState(1);
   const [category, setCategory]   = useState('all');
   const [searchInput, setSearchInput] = useState('');
@@ -339,6 +404,8 @@ export default function InventoryPage() {
         setProducts(data.products ?? []);
         setTotal(data.total ?? 0);
         setLowStock(data.lowStock ?? 0);
+        setCritical(data.criticalCount ?? 0);
+        setOutOfStock(data.outOfStock ?? 0);
       })
       .catch(err => console.error('Lỗi kho:', err))
       .finally(() => setLoading(false));
@@ -362,6 +429,20 @@ export default function InventoryPage() {
     setModal(null);
     showToast(modal?.type === 'edit' ? '✅ Đã cập nhật sản phẩm!' : '✅ Đã thêm sản phẩm mới!');
     fetchInventory();
+  };
+
+  // Fetch chi tiết đầy đủ rồi mở modal chỉnh sửa
+  const openEditModal = async (p) => {
+    setEditLoading(p.id);
+    try {
+      const res = await authFetch(`${API_BASE}/admin/inventory/${p.id}`);
+      const detail = await res.json();
+      setModal({ type: 'edit', product: res.ok ? detail : p });
+    } catch {
+      setModal({ type: 'edit', product: p }); // fallback dùng data từ list
+    } finally {
+      setEditLoading(null);
+    }
   };
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
@@ -392,17 +473,35 @@ export default function InventoryPage() {
           <h1 className="text-4xl font-bold text-[#191c1d] tracking-tight mb-1">Quản lý kho hàng</h1>
           <p className="text-base text-[#404850]">Theo dõi và quản lý vật tư nuôi tôm định kỳ.</p>
         </div>
-        {lowStock > 0 && (
-          <div className="flex items-center gap-4 bg-[#ffdbc8] p-4 rounded-xl shadow-sm border border-[#904300]/20 shrink-0">
-            <div className="bg-[#b65600] p-2 rounded-lg text-white">
-              <CircleAlert className="w-6 h-6" />
+        {/* Cảnh báo tồn kho – hiển thị 2 mức */}
+        <div className="flex flex-col gap-2 shrink-0">
+          {(criticalCount > 0 || outOfStock > 0) && (
+            <div className="flex items-center gap-3 bg-[#ffdad6] px-4 py-3 rounded-xl border border-[#ba1a1a]/20">
+              <div className="bg-[#ba1a1a] p-1.5 rounded-lg text-white shrink-0">
+                <CircleAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[#93000a] font-bold text-sm">
+                  {outOfStock > 0 && <span>{outOfStock} hết hàng</span>}
+                  {outOfStock > 0 && criticalCount > 0 && <span className="mx-1">&</span>}
+                  {criticalCount > 0 && <span>{criticalCount} nguy cấp (≤5 {criticalCount > 1 ? 'sp' : 'sp'})</span>}
+                </p>
+                <p className="text-[#ba1a1a] text-xs font-medium">Nhập hàng ngay!</p>
+              </div>
             </div>
-            <div>
-              <p className="text-[#321300] font-bold text-base">{lowStock} sản phẩm sắp hết / hết</p>
-              <p className="text-[#743500] text-xs font-medium">Cần nhập thêm hàng ngay lập tức</p>
+          )}
+          {lowStock > 0 && (
+            <div className="flex items-center gap-3 bg-[#ffdbc8] px-4 py-3 rounded-xl border border-[#904300]/20">
+              <div className="bg-[#b65600] p-1.5 rounded-lg text-white shrink-0">
+                <CircleAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[#321300] font-bold text-sm">{lowStock} sắp hết (6–15)</p>
+                <p className="text-[#743500] text-xs font-medium">Cần lên kế hoạch nhập</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Toolbar */}
@@ -447,8 +546,8 @@ export default function InventoryPage() {
           <table className="w-full text-left border-collapse min-w-[860px]">
             <thead className="bg-[#f3f4f5] border-b border-[#e1e3e4]">
               <tr>
-                {['Hình ảnh', 'Tên sản phẩm / Thương hiệu', 'Danh mục', 'Tồn kho', 'Đơn giá', 'Đã bán', 'Trạng thái', 'Hành động'].map((h, i) => (
-                  <th key={h} className={`px-6 py-4 text-xs font-semibold text-[#404850] uppercase tracking-wider${i === 3 || i === 5 ? ' text-center' : i === 7 ? ' text-right' : ''}`}>
+                {['Hình ảnh', 'Tên sản phẩm / Thương hiệu', 'Danh mục', 'Tồn kho', 'Đơn giá', 'Đã bán', 'Trạng thái', 'Kinh doanh', 'Hành động'].map((h, i) => (
+                  <th key={h + i} className={`px-6 py-4 text-xs font-semibold text-[#404850] uppercase tracking-wider${i === 3 || i === 5 ? ' text-center' : i === 8 ? ' text-right' : ''}`}>
                     {h}
                   </th>
                 ))}
@@ -456,7 +555,7 @@ export default function InventoryPage() {
             </thead>
             <tbody className="divide-y divide-[#e7e8e9]">
               {loading && (
-                <tr><td colSpan={8} className="px-6 py-12 text-center text-[#707881]">
+                <tr><td colSpan={9} className="px-6 py-12 text-center text-[#707881]">
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-[#0077b6] border-t-transparent rounded-full animate-spin" />
                     Đang tải...
@@ -464,7 +563,7 @@ export default function InventoryPage() {
                 </td></tr>
               )}
               {!loading && products.length === 0 && (
-                <tr><td colSpan={8} className="px-6 py-12 text-center">
+                <tr><td colSpan={9} className="px-6 py-12 text-center">
                   <Package className="w-12 h-12 mx-auto text-[#bfc7d1] mb-3" />
                   <p className="text-[#707881] text-sm font-medium">Không tìm thấy sản phẩm nào.</p>
                 </td></tr>
@@ -483,20 +582,29 @@ export default function InventoryPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-[#404850] font-medium">{p.category}</td>
                   <td className="px-6 py-4 text-center">
-                    <span className={`font-bold text-lg ${p.status === 'het_hang' ? 'text-[#ba1a1a]' : p.status === 'sap_het' ? 'text-[#904300]' : 'text-[#2c694e]'}`}>{p.qty}</span>
+                    <span className={`font-bold text-lg ${
+                      p.status === 'het_hang' ? 'text-[#404850]' :
+                      p.status === 'nguy_cap' ? 'text-[#ba1a1a]' :
+                      p.status === 'sap_het'  ? 'text-[#904300]' :
+                      'text-[#2c694e]'
+                    }`}>{p.qty}</span>
                     <span className="text-xs text-[#707881] ml-1">{p.unit}</span>
                   </td>
                   <td className="px-6 py-4 font-semibold text-[#191c1d]">{formatPrice(p.price)}</td>
                   <td className="px-6 py-4 text-center"><span className="text-sm font-semibold text-[#404850]">{p.sold}</span></td>
                   <td className="px-6 py-4"><StatusBadge status={p.status} label={p.statusLabel} /></td>
+                  <td className="px-6 py-4"><SaleBadge trangthai={p.trangthai} /></td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => setModal({ type: 'edit', product: p })}
-                        className="p-2 text-[#404850] hover:bg-[#e7e8e9] rounded-lg transition-colors"
+                        onClick={() => openEditModal(p)}
+                        disabled={editLoading === p.id}
+                        className="p-2 text-[#404850] hover:bg-[#e7e8e9] rounded-lg transition-colors disabled:opacity-50"
                         title="Chỉnh sửa"
                       >
-                        <Pencil className="w-[18px] h-[18px]" />
+                        {editLoading === p.id
+                          ? <div className="w-[18px] h-[18px] border-2 border-[#0077b6] border-t-transparent rounded-full animate-spin" />
+                          : <Pencil className="w-[18px] h-[18px]" />}
                       </button>
                       <button
                         onClick={() => setModal({ type: 'delete', product: p })}

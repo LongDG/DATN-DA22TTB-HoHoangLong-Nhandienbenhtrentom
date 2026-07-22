@@ -50,7 +50,7 @@ function ProductCard({ product, onAdd }) {
   const handleAdd = (e) => {
     e.stopPropagation();
     if (isOut) return;
-    onAdd(product);
+    onAdd({ ...product, image: img });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };

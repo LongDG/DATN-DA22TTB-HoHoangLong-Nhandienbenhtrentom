@@ -65,13 +65,40 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
     let aiResponse;
     try {
-      const { data } = await axios.post(`${AI_SERVICE_URL}/predict`, form, {
+      // Thử gọi AI service, retry 1 lần nếu gặp 503 (service đang bận)
+      const callAI = async () => axios.post(`${AI_SERVICE_URL}/predict`, form, {
         headers:          { ...form.getHeaders() },
         maxContentLength: Infinity,
         maxBodyLength:    Infinity,
-        timeout:          60_000,
+        timeout:          90_000,  // 90s — đủ cho TTA×4 + 3 models
       });
-      aiResponse = data;
+
+      let aiResult;
+      try {
+        aiResult = await callAI();
+      } catch (firstErr) {
+        // Nếu lỗi 503 (AI service đang bận) → đợi 3s rồi thử lại 1 lần
+        const is503 = firstErr.response?.status === 503;
+        if (is503) {
+          console.log('[DIAGNOSE] AI service bận, thử lại sau 3s...');
+          await new Promise(r => setTimeout(r, 3000));
+          // Tạo lại form vì stream đã cạn
+          const retryForm = new FormData();
+          retryForm.append('image', fs.createReadStream(file.path), {
+            filename:    file.originalname || file.filename,
+            contentType: file.mimetype,
+          });
+          aiResult = await axios.post(`${AI_SERVICE_URL}/predict`, retryForm, {
+            headers:          { ...retryForm.getHeaders() },
+            maxContentLength: Infinity,
+            maxBodyLength:    Infinity,
+            timeout:          90_000,
+          });
+        } else {
+          throw firstErr;
+        }
+      }
+      aiResponse = aiResult.data;
     } catch (aiErr) {
       cleanupFile(file.path);
       if (aiErr.response) return res.status(aiErr.response.status).json(aiErr.response.data);
@@ -214,14 +241,21 @@ router.get('/history', authMiddleware, async (req, res) => {
         ma_benh:      d.ma_benh       || '',
         do_chinh_xac: d.do_chinh_xac  || 0,
         muc_do:       d.muc_do_canh_bao || '',
-        image_url:    getBestImageUrl(d),  // cloud_url nếu có, else full local URL
+        image_url:    getBestImageUrl(d),
         ngay:         d.ngay_nhan_dien
                         ? new Date(d.ngay_nhan_dien).toLocaleDateString('vi-VN') : '—',
         gio:          d.ngay_nhan_dien
                         ? new Date(d.ngay_nhan_dien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '',
+        // Admin correction fields
+        admin_verified:     d.admin_verified     || false,
+        admin_action:       d.admin_action       || null,
+        chuandoan_sua:      d.chuandoan_sua      || null,
+        admin_note:         d.admin_note         || null,
+        trang_thai_xacminh: d.trang_thai_xacminh || null,
       })),
       total, page, limit,
     });
+
   } catch (err) {
     res.status(500).json({ message: 'Lỗi lấy lịch sử', error: err.message });
   }
@@ -335,6 +369,13 @@ router.get('/:id', authMiddleware, async (req, res) => {
       gio:             doc.ngay_nhan_dien
                          ? new Date(doc.ngay_nhan_dien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '',
       ngay_raw:        doc.ngay_nhan_dien || null,
+      // Admin correction fields
+      admin_verified:     doc.admin_verified     || false,
+      admin_action:       doc.admin_action       || null,
+      chuandoan_sua:      doc.chuandoan_sua      || null,
+      admin_note:         doc.admin_note         || null,
+      trang_thai_xacminh: doc.trang_thai_xacminh || null,
+      admin_verified_at:  doc.admin_verified_at  || null,
       benh_info:       benhDoc ? {
         id:         benhDoc._id.toString(),
         tenbenh:    benhDoc.tenbenh,

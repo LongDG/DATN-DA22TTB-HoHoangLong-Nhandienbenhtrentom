@@ -1,0 +1,38 @@
+[{
+  "_id": "current",
+  "capnhat_boi": "Long Hoàng",
+  "capnhat_luc": {
+    "$date": "2026-05-22T10:58:31.702Z"
+  },
+  "gia": [
+    {
+      "co": "20 con/kg",
+      "tom_su": 284997,
+      "tom_the": 160000,
+      "xu_huong": 1,
+      "thay_doi": 2500
+    },
+    {
+      "co": "30 con/kg",
+      "tom_su": 240000,
+      "tom_the": 142000,
+      "xu_huong": 1,
+      "thay_doi": 1800
+    },
+    {
+      "co": "40 con/kg",
+      "tom_su": 210000,
+      "tom_the": 135000,
+      "xu_huong": -1,
+      "thay_doi": 500
+    },
+    {
+      "co": "50 con/kg",
+      "tom_su": 185000,
+      "tom_the": 118000,
+      "xu_huong": 0,
+      "thay_doi": 0
+    }
+  ],
+  "vung": "ĐBSCL"
+}]

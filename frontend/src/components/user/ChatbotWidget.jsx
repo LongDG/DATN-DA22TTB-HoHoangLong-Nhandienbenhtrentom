@@ -215,7 +215,8 @@ export default function ChatbotWidget({ user }) {
       const botMsg = {
         role: 'model',
         type: result.type,
-        content: '', // không dùng text thuần cho bot
+        // greeting: dùng text bubble thay vì card đặc biệt
+        content: result.type === 'greeting' ? result.message : '',
         data: result,
       };
       setMessages(prev => [...prev, botMsg]);
@@ -269,7 +270,12 @@ export default function ChatbotWidget({ user }) {
 
   const handleBuyClick = (thuoc) => {
     setOpen(false);
-    navigate(`/store?search=${encodeURIComponent(thuoc.tensanpham)}`);
+    // Ưu tiên dùng id thuốc → trang chi tiết, fallback search nếu không có id
+    if (thuoc.id) {
+      navigate(`/product/${thuoc.id}`);
+    } else {
+      navigate(`/store?search=${encodeURIComponent(thuoc.tensanpham)}`);
+    }
   };
 
   const resetChat = () => {
@@ -346,8 +352,8 @@ export default function ChatbotWidget({ user }) {
                     </div>
                   )}
 
-                  {/* Bot: welcome / text / error / transferred */}
-                  {msg.role === 'model' && (msg.type === 'welcome' || msg.type === 'error' || msg.type === 'transferred' || msg.content) && (
+                  {/* Bot: welcome / text / greeting / error / transferred */}
+                  {msg.role === 'model' && (msg.type === 'welcome' || msg.type === 'greeting' || msg.type === 'error' || msg.type === 'transferred' || msg.content) && (
                     <div className={`text-sm rounded-2xl rounded-tl-sm px-4 py-2.5 leading-relaxed whitespace-pre-line ${
                       msg.type === 'error' ? 'bg-red-50 text-red-700 border border-red-100'
                       : msg.type === 'transferred' ? 'bg-green-50 text-green-800 border border-green-100'

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Search, Download, Plus, ChevronDown, ChevronLeft, ChevronRight,
   Calendar, ListFilter, Eye, Printer, ClipboardList,
@@ -209,12 +209,19 @@ export default function OrdersPage() {
   const [loading, setLoading]     = useState(true);
   const [page, setPage]           = useState(1);
   const [status, setStatus]       = useState('all');
+  const [search, setSearch]       = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [month, setMonth]         = useState('current'); // 'current' | 'all' | 'YYYY-MM'
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const LIMIT = 10;
+  const searchTimerRef = useRef(null);
 
   const fetchOrders = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams({ page, limit: LIMIT, status });
+    if (search.trim()) params.set('search', search.trim());
+    if (month !== 'all') params.set('month', month);
     authFetch(`${API_BASE}/admin/orders?${params}`)
       .then(r => r.json())
       .then(data => {
@@ -224,9 +231,38 @@ export default function OrdersPage() {
       })
       .catch(err => console.error('Lỗi đơn hàng:', err))
       .finally(() => setLoading(false));
-  }, [page, status]);
+  }, [page, status, search, month]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
+
+  // Debounce search input 400ms
+  const handleSearchInput = (val) => {
+    setSearchInput(val);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setSearch(val);
+      setPage(1);
+    }, 400);
+  };
+
+  // Label tháng hiển thị
+  const monthLabel = () => {
+    if (month === 'current') return 'Tháng này';
+    if (month === 'all') return 'Tất cả';
+    const [y, m] = month.split('-');
+    return `Tháng ${parseInt(m)}/${y}`;
+  };
+
+  // Danh sách 12 tháng gần đây
+  const recentMonths = () => {
+    const now = new Date();
+    return Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = `Tháng ${d.getMonth() + 1}/${d.getFullYear()}`;
+      return { key, label };
+    });
+  };
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
@@ -268,7 +304,20 @@ export default function OrdersPage() {
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <div className="relative sm:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#707881] w-4 h-4" />
-              <input className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#bfc7d1] focus:border-[#0077b6] focus:ring-1 focus:ring-[#0077b6]/30 outline-none text-sm" placeholder="Mã đơn, tên khách hàng..." />
+              <input
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#bfc7d1] focus:border-[#0077b6] focus:ring-1 focus:ring-[#0077b6]/30 outline-none text-sm"
+                placeholder="Mã đơn, tên khách hàng..."
+                value={searchInput}
+                onChange={e => handleSearchInput(e.target.value)}
+              />
+              {searchInput && (
+                <button
+                  onClick={() => { setSearchInput(''); setSearch(''); setPage(1); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707881] hover:text-[#404850]"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
             <div className="relative sm:w-52">
               <select value={status} onChange={e => { setStatus(e.target.value); setPage(1); }} className="w-full pl-4 pr-9 py-2.5 rounded-lg border border-[#bfc7d1] focus:border-[#0077b6] focus:ring-1 focus:ring-[#0077b6]/30 outline-none text-sm appearance-none bg-white">
@@ -278,8 +327,40 @@ export default function OrdersPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#f3f4f5] border border-[#bfc7d1] rounded-lg px-4 py-2.5 text-sm text-[#404850]">
-              <Calendar className="w-4 h-4" /><span>Tháng này</span>
+            {/* Bộ lọc tháng */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMonthPicker(v => !v)}
+                className={`flex items-center gap-2 border rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                  month !== 'all'
+                    ? 'bg-[#cde5ff] border-[#0077b6] text-[#0077b6]'
+                    : 'bg-[#f3f4f5] border-[#bfc7d1] text-[#404850]'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                <span>{monthLabel()}</span>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+              {showMonthPicker && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-[#e1e3e4] rounded-xl shadow-lg z-20 w-44 py-1">
+                  <button
+                    onClick={() => { setMonth('current'); setPage(1); setShowMonthPicker(false); }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-[#f3f4f5] ${ month === 'current' ? 'font-bold text-[#0077b6]' : 'text-[#191c1d]'}`}
+                  >Tháng này</button>
+                  <button
+                    onClick={() => { setMonth('all'); setPage(1); setShowMonthPicker(false); }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-[#f3f4f5] ${ month === 'all' ? 'font-bold text-[#0077b6]' : 'text-[#191c1d]'}`}
+                  >Tất cả</button>
+                  <div className="border-t border-[#e1e3e4] my-1" />
+                  {recentMonths().map(({ key, label }) => (
+                    <button
+                      key={key}
+                      onClick={() => { setMonth(key); setPage(1); setShowMonthPicker(false); }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-[#f3f4f5] ${ month === key ? 'font-bold text-[#0077b6]' : 'text-[#191c1d]'}`}
+                    >{label}</button>
+                  ))}
+                </div>
+              )}
             </div>
             <button className="p-2.5 bg-white border border-[#bfc7d1] rounded-lg hover:bg-[#f3f4f5] transition-colors">
               <ListFilter className="w-5 h-5 text-[#707881]" />

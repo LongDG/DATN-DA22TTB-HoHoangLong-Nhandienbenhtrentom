@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useOutletContext, Link } from 'react-router-dom';
+import { useOutletContext, Link, useNavigate } from 'react-router-dom';
 import {
   Camera, Upload, ShieldCheck, Users, TrendingUp, TrendingDown,
   ArrowRight, ShoppingCart, CheckCircle2, X, AlertTriangle,
   AlertCircle, Info, Loader2, RefreshCw, ChevronRight,
-  ImageIcon, Zap, Clock, History, ChevronDown,
+  ImageIcon, Zap, Clock, History, ChevronDown, Plus, Images,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -97,7 +97,7 @@ function ResultModal({ result, imagePreview, onClose, onNewScan }) {
                 <p className="text-xs mt-1 opacity-80">
                   {confLevel === 'low'
                     ? 'Mô hình AI không đủ tự tin để đưa ra chẩn đoán chính xác. Ảnh có thể không rõ ràng hoặc bệnh chưa có trong dữ liệu huấn luyện. Vui lòng chụp lại ảnh rõ hơn hoặc liên hệ chuyên gia.'
-                    : 'Kết quả cần được xem xét cẩn thận. Nên chụp thêm ảnh từ góc khác hoặc tham vấn chuyên gia thú y thủy sản để xác nhận.'}
+                    : 'Kết quả cần được xem xét cẩn thận. Nên chụp thêm ảnh từ góc khác hoặc tham vấn chuyên gia thủy sản để xác nhận.'}
                 </p>
                 {top2Gap < 15 && (
                   <p className="text-xs mt-1 font-semibold">
@@ -149,7 +149,7 @@ function ResultModal({ result, imagePreview, onClose, onNewScan }) {
                 )}
                 {ensembleCount > 1 && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                    🔗 {ensembleCount} models • Đồng thuận {modelAgreement.toFixed(0)}%
+                    🔗 {ensembleCount} mô hình • Đồng thuận {modelAgreement.toFixed(0)}%
                   </span>
                 )}
               </div>
@@ -294,100 +294,169 @@ function ResultModal({ result, imagePreview, onClose, onNewScan }) {
   );
 }
 
-/* ── Diagnostic Upload ── */
-function DiagnosticSection() {
-  const [isDrag,      setIsDrag]      = useState(false);
-  const [preview,     setPreview]     = useState(null);   // base64 preview
-  const [file,        setFile]        = useState(null);
-  const [status,      setStatus]      = useState('idle'); // idle|loading|success|error
-  const [result,      setResult]      = useState(null);
-  const [errorMsg,    setErrorMsg]    = useState('');
-  const [validation,  setValidation]  = useState(null);  // AI validation info
-  const [showResult,  setShowResult]  = useState(false);
-  const fileInputRef = useRef(null);
+/* ── Diagnostic Upload (Multi-image) ── */
+const MAX_FILES = 5;
 
-  /* Đọc file → preview */
-  const readFile = useCallback((f) => {
-    if (!f) return;
-    setFile(f);
-    setStatus('idle');
-    setResult(null);
-    setErrorMsg('');
-    setValidation(null);
-    const reader = new FileReader();
-    reader.onload = e => setPreview(e.target.result);
-    reader.readAsDataURL(f);
+function DiagnosticSection() {
+  const [isDrag,       setIsDrag]       = useState(false);
+  const [files,        setFiles]        = useState([]);   // File[]
+  const [previews,     setPreviews]     = useState([]);   // base64[]
+  const [itemStatus,   setItemStatus]   = useState([]);   // 'idle'|'loading'|'success'|'error' cho từng ảnh
+  const [itemResults,  setItemResults]  = useState([]);   // kết quả từng ảnh
+  const [itemErrors,   setItemErrors]   = useState([]);   // errorMsg từng ảnh
+  const [itemValid,    setItemValid]    = useState([]);   // validation từng ảnh
+  const [isRunning,    setIsRunning]    = useState(false);
+  const [doneCount,    setDoneCount]    = useState(0);
+  const [modalIdx,     setModalIdx]     = useState(null); // index ảnh đang xem modal
+  const fileInputRef  = useRef(null);
+  const addInputRef   = useRef(null);
+
+  /* Đọc FileList → thêm vào danh sách, giới hạn MAX_FILES */
+  const addFiles = useCallback((incoming) => {
+    const arr = Array.from(incoming).filter(
+      f => /^image\/(jpeg|jpg|png)$/i.test(f.type)
+    );
+    setFiles(prev => {
+      const combined = [...prev, ...arr].slice(0, MAX_FILES);
+      // Tạo previews cho file mới
+      const newPreviews = [];
+      const readers     = [];
+      combined.forEach((f, i) => {
+        if (i < prev.length) {
+          newPreviews[i] = null; // placeholder — sẽ fill từ state cũ
+        } else {
+          const reader = new FileReader();
+          readers.push({ reader, i });
+          reader.readAsDataURL(f);
+        }
+      });
+      // Sau khi set files, cập nhật previews, status, results, errors, validation
+      setPreviews(old => {
+        const base = old.slice(0, prev.length);
+        const fresh = Array(combined.length - prev.length).fill(null);
+        return [...base, ...fresh];
+      });
+      setItemStatus(old  => [...old.slice(0, prev.length),  ...Array(combined.length - prev.length).fill('idle')]);
+      setItemResults(old => [...old.slice(0, prev.length),  ...Array(combined.length - prev.length).fill(null)]);
+      setItemErrors(old  => [...old.slice(0, prev.length),  ...Array(combined.length - prev.length).fill('')]);
+      setItemValid(old   => [...old.slice(0, prev.length),  ...Array(combined.length - prev.length).fill(null)]);
+      setDoneCount(0);
+
+      // Đọc file mới → cập nhật previews
+      arr.slice(0, MAX_FILES - prev.length).forEach((f, ri) => {
+        const idx = prev.length + ri;
+        const reader = new FileReader();
+        reader.onload = e => {
+          setPreviews(p => {
+            const copy = [...p];
+            copy[idx] = e.target.result;
+            return copy;
+          });
+        };
+        reader.readAsDataURL(f);
+      });
+      return combined;
+    });
   }, []);
 
   const handleDrop = (e) => {
     e.preventDefault(); setIsDrag(false);
-    const f = e.dataTransfer.files[0];
-    if (f) readFile(f);
+    if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
   };
 
   const handleFileChange = (e) => {
-    const f = e.target.files[0];
-    if (f) readFile(f);
+    if (e.target.files.length) { addFiles(e.target.files); e.target.value = ''; }
   };
 
-  /* Gửi ảnh lên API */
-  const handleSubmit = async () => {
-    if (!file || status === 'loading') return;
-    setStatus('loading');
-    setErrorMsg('');
-    setValidation(null);
-
-    const token   = localStorage.getItem('token') || '';
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      const res  = await fetch(`${API_BASE}/diagnose`, {
-        method:  'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body:    formData,
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        /* 422: validation thất bại từ AI service */
-        if (res.status === 422 && data.validation) {
-          setValidation(data.validation);
-          setStatus('error');
-          setErrorMsg('Ảnh không đạt yêu cầu chất lượng. Xem chi tiết bên dưới.');
-        } else {
-          setStatus('error');
-          setErrorMsg(data.message || 'Lỗi không xác định. Vui lòng thử lại.');
-        }
-        return;
-      }
-
-      setResult(data);
-      setValidation(data.validation);
-      setStatus('success');
-      setShowResult(true);
-    } catch {
-      setStatus('error');
-      setErrorMsg('Không kết nối được server. Vui lòng kiểm tra lại.');
-    }
+  const handleAddMore = (e) => {
+    if (e.target.files.length) { addFiles(e.target.files); e.target.value = ''; }
   };
 
+  /* Xóa 1 ảnh khỏi danh sách */
+  const removeFile = (idx) => {
+    setFiles(prev     => prev.filter((_, i)      => i !== idx));
+    setPreviews(prev  => prev.filter((_, i)      => i !== idx));
+    setItemStatus(prev  => prev.filter((_, i)   => i !== idx));
+    setItemResults(prev => prev.filter((_, i)   => i !== idx));
+    setItemErrors(prev  => prev.filter((_, i)   => i !== idx));
+    setItemValid(prev   => prev.filter((_, i)   => i !== idx));
+  };
+
+  /* Reset toàn bộ */
   const handleReset = () => {
-    setFile(null); setPreview(null); setStatus('idle');
-    setResult(null); setErrorMsg(''); setValidation(null);
+    setFiles([]); setPreviews([]); setItemStatus([]); setItemResults([]);
+    setItemErrors([]); setItemValid([]); setIsRunning(false); setDoneCount(0);
+    setModalIdx(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  /* Gửi từng ảnh tuần tự */
+  const handleSubmit = async () => {
+    if (!files.length || isRunning) return;
+    setIsRunning(true);
+    setDoneCount(0);
+    const token = localStorage.getItem('token') || '';
+
+    // Reset tất cả về idle trừ ảnh đã success
+    setItemStatus(prev => prev.map(s => s === 'success' ? 'success' : 'idle'));
+    setItemErrors(prev => prev.map((e, i) => itemStatus[i] === 'success' ? e : ''));
+    setItemValid(prev  => prev.map((v, i) => itemStatus[i] === 'success' ? v : null));
+
+    let done = 0;
+    for (let i = 0; i < files.length; i++) {
+      // Bỏ qua ảnh đã thành công
+      if (itemStatus[i] === 'success') { done++; setDoneCount(done); continue; }
+
+      // Đặt trạng thái loading
+      setItemStatus(prev => { const c = [...prev]; c[i] = 'loading'; return c; });
+
+      const formData = new FormData();
+      formData.append('image', files[i]);
+      try {
+        const res  = await fetch(`${API_BASE}/diagnose`, {
+          method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData,
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setItemStatus(prev  => { const c = [...prev]; c[i] = 'error'; return c; });
+          if (res.status === 422 && data.validation) {
+            setItemValid(prev  => { const c = [...prev]; c[i] = data.validation; return c; });
+            setItemErrors(prev => { const c = [...prev]; c[i] = 'Ảnh không đạt yêu cầu chất lượng.'; return c; });
+          } else {
+            setItemErrors(prev => { const c = [...prev]; c[i] = data.message || 'Lỗi không xác định.'; return c; });
+          }
+        } else {
+          setItemStatus(prev  => { const c = [...prev]; c[i] = 'success'; return c; });
+          setItemResults(prev => { const c = [...prev]; c[i] = data; return c; });
+          setItemValid(prev   => { const c = [...prev]; c[i] = data.validation; return c; });
+        }
+      } catch {
+        setItemStatus(prev  => { const c = [...prev]; c[i] = 'error'; return c; });
+        setItemErrors(prev  => { const c = [...prev]; c[i] = 'Không kết nối được server.'; return c; });
+      }
+
+      done++;
+      setDoneCount(done);
+    }
+    setIsRunning(false);
+  };
+
+  const allDone     = files.length > 0 && !isRunning && itemStatus.every(s => s === 'success' || s === 'error');
+  const successCount = itemStatus.filter(s => s === 'success').length;
+  const hasAnyResult = itemResults.some(Boolean);
+
   /* ── Render ── */
   return (
-    <section className="py-24 px-6 bg-white">
+    <section id="diagnose-section" className="py-24 px-6 bg-white">
+      {/* Modal chi tiết từng ảnh */}
       <AnimatePresence>
-        {showResult && result && (
+        {modalIdx !== null && itemResults[modalIdx] && (
           <ResultModal
-            result={result}
-            imagePreview={preview}
-            onClose={() => setShowResult(false)}
-            onNewScan={() => { setShowResult(false); handleReset(); }}
+            result={itemResults[modalIdx]}
+            imagePreview={previews[modalIdx]}
+            onClose={() => setModalIdx(null)}
+            onNewScan={() => { setModalIdx(null); handleReset(); }}
           />
         )}
       </AnimatePresence>
@@ -395,11 +464,11 @@ function DiagnosticSection() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12 space-y-3">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#0077b6]/10 text-[#0077b6] rounded-full text-xs font-bold uppercase tracking-wider">
-            <Camera className="w-4 h-4" /> Chẩn đoán bằng AI
+            <Images className="w-4 h-4" /> Chẩn đoán bằng AI
           </div>
           <h2 className="text-4xl font-extrabold text-slate-900">Chẩn đoán thông minh</h2>
           <p className="text-slate-500 text-lg max-w-xl mx-auto">
-            Tải ảnh tôm lên để AI phân tích và nhận diện bệnh chỉ trong vài giây.
+            Tải lên đến <span className="font-bold text-[#0077b6]">{MAX_FILES} ảnh tôm</span> để AI phân tích và nhận diện bệnh cùng lúc
           </p>
         </div>
 
@@ -412,17 +481,17 @@ function DiagnosticSection() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1.5 text-sm text-slate-600">
               {[
                 '✅ Định dạng JPG hoặc PNG',
-                '✅ Kích thước 50KB – 10MB',
+                '✅ Kích thước 50KB – 10MB/ảnh',
                 '✅ Độ phân giải ≥ 224×224px',
                 '✅ Ảnh sắc nét, không mờ',
-                '✅ Đủ ánh sáng, không quá tối/sáng',
-                '✅ Ánh sáng đều, tránh đổ bóng',
+                '✅ Hình ảnh nên chỉ có tôm',
+                `✅ Tối đa ${MAX_FILES} ảnh mỗi lần`,
               ].map(t => <p key={t}>{t}</p>)}
             </div>
           </div>
 
-          {/* ── Drop zone ── */}
-          {!preview ? (
+          {/* ── Drop zone (hiện khi chưa có ảnh nào) ── */}
+          {files.length === 0 ? (
             <div
               onDragOver={e => { e.preventDefault(); setIsDrag(true); }}
               onDragLeave={() => setIsDrag(false)}
@@ -436,99 +505,316 @@ function DiagnosticSection() {
               <input
                 type="file" ref={fileInputRef} className="hidden"
                 accept="image/jpeg,image/jpg,image/png"
+                multiple
                 onChange={handleFileChange}
               />
               <div className="w-20 h-20 bg-[#0077b6]/10 rounded-3xl flex items-center justify-center text-[#0077b6]">
-                <ImageIcon className="w-10 h-10" />
+                <Images className="w-10 h-10" />
               </div>
               <div className="text-center space-y-1.5">
                 <h3 className="text-xl font-bold text-slate-800">Kéo thả hoặc nhấn để chọn ảnh</h3>
-                <p className="text-slate-400 text-sm">Hỗ trợ JPG, PNG — Tối đa 10MB</p>
+                <p className="text-slate-400 text-sm">Hỗ trợ JPG, PNG — Tối đa {MAX_FILES} ảnh, mỗi ảnh 10MB</p>
               </div>
               <button className="px-8 h-12 bg-[#0077b6] text-white font-bold rounded-2xl shadow-lg shadow-[#0077b6]/20 hover:bg-[#005d90] transition-colors text-sm">
                 Chọn tệp ảnh
               </button>
             </div>
           ) : (
-            /* ── Preview + actions ── */
-            <div className="rounded-3xl border border-slate-200 overflow-hidden bg-white shadow-sm">
-              <div className="relative h-64 bg-slate-100">
-                <img src={preview} alt="Preview" className="w-full h-full object-contain" />
-                <button
-                  onClick={handleReset}
-                  className="absolute top-3 right-3 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                {/* Quality overlay khi có kết quả validation */}
-                {validation?.details?.quality_score !== undefined && (
-                  <div className="absolute bottom-3 left-3">
-                    <QualityBadge score={validation.details.quality_score} />
+            /* ── Đã có ảnh: grid thumbnail + actions ── */
+            <div className="space-y-4">
+              {/* Drop zone nhỏ + Grid ảnh */}
+              <div
+                onDragOver={e => { e.preventDefault(); setIsDrag(true); }}
+                onDragLeave={() => setIsDrag(false)}
+                onDrop={handleDrop}
+                className={`rounded-2xl border-2 border-dashed p-4 transition-all ${
+                  isDrag ? 'border-[#0077b6] bg-[#0077b6]/5' : 'border-slate-200 bg-slate-50'
+                }`}
+              >
+                {/* Header row */}
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-bold text-slate-700">
+                    <span className="text-[#0077b6]">{files.length}</span>/{MAX_FILES} ảnh đã chọn
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {/* Nút thêm ảnh */}
+                    {files.length < MAX_FILES && !isRunning && (
+                      <button
+                        onClick={() => addInputRef.current?.click()}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 text-slate-600 hover:border-[#0077b6] hover:text-[#0077b6] rounded-xl text-xs font-bold transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Thêm ảnh
+                      </button>
+                    )}
+                    <input
+                      ref={addInputRef} type="file" className="hidden"
+                      accept="image/jpeg,image/jpg,image/png" multiple
+                      onChange={handleAddMore}
+                    />
+                    {/* Nút reset */}
+                    {!isRunning && (
+                      <button
+                        onClick={handleReset}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 text-slate-400 hover:border-red-300 hover:text-red-500 rounded-xl text-xs font-bold transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" /> Xóa tất cả
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
 
-              <div className="p-5 space-y-4">
-                <p className="text-sm text-slate-500 truncate">
-                  <span className="font-semibold text-slate-700">{file?.name}</span>
-                  {' · '}{file ? (file.size / 1024 < 1000
-                    ? `${(file.size / 1024).toFixed(0)} KB`
-                    : `${(file.size / 1024 / 1024).toFixed(1)} MB`) : ''}
-                </p>
+                {/* Thumbnail grid */}
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                  {files.map((f, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="relative aspect-square rounded-xl overflow-hidden border-2 transition-colors"
+                      style={{
+                        borderColor:
+                          itemStatus[i] === 'success' ? '#2c694e'
+                          : itemStatus[i] === 'error'   ? '#ba1a1a'
+                          : itemStatus[i] === 'loading' ? '#0077b6'
+                          : '#e2e8f0'
+                      }}
+                    >
+                      {/* Preview ảnh */}
+                      {previews[i] ? (
+                        <img src={previews[i]} alt={f.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                          <ImageIcon className="w-6 h-6 text-slate-300" />
+                        </div>
+                      )}
 
-                {/* Warnings từ validation */}
-                {validation?.warnings?.length > 0 && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-1">
-                    {validation.warnings.map((w, i) => (
-                      <p key={i} className="text-sm text-amber-700 flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /> {w}
-                      </p>
-                    ))}
-                  </div>
-                )}
-
-                {/* Errors */}
-                {status === 'error' && errorMsg && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-1">
-                    <p className="text-sm text-[#ba1a1a] font-semibold flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" /> {errorMsg}
-                    </p>
-                    {validation?.errors?.map((e, i) => (
-                      <p key={i} className="text-sm text-[#ba1a1a] pl-6">{e}</p>
-                    ))}
-                    {validation?.tips?.length > 0 && (
-                      <div className="pt-1 pl-6 space-y-0.5">
-                        <p className="text-xs font-bold text-[#ba1a1a] uppercase">Gợi ý:</p>
-                        {validation.tips.map((t, i) => (
-                          <p key={i} className="text-xs text-[#ba1a1a]">• {t}</p>
-                        ))}
+                      {/* Overlay trạng thái */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {itemStatus[i] === 'loading' && (
+                          <div className="bg-black/40 rounded-full p-2">
+                            <Loader2 className="w-5 h-5 text-white animate-spin" />
+                          </div>
+                        )}
+                        {itemStatus[i] === 'success' && (
+                          <div className="bg-[#2c694e]/80 rounded-full p-1.5">
+                            <CheckCircle2 className="w-5 h-5 text-white" />
+                          </div>
+                        )}
+                        {itemStatus[i] === 'error' && (
+                          <div className="bg-[#ba1a1a]/80 rounded-full p-1.5">
+                            <AlertCircle className="w-5 h-5 text-white" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                )}
 
-                {/* Submit / Success */}
-                {status === 'success' ? (
-                  <button
-                    onClick={() => setShowResult(true)}
-                    className="w-full py-3.5 bg-[#2c694e] text-white font-bold rounded-2xl hover:bg-[#1e4f38] transition-colors flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle2 className="w-5 h-5" /> Xem kết quả chẩn đoán
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleSubmit}
-                    disabled={status === 'loading'}
-                    className="w-full py-3.5 bg-[#0077b6] text-white font-bold rounded-2xl hover:bg-[#005d90] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-[#0077b6]/20"
-                  >
-                    {status === 'loading' ? (
-                      <><Loader2 className="w-5 h-5 animate-spin" /> Đang phân tích AI...</>
-                    ) : (
-                      <><Camera className="w-5 h-5" /> Phân tích ngay</>
-                    )}
-                  </button>
-                )}
+                      {/* Nút xóa */}
+                      {!isRunning && (
+                        <button
+                          onClick={() => removeFile(i)}
+                          className="absolute top-1 right-1 w-5 h-5 bg-black/60 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+
+                      {/* Số thứ tự */}
+                      <div className="absolute bottom-1 left-1 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                        {i + 1}
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {/* Placeholder thêm ảnh (khi còn slot) */}
+                  {files.length < MAX_FILES && !isRunning && (
+                    <button
+                      onClick={() => addInputRef.current?.click()}
+                      className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-1 text-slate-300 hover:border-[#0077b6]/50 hover:text-[#0077b6] transition-colors"
+                    >
+                      <Plus className="w-6 h-6" />
+                      <span className="text-[10px] font-bold">Thêm</span>
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* ── Progress bar (khi đang chạy) ── */}
+              {isRunning && (
+                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm font-bold text-[#0077b6] flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Đang phân tích {doneCount}/{files.length} ảnh...
+                    </p>
+                    <span className="text-xs font-bold text-[#0077b6]">
+                      {Math.round((doneCount / files.length) * 100)}%
+                    </span>
+                  </div>
+                  <div className="w-full h-2.5 bg-blue-100 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-[#0077b6] rounded-full"
+                      animate={{ width: `${(doneCount / files.length) * 100}%` }}
+                      transition={{ duration: 0.4 }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* ── Nút phân tích ── */}
+              {!allDone ? (
+                <button
+                  onClick={handleSubmit}
+                  disabled={isRunning || files.length === 0}
+                  className="w-full py-3.5 bg-[#0077b6] text-white font-bold rounded-2xl hover:bg-[#005d90] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-[#0077b6]/20"
+                >
+                  {isRunning ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Đang phân tích AI...</>
+                  ) : (
+                    <><Camera className="w-5 h-5" /> Phân tích {files.length} ảnh ngay</>
+                  )}
+                </button>
+              ) : (
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleReset}
+                    className="flex-1 py-3.5 bg-slate-100 text-slate-700 font-bold rounded-2xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" /> Chẩn đoán mới
+                  </button>
+                  {successCount < files.length && (
+                    <button
+                      onClick={handleSubmit}
+                      className="flex-1 py-3.5 bg-amber-500 text-white font-bold rounded-2xl hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw className="w-4 h-4" /> Thử lại ảnh lỗi
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* ── Kết quả tổng hợp ── */}
+              {hasAnyResult && (
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Kết quả chẩn đoán
+                    {allDone && (
+                      <span className="text-[#2c694e]">
+                        — {successCount}/{files.length} ảnh thành công
+                      </span>
+                    )}
+                  </p>
+
+                  {files.map((f, i) => {
+                    const r = itemResults[i];
+                    const s = itemStatus[i];
+                    const e = itemErrors[i];
+                    const v = itemValid[i];
+                    const disease = r?.result?.disease || {};
+                    const conf    = r?.result?.confidence || 0;
+                    const sevCfg  = SEVERITY_CFG[disease.severity] || SEVERITY_CFG.unknown;
+
+                    return (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className={`rounded-2xl border p-4 flex items-center gap-4 ${
+                          s === 'success' ? 'bg-white border-slate-200'
+                          : s === 'error'   ? 'bg-red-50 border-red-200'
+                          : s === 'loading' ? 'bg-blue-50 border-blue-100'
+                          : 'bg-slate-50 border-slate-200'
+                        }`}
+                      >
+                        {/* Thumbnail */}
+                        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-slate-200">
+                          {previews[i] ? (
+                            <img src={previews[i]} alt={f.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                              <ImageIcon className="w-5 h-5 text-slate-300" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-slate-400 truncate mb-0.5">{f.name}</p>
+                          {s === 'idle' && (
+                            <p className="text-sm font-semibold text-slate-400">Chờ phân tích...</p>
+                          )}
+                          {s === 'loading' && (
+                            <p className="text-sm font-bold text-[#0077b6] flex items-center gap-1.5">
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang phân tích AI...
+                            </p>
+                          )}
+                          {s === 'error' && (
+                            <>
+                              <p className="text-sm font-bold text-[#ba1a1a] flex items-center gap-1.5">
+                                <AlertCircle className="w-3.5 h-3.5" /> {e || 'Lỗi phân tích'}
+                              </p>
+                              {v?.errors?.map((err, ei) => (
+                                <p key={ei} className="text-xs text-[#ba1a1a] mt-0.5">• {err}</p>
+                              ))}
+                            </>
+                          )}
+                          {s === 'success' && r && (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border ${sevCfg.cls}`}>
+                                {disease.severity === 'none'
+                                  ? <CheckCircle2 className="w-3 h-3" />
+                                  : <AlertTriangle className="w-3 h-3" />}
+                                {disease.name || 'Không xác định'}
+                              </span>
+                              <span className="text-xs font-bold text-slate-500">
+                                {conf.toFixed(1)}% tin cậy
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Nút xem chi tiết */}
+                        {s === 'success' && (
+                          <button
+                            onClick={() => setModalIdx(i)}
+                            className="shrink-0 px-3 py-1.5 bg-[#0077b6] text-white text-xs font-bold rounded-xl hover:bg-[#005d90] transition-colors flex items-center gap-1"
+                          >
+                            <ChevronRight className="w-3.5 h-3.5" /> Chi tiết
+                          </button>
+                        )}
+                        {s === 'error' && (
+                          <button
+                            onClick={async () => {
+                              const token = localStorage.getItem('token') || '';
+                              setItemStatus(prev => { const c=[...prev]; c[i]='loading'; return c; });
+                              setItemErrors(prev  => { const c=[...prev]; c[i]=''; return c; });
+                              const fd = new FormData(); fd.append('image', files[i]);
+                              try {
+                                const res  = await fetch(`${API_BASE}/diagnose`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }, body:fd });
+                                const data = await res.json();
+                                if (!res.ok) {
+                                  setItemStatus(prev  => { const c=[...prev]; c[i]='error'; return c; });
+                                  setItemErrors(prev  => { const c=[...prev]; c[i]=data.message||'Lỗi.'; return c; });
+                                  if (res.status===422 && data.validation) setItemValid(prev=>{ const c=[...prev]; c[i]=data.validation; return c; });
+                                } else {
+                                  setItemStatus(prev  => { const c=[...prev]; c[i]='success'; return c; });
+                                  setItemResults(prev => { const c=[...prev]; c[i]=data; return c; });
+                                  setItemValid(prev   => { const c=[...prev]; c[i]=data.validation; return c; });
+                                }
+                              } catch {
+                                setItemStatus(prev  => { const c=[...prev]; c[i]='error'; return c; });
+                                setItemErrors(prev  => { const c=[...prev]; c[i]='Không kết nối được server.'; return c; });
+                              }
+                            }}
+                            className="shrink-0 px-3 py-1.5 bg-amber-500 text-white text-xs font-bold rounded-xl hover:bg-amber-600 transition-colors flex items-center gap-1"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" /> Thử lại
+                          </button>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -539,6 +825,15 @@ function DiagnosticSection() {
 
 
 function Hero() {
+  const navigate = useNavigate();
+
+  const handleQuetBenh = () => {
+    const el = document.getElementById('diagnose-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <section className="relative min-h-[700px] flex items-center overflow-hidden bg-slate-900 border-b border-white/5">
       <div className="absolute inset-0 z-0">
@@ -562,13 +857,19 @@ function Hero() {
             </span> Tức Thì
           </h1>
           <p className="text-lg text-slate-300 max-w-lg leading-relaxed">
-            Công nghệ phân tích hình ảnh tiên tiến giúp người nuôi tôm chẩn đoán bệnh chính xác đến 98% chỉ trong vài giây.
+            Công nghệ phân tích hình ảnh tiên tiến giúp người nuôi tôm chẩn đoán bệnh hỗ trợ quyết định điều trị nhanh chóng, chính xác và hiệu quả
           </p>
           <div className="flex flex-wrap gap-4">
-            <button className="h-14 px-8 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-xl shadow-amber-600/20 flex items-center gap-3 transition-all hover:scale-105">
+            <button
+              onClick={handleQuetBenh}
+              className="h-14 px-8 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-xl shadow-amber-600/20 flex items-center gap-3 transition-all hover:scale-105"
+            >
               <Camera className="w-5 h-5" /> QUÉT BỆNH NGAY
             </button>
-            <button className="h-14 px-8 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold rounded-2xl backdrop-blur-md transition-all">
+            <button
+              onClick={() => navigate('/handbook')}
+              className="h-14 px-8 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold rounded-2xl backdrop-blur-md transition-all"
+            >
               Tìm hiểu thêm
             </button>
           </div>
@@ -677,6 +978,36 @@ function HistoryDetailModal({ detail, onClose }) {
               </div>
             </div>
           </div>
+
+          {/* Banner Admin đã chỉnh sửa kết quả */}
+          {detail.admin_action === 'update' && (
+            <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-purple-600 mb-1.5 flex items-center gap-1.5">
+                ✏️ Admin đã điều chỉnh kết quả chẩn đoán
+              </p>
+              <p className="text-sm font-bold text-purple-800">
+                Kết quả đúng: <span className="underline underline-offset-2">{detail.chuandoan_sua || '—'}</span>
+              </p>
+              {detail.admin_note && (
+                <p className="text-sm text-purple-700 mt-1">Ghi chú: {detail.admin_note}</p>
+              )}
+              {detail.admin_verified_at && (
+                <p className="text-[11px] text-purple-400 mt-1">
+                  Cập nhật lúc {new Date(detail.admin_verified_at).toLocaleString('vi-VN')}
+                </p>
+              )}
+            </div>
+          )}
+          {detail.admin_action === 'correct' && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-1 flex items-center gap-1.5">
+                ✅ Đã được Admin xác minh chính xác
+              </p>
+              {detail.admin_note && (
+                <p className="text-sm text-emerald-700">{detail.admin_note}</p>
+              )}
+            </div>
+          )}
 
           {/* Chẩn đoán text */}
           {detail.chuandoan_text && (
@@ -900,8 +1231,24 @@ function DiagnosisHistory() {
                   key={item.id}
                   whileHover={{ y: -4 }}
                   onClick={() => fetchDetail(item.id)}
-                  className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-pointer"
+                  className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-pointer relative"
                 >
+                  {/* Badge Admin sửa */}
+                  {item.admin_action === 'update' && (
+                    <div className="absolute top-2 left-2 z-10">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-purple-600 text-white shadow">
+                        ✏️ Admin đã chỉnh
+                      </span>
+                    </div>
+                  )}
+                  {/* Badge Admin xác nhận đúng */}
+                  {item.admin_action === 'correct' && (
+                    <div className="absolute top-2 left-2 z-10">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white shadow">
+                        ✅ Đã xác minh
+                      </span>
+                    </div>
+                  )}
                   {/* Ảnh */}
                   <div className="h-32 bg-slate-100 relative overflow-hidden">
                     {item.image_url ? (
@@ -926,8 +1273,11 @@ function DiagnosisHistory() {
 
                   {/* Info */}
                   <div className="p-3">
+                    {/* Nếu admin đã sửa, hiện tên bệnh đã sửa thay vì tên gốc */}
                     <p className="text-xs font-bold text-slate-800 leading-tight line-clamp-2 mb-2">
-                      {item.ten_benh}
+                      {item.admin_action === 'update' && item.chuandoan_sua
+                        ? item.chuandoan_sua
+                        : item.ten_benh}
                     </p>
                     <div className="flex items-center gap-1.5">
                       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${sc.dot}`} />

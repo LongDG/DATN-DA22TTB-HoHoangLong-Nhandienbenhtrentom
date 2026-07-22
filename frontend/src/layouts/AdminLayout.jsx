@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Settings, LayoutDashboard, Microscope,
-  Package, ShoppingCart, MessageSquare, Book, LogOut, Users, Tag, TrendingUp,
+  Package, ShoppingCart, MessageSquare, Book, LogOut, Users, Tag, TrendingUp, Bug,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/admin',             icon: LayoutDashboard, label: 'Tổng quan',         end: true },
   { to: '/admin/diagnostics', icon: Microscope,      label: 'Nhật ký chẩn đoán'  },
   { to: '/admin/inventory',   icon: Package,         label: 'Kho hàng'            },
+  { to: '/admin/diseases',    icon: Bug,             label: 'Quản lý bệnh tôm'   },
   { to: '/admin/orders',      icon: ShoppingCart,    label: 'Đơn hàng'            },
   { to: '/admin/categories',  icon: Tag,             label: 'Danh mục'            },
   { to: '/admin/consult',     icon: MessageSquare,   label: 'Tư vấn'              },
@@ -51,7 +52,7 @@ function Header({ user, onLogout }) {
   return (
     <header className="fixed top-0 right-0 left-0 z-40 flex items-center justify-between px-6 h-16 bg-white border-b border-[#e1e3e4] shadow-sm">
       <div className="flex items-center gap-4">
-        <span className="text-xl font-bold text-[#0077b6]">AquaSense Admin</span>
+        <span className="text-xl font-bold text-[#0077b6]">Nhận Diện Bệnh Tôm Sú — Admin</span>
         <div className="ml-8 hidden md:flex items-center bg-[#f3f4f5] px-4 py-2 rounded-full w-96 border border-[#bfc7d1]/30">
           <Search size={18} className="text-[#707881] mr-2" />
           <input
@@ -62,13 +63,7 @@ function Header({ user, onLogout }) {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <button className="p-2 text-[#707881] hover:bg-[#f3f4f5] rounded-full relative">
-          <Bell size={20} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-[#ba1a1a] rounded-full border-2 border-white" />
-        </button>
-        <button className="p-2 text-[#707881] hover:bg-[#f3f4f5] rounded-full">
-          <Settings size={20} />
-        </button>
+
         <div className="flex items-center gap-3 ml-2 border-l border-[#bfc7d1]/50 pl-4 py-1">
           <div className="h-8 w-8 rounded-full overflow-hidden border border-[#cde5ff]">
             <img
@@ -94,10 +89,9 @@ function Header({ user, onLogout }) {
 function Footer() {
   return (
     <footer className="flex justify-between items-center px-8 py-4 bg-[#f8f9fa] border-t border-[#e1e3e4]">
-      <span className="text-[#707881] text-xs uppercase tracking-tighter">© 2026 AquaSense. Hệ thống v3.0.0-stable</span>
+      <span className="text-[#707881] text-xs uppercase tracking-tighter">© 2026 Nhận Diện Bệnh Tôm Sú. Phiên bản v3.0.0</span>
       <div className="flex gap-6">
         <a href="#" className="text-[#707881] text-xs hover:text-[#0077b6] transition-colors">Trạng thái hệ thống</a>
-        <a href="#" className="text-[#707881] text-xs hover:text-[#0077b6] transition-colors">Tài liệu API</a>
       </div>
     </footer>
   );

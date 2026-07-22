@@ -1,1 +1,44 @@
-[]
+[{
+  "_id": {
+    "$oid": "6a06d26fd3a30202eee764ad"
+  },
+  "key": "dac_tri",
+  "tensanpham": "Đặc trị bệnh",
+  "color": "bg-red-600 text-white",
+  "icon": "Droplet",
+  "thutu": 1,
+  "active": true
+},
+{
+  "_id": {
+    "$oid": "6a06d26fd3a30202eee764ae"
+  },
+  "key": "vi_sinh",
+  "tensanpham": "Vi sinh",
+  "color": "bg-[#0077b6] text-white",
+  "icon": "Beaker",
+  "thutu": 2,
+  "active": true
+},
+{
+  "_id": {
+    "$oid": "6a06d26fd3a30202eee764af"
+  },
+  "key": "vi_sinh_moi_truong",
+  "tensanpham": "Vi sinh MT",
+  "color": "bg-green-700 text-white",
+  "icon": "Leaf",
+  "thutu": 3,
+  "active": true
+},
+{
+  "_id": {
+    "$oid": "6a06d26fd3a30202eee764b0"
+  },
+  "key": "dinh_duong_de_khang",
+  "tensanpham": "Dinh dưỡng",
+  "color": "bg-amber-600 text-white",
+  "icon": "Heart",
+  "thutu": 4,
+  "active": true
+}]

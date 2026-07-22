@@ -35,14 +35,19 @@ router.get('/', async (req, res) => {
       phan_trang:'60f1a2b3c4d5e6f7a8b90003',
     };
 
-    const filter = {};
+    // Chỉ hiển thị sản phẩm đang bán (dang_ban) hoặc chưa có trạng thái (dữ liệu cũ)
+    const filter = {
+      $and: [
+        { $or: [{ trangthai: 'dang_ban' }, { trangthai: { $exists: false } }, { trangthai: null }] },
+      ],
+    };
     if (category && category !== 'all') filter.loaisanpham = category;
     if (search) {
-      filter.$or = [
+      filter.$and.push({ $or: [
         { tensanpham: { $regex: search, $options: 'i' } },
         { thuonghieu: { $regex: search, $options: 'i' } },
         { mota:       { $regex: search, $options: 'i' } },
-      ];
+      ]});
     }
 
     // Lọc theo bệnh (disease=dom_trang,gan_tuy,...)
@@ -50,7 +55,7 @@ router.get('/', async (req, res) => {
       const keys = disease.split(',').filter(k => DISEASE_ID_MAP[k]);
       if (keys.length > 0) {
         const ids = keys.map(k => new ObjectId(DISEASE_ID_MAP[k]));
-        filter.benh_ids = { $elemMatch: { $in: ids } };
+        filter.$and.push({ benh_ids: { $elemMatch: { $in: ids } } });
       }
     }
 
@@ -119,7 +124,7 @@ router.get('/featured', async (req, res) => {
   try {
     const db = mongoose.connection.db;
     const products = await db.collection('SANPHAM')
-      .find({ soluong: { $gt: 0 } })
+      .find({ soluong: { $gt: 0 }, $or: [{ trangthai: 'dang_ban' }, { trangthai: { $exists: false } }, { trangthai: null }] })
       .sort({ daban: -1 })
       .limit(4)
       .toArray();
@@ -160,7 +165,12 @@ router.get('/:id', async (req, res) => {
     if (!p) return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
 
     const qty = p.soluong ?? 0;
-    const status = qty === 0 ? 'het_hang' : qty <= 15 ? 'sap_het' : 'con_hang';
+    const trangthai = p.trangthai || 'dang_ban';
+    // Nếu ngừng bán → coi như hết hàng với người dùng
+    const status = trangthai === 'ngung_ban' ? 'het_hang'
+      : qty === 0 ? 'het_hang'
+      : qty <= 15 ? 'sap_het'
+      : 'con_hang';
 
     res.json({
       id:           p._id.toString(),
@@ -180,6 +190,8 @@ router.get('/:id', async (req, res) => {
       unit:         p.donvi || 'gói',
       sold:         p.daban || 0,
       status,
+      trangthai,
+      isNgungBan:   trangthai === 'ngung_ban',
       images:       p.hinhanh || [],
       createdAt:    p.ngaytao,
     });

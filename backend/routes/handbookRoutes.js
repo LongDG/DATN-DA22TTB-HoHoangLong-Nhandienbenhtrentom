@@ -3,11 +3,11 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const CATEGORY_MAP = {
-  ky_thuat_nuoi:  { label: 'Kỹ thuật nuôi',    color: 'bg-[#005d90] text-white' },
-  phong_tri_benh: { label: 'Phòng & Trị bệnh', color: 'bg-red-600 text-white'   },
-  quan_ly_ao:     { label: 'Quản lý ao nuôi',  color: 'bg-[#2c694e] text-white'  },
-  sop:            { label: 'Quy trình SOP',     color: 'bg-[#904300] text-white'  },
-  dinh_duong:     { label: 'Dinh dưỡng',        color: 'bg-[#005d90] text-white'  },
+  ky_thuat_nuoi:  { label: 'Kỹ thuật nuôi',  color: 'bg-[#0077b6] text-white'   },
+  phong_tri_benh: { label: 'Phòng & Trị',     color: 'bg-red-600 text-white'     },
+  quan_ly_ao:     { label: 'Quản lý ao',      color: 'bg-[#2c694e] text-white'   },
+  sop:            { label: 'SOP',             color: 'bg-[#904300] text-white'   },
+  dinh_duong:     { label: 'Dinh dưỡng',      color: 'bg-purple-600 text-white'  },
 };
 
 function format(a) {
@@ -36,8 +36,9 @@ function format(a) {
 router.get('/', async (req, res) => {
   try {
     const db = mongoose.connection.db;
-    const { category, search, page = 1, limit = 9, type } = req.query;
-    const filter = { trangthai: 'published' };
+    const { category, search, page = 1, limit = 9, type, _admin } = req.query;
+    // Admin có thể xem tất cả trạng thái
+    const filter = _admin === '1' ? {} : { trangthai: 'published' };
     if (category && category !== 'all') filter.danhmuc = category;
     if (search) filter.$or = [
       { tieude:  { $regex: search, $options: 'i' } },
@@ -52,6 +53,31 @@ router.get('/', async (req, res) => {
       .find(filter).sort({ ngaytao: -1 }).skip(skip).limit(parseInt(limit)).toArray();
 
     res.json({ articles: articles.map(format), total, totalPages: Math.ceil(total / parseInt(limit)) });
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+/* GET /api/handbook/admin-detail/:id — chi tiết đầy đủ cho admin (không tăng lượt xem) */
+router.get('/admin-detail/:id', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { ObjectId } = require('mongodb');
+    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID không hợp lệ' });
+    const a = await db.collection('SOTAYKYTHUAT').findOne({ _id: new ObjectId(req.params.id) });
+    if (!a) return res.status(404).json({ message: 'Không tìm thấy' });
+    // Trả về field gốc để form chỉnh sửa
+    res.json({
+      id:             a._id.toString(),
+      tieude:         a.tieude         || '',
+      tomtat:         a.tomtat         || '',
+      noidung:        a.noidung        || '',
+      danhmuc:        a.danhmuc        || 'ky_thuat_nuoi',
+      hinhanh:        a.hinhanh        || '',
+      video_url:      a.video_url      || '',
+      video_thoigian: a.video_thoigian || '',
+      tacgia:         a.tacgia         || '',
+      trangthai:      a.trangthai      || 'nhap',
+      tags:           a.tags           || [],
+    });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 

@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   vaitro: { type: String, enum: ['user', 'admin'], default: 'user' },
   anhdaidien: { type: String, default: '' },
   googleId: { type: String, default: '' },
+  trangthai: { type: String, enum: ['active', 'inactive'], default: 'active' },
   diachi: [diaChiSchema],
   ngaytao: { type: Date, default: Date.now },
 });

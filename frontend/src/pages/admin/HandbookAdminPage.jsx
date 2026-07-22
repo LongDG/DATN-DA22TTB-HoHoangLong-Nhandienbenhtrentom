@@ -16,10 +16,19 @@ const CATEGORIES = [
   { key: 'dinh_duong',     label: 'Dinh dưỡng'       },
 ];
 
+// Map danh mục → label ngắn + class màu cỏ định (Tailwind compile được)
+const CATEGORY_STYLE = {
+  ky_thuat_nuoi:  { label: 'Kỹ thuật nuôi', cls: 'bg-blue-600 text-white'   },
+  phong_tri_benh: { label: 'Phòng & Trị',    cls: 'bg-red-600 text-white'    },
+  quan_ly_ao:     { label: 'Quản lý ao',    cls: 'bg-emerald-700 text-white' },
+  sop:            { label: 'SOP',           cls: 'bg-orange-700 text-white'  },
+  dinh_duong:     { label: 'Dinh dưỡng',    cls: 'bg-purple-600 text-white'  },
+};
+
 const STATUS_STYLE = {
-  published: { label: 'Đã đăng',  cls: 'bg-green-100 text-green-700'  },
-  nhap:      { label: 'Nháp',     cls: 'bg-slate-100 text-slate-500'  },
-  archived:  { label: 'Lưu trữ', cls: 'bg-amber-100 text-amber-700'  },
+  published: { label: 'Đã đăng',  cls: 'bg-green-100 text-green-700 whitespace-nowrap'  },
+  nhap:      { label: 'Nháp',     cls: 'bg-slate-100 text-slate-500 whitespace-nowrap'  },
+  archived:  { label: 'Lưu trữ', cls: 'bg-amber-100 text-amber-700 whitespace-nowrap'  },
 };
 
 const EMPTY_FORM = { tieude: '', tomtat: '', noidung: '', danhmuc: 'ky_thuat_nuoi', hinhanh: '', video_url: '', video_thoigian: '', tacgia: '', trangthai: 'nhap', tags: '' };
@@ -30,7 +39,11 @@ const TEXTAREA = `${INPUT} resize-none`;
 /* ── Article Form Modal ── */
 function ArticleModal({ article, onClose, onSave }) {
   const isEdit = !!article;
-  const [form, setForm] = useState(isEdit ? { ...article, tags: article.tags?.join(', ') || '' } : EMPTY_FORM);
+  const [form, setForm] = useState(isEdit ? {
+    ...article,
+    tags: article.tags?.join(', ') || '',
+    noidung: (article.noidung || '').replace(/<br\s*\/?>/gi, '\n'),
+  } : EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState('');
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -40,7 +53,11 @@ function ArticleModal({ article, onClose, onSave }) {
     if (!form.danhmuc)        { setError('Vui lòng chọn danh mục'); return; }
     setSaving(true); setError('');
     try {
-      const payload = { ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) };
+      const payload = {
+        ...form,
+        tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+        noidung: form.noidung.replace(/\n/g, '<br>'),
+      };
       const url    = isEdit ? `${API}/handbook/${article.id}` : `${API}/handbook`;
       const method = isEdit ? 'PUT' : 'POST';
       const res = await authFetch(url, { method, body: JSON.stringify(payload) });
@@ -172,6 +189,7 @@ export default function HandbookAdminPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [modal, setModal]       = useState(null); // { type: 'create'|'edit'|'delete', article }
   const [toast, setToast]       = useState('');
+  const [editLoading, setEditLoading] = useState(null); // id bài đang fetch chi tiết
   const LIMIT = 10;
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
@@ -199,6 +217,20 @@ export default function HandbookAdminPage() {
     setModal(null);
     showToast('✅ Đã xóa bài viết!');
     fetchArticles();
+  };
+
+  // Fetch chi tiết đầy đủ (field gốc) rồi mở modal chỉnh sửa
+  const openEditModal = async (a) => {
+    setEditLoading(a.id);
+    try {
+      const res = await authFetch(`${API}/handbook/admin-detail/${a.id}`);
+      const detail = await res.json();
+      setModal({ type: 'edit', article: res.ok ? detail : a });
+    } catch {
+      setModal({ type: 'edit', article: a }); // fallback
+    } finally {
+      setEditLoading(null);
+    }
   };
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
@@ -290,14 +322,35 @@ export default function HandbookAdminPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4"><span className={`text-xs font-bold px-2.5 py-1 rounded-full ${a.categoryColor}`}>{a.categoryLabel}</span></td>
+                    <td className="px-3 py-4">
+                      {(() => {
+                        const cs = CATEGORY_STYLE[a.category] || { label: a.categoryLabel, cls: 'bg-slate-500 text-white' };
+                        return (
+                          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg whitespace-nowrap ${cs.cls}`}>
+                            {cs.label}
+                          </span>
+                        );
+                      })()}
+                    </td>
                     <td className="px-5 py-4 text-sm text-[#404850]">{a.author}</td>
-                    <td className="px-5 py-4 text-sm text-[#404850] font-semibold">{a.views}</td>
-                    <td className="px-5 py-4"><span className={`text-xs font-bold px-3 py-1 rounded-full ${sts.cls}`}>{sts.label}</span></td>
+                    <td className="px-5 py-4 text-sm text-[#404850] font-semibold text-center">{a.views}</td>
+                    <td className="px-3 py-4">
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${sts.cls}`}>
+                        {sts.label}
+                      </span>
+                    </td>
                     <td className="px-5 py-4 text-sm text-[#707881]">{a.createdAt}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => setModal({ type: 'edit', article: a })} className="p-2 hover:bg-[#e7e8e9] rounded-lg transition-colors" title="Chỉnh sửa"><Pencil className="w-[17px] h-[17px] text-[#404850]" /></button>
+                        <button
+                          onClick={() => openEditModal(a)}
+                          disabled={editLoading === a.id}
+                          className="p-2 hover:bg-[#e7e8e9] rounded-lg transition-colors disabled:opacity-50" title="Chỉnh sửa"
+                        >
+                          {editLoading === a.id
+                            ? <div className="w-[17px] h-[17px] border-2 border-[#0077b6] border-t-transparent rounded-full animate-spin" />
+                            : <Pencil className="w-[17px] h-[17px] text-[#404850]" />}
+                        </button>
                         <button onClick={() => setModal({ type: 'delete', article: a })} className="p-2 hover:bg-[#ffdad6] rounded-lg transition-colors" title="Xóa"><Trash2 className="w-[17px] h-[17px] text-[#ba1a1a]" /></button>
                       </div>
                     </td>

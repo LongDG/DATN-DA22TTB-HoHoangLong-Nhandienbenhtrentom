@@ -1,0 +1,228 @@
+[{
+  "_id": {
+    "$oid": "6a102d59075b4865c159d4e7"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "✅ Kết quả chẩn đoán đã được xác minh",
+  "noi_dung": "Admin đã xác nhận kết quả AI là chính xác: \"Bệnh mang đen (BlackGill)\". Bạn có thể xem lại lịch sử chẩn đoán.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-22T10:18:01.977Z"
+  },
+  "doc_luc": {
+    "$date": "2026-05-22T10:41:00.972Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a102d67075b4865c159d4e8"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "✅ Kết quả chẩn đoán đã được xác minh",
+  "noi_dung": "Admin đã xác nhận kết quả AI là chính xác: \"Bệnh đốm trắng (WSSV)\". Bạn có thể xem lại lịch sử chẩn đoán.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-22T10:18:15.991Z"
+  },
+  "doc_luc": {
+    "$date": "2026-05-22T10:41:00.972Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a102e436870e4356855a8c8"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "✅ Kết quả chẩn đoán đã được xác minh",
+  "noi_dung": "Admin đã xác nhận kết quả AI là chính xác: \"Bệnh đầu vàng (Yellowhead)\". Bạn có thể xem lại lịch sử chẩn đoán.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-22T10:21:55.237Z"
+  },
+  "doc_luc": {
+    "$date": "2026-05-22T10:41:00.972Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a102e4f6870e4356855a8c9"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "✅ Kết quả chẩn đoán đã được xác minh",
+  "noi_dung": "Admin đã xác nhận kết quả AI là chính xác: \"Bệnh mang đen (BlackGill)\". Bạn có thể xem lại lịch sử chẩn đoán.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-22T10:22:07.621Z"
+  },
+  "doc_luc": {
+    "$date": "2026-05-22T10:41:00.972Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a102f1b0d742e76ba7b627f"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "✅ Kết quả chẩn đoán đã được xác minh",
+  "noi_dung": "Admin đã xác nhận kết quả AI là chính xác: \"Bệnh đầu vàng (Yellowhead)\". Bạn có thể xem lại lịch sử chẩn đoán.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-22T10:25:31.339Z"
+  },
+  "doc_luc": {
+    "$date": "2026-05-22T10:41:00.972Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a102f1f0d742e76ba7b6280"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "✅ Kết quả chẩn đoán đã được xác minh",
+  "noi_dung": "Admin đã xác nhận kết quả AI là chính xác: \"Bệnh đầu vàng (Yellowhead)\". Bạn có thể xem lại lịch sử chẩn đoán.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-22T10:25:35.888Z"
+  },
+  "doc_luc": {
+    "$date": "2026-05-22T10:26:26.804Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a102f470d742e76ba7b6281"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "⚠️ Kết quả chẩn đoán cần điều chỉnh",
+  "noi_dung": "Admin đã xác nhận kết quả AI không chính xác. Chẩn đoán đúng là: \"Đầu vàng\". Vui lòng tham khảo ý kiến chuyên gia.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-22T10:26:15.932Z"
+  },
+  "doc_luc": {
+    "$date": "2026-05-22T10:26:21.870Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a18e3a4f19aa7690c9baac3"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "✅ Kết quả chẩn đoán đã được xác minh",
+  "noi_dung": "Admin đã xác nhận kết quả AI là chính xác: \"Bệnh mang đen (BlackGill)\". Bạn có thể xem lại lịch sử chẩn đoán.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-29T00:53:56.189Z"
+  },
+  "doc_luc": {
+    "$date": "2026-05-29T00:54:16.647Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a18e466f19aa7690c9baac5"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "✅ Kết quả chẩn đoán đã được xác minh",
+  "noi_dung": "Admin đã xác nhận kết quả AI là chính xác: \"Bệnh mang đen (BlackGill)\". Bạn có thể xem lại lịch sử chẩn đoán.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-05-29T00:57:10.548Z"
+  },
+  "doc_luc": {
+    "$date": "2026-06-05T02:36:44.071Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a290afaecfdce52f8b954ba"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "⚠️ Kết quả chẩn đoán cần điều chỉnh",
+  "noi_dung": "Admin đã xác nhận kết quả AI không chính xác. Chẩn đoán đúng là: \"mang đen\". Vui lòng tham khảo ý kiến chuyên gia.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-06-10T06:58:02.133Z"
+  },
+  "doc_luc": {
+    "$date": "2026-06-10T07:03:15.778Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a290b06ecfdce52f8b954bb"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "⚠️ Kết quả chẩn đoán cần điều chỉnh",
+  "noi_dung": "Admin đã xác nhận kết quả AI không chính xác. Chẩn đoán đúng là: \"Mang Đen\". Vui lòng tham khảo ý kiến chuyên gia.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-06-10T06:58:14.758Z"
+  },
+  "doc_luc": {
+    "$date": "2026-06-10T07:01:23.173Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6a290b0cecfdce52f8b954bc"
+  },
+  "nguoidung_id": {
+    "$oid": "6a0e54b39d21891ad4472f04"
+  },
+  "loai": "chan_doan",
+  "tieu_de": "⚠️ Kết quả chẩn đoán cần điều chỉnh",
+  "noi_dung": "Admin đã xác nhận kết quả AI không chính xác. Chẩn đoán đúng là: \"Mang Đen\". Vui lòng tham khảo ý kiến chuyên gia.",
+  "da_doc": true,
+  "lien_ket": "/home",
+  "ngaytao": {
+    "$date": "2026-06-10T06:58:20.223Z"
+  },
+  "doc_luc": {
+    "$date": "2026-06-10T07:01:14.919Z"
+  }
+}]

@@ -280,8 +280,8 @@ export default function HandbookPage() {
       {/* Video Library — hiển thị bài viết có video từ API */}
       <VideoLibrary />
 
-      {/* Newsletter */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
+      {/* Newsletter — đã ẩn */}
+      {/* <section className="max-w-7xl mx-auto px-6 py-16">
         <div className="bg-gradient-to-br from-[#005d90] to-[#0077b6] rounded-3xl p-12 text-center text-white relative overflow-hidden">
           <div className="relative z-10 max-w-2xl mx-auto">
             <h2 className="text-3xl font-bold mb-3">📬 Nhận tài liệu miễn phí</h2>
@@ -297,7 +297,7 @@ export default function HandbookPage() {
             <p className="mt-4 text-xs text-white/50 italic">* Chúng tôi cam kết không spam và bảo mật thông tin của bạn.</p>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

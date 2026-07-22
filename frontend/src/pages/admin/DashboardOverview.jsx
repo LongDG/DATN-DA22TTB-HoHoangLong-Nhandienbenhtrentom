@@ -28,7 +28,7 @@ export default function DashboardOverview() {
   });
   const [recentLogs, setRecentLogs]       = useState([]);
   const [consultations, setConsultations] = useState([]);
-  const [lowStock, setLowStock]           = useState({ items: [], outOfStock: 0, threshold: 15 });
+  const [lowStock, setLowStock] = useState({ items: [], outOfStock: 0, criticalCount: 0, lowCount: 0, threshold: 15, thresholdCritical: 5 });
 
   useEffect(() => {
     authFetch(`${API_BASE}/admin/stats`)
@@ -47,7 +47,7 @@ export default function DashboardOverview() {
       .then(setConsultations)
       .catch(err => console.error('Lỗi tư vấn:', err));
 
-    authFetch(`${API_BASE}/admin/low-stock?limit=6`)
+    authFetch(`${API_BASE}/admin/low-stock?limit=8`)
       .then(r => r.json())
       .then(setLowStock)
       .catch(err => console.error('Lỗi tồn kho:', err));
@@ -153,7 +153,7 @@ export default function DashboardOverview() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-tight ${statusClass}`}>{log.status}</span>
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-tight whitespace-nowrap ${statusClass}`}>{log.status}</span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button className="text-[#707881] hover:text-[#0077b6] transition-colors"><MoreVertical className="w-5 h-5" /></button>
@@ -235,34 +235,50 @@ export default function DashboardOverview() {
             <div className="px-6 py-4 bg-[#ffdad6]/40 border-b border-[#ffdad6]/50 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-[#ba1a1a]" />
-                <h3 className="text-sm font-semibold text-[#ba1a1a]">Cảnh báo tồn kho thấp</h3>
+                <h3 className="text-sm font-semibold text-[#ba1a1a]">Cảnh báo tồn kho</h3>
                 {lowStock.items.length > 0 && (
                   <span className="ml-1 px-2 py-0.5 bg-[#ba1a1a] text-white text-[10px] font-bold rounded-full">
                     {lowStock.items.length}
                   </span>
                 )}
               </div>
-              {lowStock.outOfStock > 0 && (
-                <span className="text-[10px] font-bold text-[#ba1a1a] bg-[#ffdad6] px-2 py-1 rounded-full">
-                  {lowStock.outOfStock} hết hàng
-                </span>
-              )}
+              {/* Badge tóm tắt */}
+              <div className="flex gap-1.5">
+                {lowStock.outOfStock > 0 && (
+                  <span className="text-[10px] font-bold text-white bg-[#404850] px-2 py-0.5 rounded-full">
+                    {lowStock.outOfStock} hết
+                  </span>
+                )}
+                {lowStock.criticalCount > 0 && (
+                  <span className="text-[10px] font-bold text-white bg-[#ba1a1a] px-2 py-0.5 rounded-full">
+                    {lowStock.criticalCount} nguy cấp
+                  </span>
+                )}
+                {lowStock.lowCount > 0 && (
+                  <span className="text-[10px] font-bold text-[#743500] bg-[#ffdbc8] px-2 py-0.5 rounded-full">
+                    {lowStock.lowCount} sắp hết
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div>
               {lowStock.items.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="w-12 h-12 bg-[#aeeecb]/30 rounded-full flex items-center justify-center mx-auto mb-3">
                     <ShoppingCart className="w-6 h-6 text-[#2c694e]" />
                   </div>
                   <p className="text-sm font-semibold text-[#2c694e]">Tồn kho ổn định</p>
-                  <p className="text-xs text-[#707881] mt-1">Không có sản phẩm dưới {lowStock.threshold} đơn vị</p>
+                  <p className="text-xs text-[#707881] mt-1">Tất cả sản phẩm đều > {lowStock.threshold} đơn vị</p>
                 </div>
               ) : (
                 lowStock.items.map(item => {
+                  const isOut      = item.level === 'out';
                   const isCritical = item.level === 'critical';
-                  const levelColor = isCritical ? 'text-[#ba1a1a]' : 'text-[#b65600]';
-                  const levelBg    = isCritical ? 'bg-[#ffdad6]'   : 'bg-[#ffdbc8]';
+                  const levelCfg = isOut
+                    ? { bg: 'bg-[#f3f4f5]',   text: 'text-[#404850]', label: 'Hết hàng' }
+                    : isCritical
+                    ? { bg: 'bg-[#ffdad6]',   text: 'text-[#ba1a1a]', label: `Còn ${item.qty} ${item.unit}` }
+                    : { bg: 'bg-[#ffdbc8]',   text: 'text-[#743500]', label: `Còn ${item.qty} ${item.unit}` };
                   return (
                     <div key={item.id} className="p-4 border-b border-[#e7e8e9] flex items-center gap-3 hover:bg-[#f8f9fa] transition-colors">
                       {/* Hình ảnh */}
@@ -276,55 +292,23 @@ export default function DashboardOverview() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-[#191c1d] truncate">{item.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          {item.brand && <span className="text-[10px] text-[#707881]">{item.brand}</span>}
+                          {item.brand    && <span className="text-[10px] text-[#707881]">{item.brand}</span>}
                           {item.category && <span className="text-[10px] text-[#707881]">• {item.category}</span>}
                         </div>
                       </div>
-                      {/* Số lượng */}
+                      {/* Badge mức cảnh báo */}
                       <div className="shrink-0 text-right">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${levelBg} ${levelColor}`}>
-                          Còn {item.qty} {item.unit}
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${levelCfg.bg} ${levelCfg.text}`}>
+                          {levelCfg.label}
                         </span>
                       </div>
                     </div>
                   );
                 })
               )}
-
-              <div className="p-4 bg-[#f3f4f5] text-center">
-                <a href="/admin/inventory" className="text-sm font-semibold text-[#0077b6] hover:underline">
-                  Quản lý kho hàng →
-                </a>
-              </div>
-            </div>
           </div>
 
-          {/* System Status */}
-          <div className="bg-white rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-[#e7e8e9] p-6">
-            <h4 className="text-xs font-semibold text-[#404850] uppercase tracking-wider mb-5">Trạng thái hệ thống</h4>
-            <div className="space-y-5">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[#191c1d]">Mô hình AI v4.2.1</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#2c694e]" />
-                  <span className="text-xs text-[#2c694e] font-bold uppercase tracking-tight">Trực tuyến</span>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-[#191c1d]">Tải máy chủ</span>
-                  <span className="text-xs font-bold text-[#404850]">24%</span>
-                </div>
-                <div className="w-full h-1.5 bg-[#e7e8e9] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#0077b6] w-[24%]" />
-                </div>
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-sm text-[#191c1d]">Đồng bộ dữ liệu</span>
-                <span className="text-xs text-[#404850] font-medium">Vừa mới đây</span>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </>

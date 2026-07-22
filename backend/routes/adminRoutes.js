@@ -16,17 +16,30 @@ router.get('/stats', async (req, res) => {
     // Tổng số chẩn đoán
     const totalDiagnostics = await db.collection('KETQUANHANDIEN').countDocuments();
     
-    // Đơn hàng mới (trạng thái cho_xac_nhan hoặc dựa vào the toàn bộ đơn hàng)
-    // Tạm lấy tổng số đơn hàng nếu chưa có dữ liệu 'cho_xac_nhan' rõ ràng
+    // Tổng số đơn hàng (tất cả trạng thái)
     const totalOrders = await db.collection('DONHANG').countDocuments();
-    const newOrders = await db.collection('DONHANG').countDocuments({ trang_thai_don_hang: 'cho_xac_nhan' });
-    
-    // Tính tổng doanh thu từ tất cả đơn hàng hoặc các đơn hàng đã thanh toán
-    const orders = await db.collection('DONHANG').find({}).toArray();
-    let totalRevenue = 0;
-    orders.forEach(order => {
-        totalRevenue += order.tong_tien_thanh_toan || 0;
-    });
+    const newOrders   = await db.collection('DONHANG').countDocuments({ trang_thai_don_hang: 'cho_xac_nhan' });
+
+    // ── Doanh thu thực: chỉ tính đơn hàng ĐÃ GIAO THÀNH CÔNG ──
+    // COD: tiền mặt thu khi giao hàng → chỉ tính khi da_giao_hang
+    // Chuyển khoản: đã xác nhận thanh toán → da_giao_hang hoặc trang_thai_thanh_toan = 'da_thanh_toan'
+    const revenueAgg = await db.collection('DONHANG').aggregate([
+      {
+        $match: {
+          $or: [
+            { trang_thai_don_hang: 'da_giao_hang' },
+            { trang_thai_thanh_toan: 'da_thanh_toan' },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $ifNull: ['$tong_tien_thanh_toan', '$tong_tien'] } },
+        },
+      },
+    ]).toArray();
+    const totalRevenue = revenueAgg[0]?.total || 0;
 
     // Tổng số người dùng
     const totalUsers = await db.collection('NGUOIDUNG').countDocuments();
@@ -50,22 +63,27 @@ router.get('/stats', async (req, res) => {
 
 /**
  * GET /api/admin/low-stock
- * Sản phẩm tồn kho thấp (soluong <= threshold)
- * Query: threshold (default 15), limit (default 10)
+ * Sản phẩm tồn kho thấp hoặc hết hàng
+ * Ngưỡng: critical <= 5 | sắp hết <= 15 | hết = 0
+ * Query: limit (default 8)
  */
 router.get('/low-stock', async (req, res) => {
   try {
-    const db = mongoose.connection.db;
-    const threshold = parseInt(req.query.threshold) || 15;
-    const limit     = parseInt(req.query.limit)     || 10;
+    const db    = mongoose.connection.db;
+    const limit = parseInt(req.query.limit) || 8;
+    const THRESHOLD_LOW      = 15;  // sắp hết
+    const THRESHOLD_CRITICAL =  5;  // nguy cấp
 
+    // Lấy cả sản phẩm hết hàng (= 0) và sắp hết (<= 15), sắp xếp tăng dần
     const products = await db.collection('SANPHAM')
-      .find({ soluong: { $lte: threshold }, soluong: { $gt: 0 } })
-      .sort({ soluong: 1 })       // Ít nhất lên đầu
+      .find({ soluong: { $lte: THRESHOLD_LOW } })
+      .sort({ soluong: 1 })
       .limit(limit)
       .toArray();
 
-    const outOfStock = await db.collection('SANPHAM').countDocuments({ soluong: 0 });
+    const outOfStock    = await db.collection('SANPHAM').countDocuments({ soluong: { $lte: 0 } });
+    const criticalCount = await db.collection('SANPHAM').countDocuments({ soluong: { $gt: 0, $lte: THRESHOLD_CRITICAL } });
+    const lowCount      = await db.collection('SANPHAM').countDocuments({ soluong: { $gt: THRESHOLD_CRITICAL, $lte: THRESHOLD_LOW } });
 
     const CATEGORY_LABELS = {
       dac_tri:               'Đặc trị',
@@ -83,11 +101,14 @@ router.get('/low-stock', async (req, res) => {
         unit:     p.donvi || 'đơn vị',
         image:    (p.hinhanh && p.hinhanh[0]) || null,
         category: CATEGORY_LABELS[p.loaisanpham] || p.loaisanpham || '',
-        // Cấp độ cảnh báo
-        level:    p.soluong === 0 ? 'out' : p.soluong <= 5 ? 'critical' : 'low',
+        // out = hết hàng | critical = nguy cấp (≤5) | low = sắp hết (≤15)
+        level: p.soluong <= 0 ? 'out' : p.soluong <= THRESHOLD_CRITICAL ? 'critical' : 'low',
       })),
       outOfStock,
-      threshold,
+      criticalCount,
+      lowCount,
+      threshold:         THRESHOLD_LOW,
+      thresholdCritical: THRESHOLD_CRITICAL,
     });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi lấy tồn kho thấp', error: error.message });
@@ -127,9 +148,14 @@ router.get('/consultations', async (req, res) => {
   try {
     const db = mongoose.connection.db;
     const { ObjectId } = mongoose.Types;
-    const { status, user_id } = req.query;
+    const { status, user_id, show_closed } = req.query;
     const filter = {};
-    if (status)  filter.trang_thai = status;
+    if (status) {
+      filter.trang_thai = status;
+    } else if (show_closed !== '1') {
+      // Mặc định ẩn tư vấn đã đóng, chỉ hiện khi show_closed=1
+      filter.trang_thai = { $ne: 'da_dong' };
+    }
     if (user_id) {
       // Hỗ trợ cả ObjectId và string để tương thích dữ liệu cũ
       const conditions = [{ nguoidung_id: user_id }];
@@ -144,7 +170,8 @@ router.get('/consultations', async (req, res) => {
 
     const now = new Date();
     const formatted = records.map(c => {
-      const name = c.ten_nguoidung || 'Người dùng';
+      // Fallback: chatbot transfer dùng 'hoten', tư vấn thường dùng 'ten_nguoidung'
+      const name = c.ten_nguoidung || c.hoten || 'Người dùng';
       const words = name.trim().split(/\s+/);
       const initials = words.length >= 2
         ? (words[words.length - 2][0] + words[words.length - 1][0]).toUpperCase()
@@ -158,19 +185,24 @@ router.get('/consultations', async (req, res) => {
       const lastMsg = c.tin_nhan?.length > 0
         ? c.tin_nhan[c.tin_nhan.length - 1].noi_dung
         : c.noidung;
+
+      // Build location an toàn: bỏ qua các phần undefined/null/rỗng
+      const locationParts = [c.vitri_tinh, c.vitri_ao].filter(v => v && v !== 'undefined');
+      const location = locationParts.length > 0 ? locationParts.join(', ') : 'Chuyển từ chatbot';
+
       return {
         _id: c._id.toString(),
         id:  c._id.toString(),
         nguoidung_id: c.nguoidung_id?.toString() || null,
         name, initials,
-        ten_nguoidung: c.ten_nguoidung,
-        location: `${c.vitri_tinh}, ${c.vitri_ao}`,
+        ten_nguoidung: c.ten_nguoidung || c.hoten || null,
+        location,
         vitri_tinh: c.vitri_tinh, vitri_ao: c.vitri_ao,
         noidung: c.noidung,
         message: c.noidung,
         lastMsg, time: timeAgo,
         ngaytao: c.ngaytao,
-        status: c.trang_thai,
+        status: c.trang_thai || c.trangthai,
         msgCount: c.tin_nhan?.length || 0,
       };
     });
@@ -190,20 +222,26 @@ router.get('/consultations/:id', async (req, res) => {
     const { ObjectId } = mongoose.Types;
     const doc = await db.collection('LIENHE').findOne({ _id: new ObjectId(req.params.id) });
     if (!doc) return res.status(404).json({ message: 'Không tìm thấy tư vấn' });
+
+    // Fallback tên: chatbot dùng 'hoten', tư vấn thường dùng 'ten_nguoidung'
+    const docName = doc.ten_nguoidung || doc.hoten || 'Người dùng';
+    const locationParts = [doc.vitri_tinh, doc.vitri_ao].filter(v => v && v !== 'undefined');
+    const docLocation = locationParts.length > 0 ? locationParts.join(', ') : 'Chuyển từ chatbot';
+
     res.json({
       _id:          doc._id.toString(),
       id:           doc._id.toString(),
       nguoidung_id: doc.nguoidung_id?.toString() || null,
-      name:         doc.ten_nguoidung,
-      ten_nguoidung: doc.ten_nguoidung,
-      location:     `${doc.vitri_tinh}, ${doc.vitri_ao}`,
+      name:         docName,
+      ten_nguoidung: doc.ten_nguoidung || doc.hoten || null,
+      location:     docLocation,
       vitri_tinh:   doc.vitri_tinh,
       vitri_ao:     doc.vitri_ao,
       noidung:      doc.noidung,
       noi_dung:     doc.noidung,
       ngaytao:      doc.ngaytao,
-      status:       doc.trang_thai,
-      trang_thai:   doc.trang_thai,
+      status:       doc.trang_thai || doc.trangthai,
+      trang_thai:   doc.trang_thai || doc.trangthai,
       tin_nhan: (doc.tin_nhan || []).map(m => ({
         vai_tro:  m.vai_tro,
         noi_dung: m.noi_dung,
@@ -288,11 +326,14 @@ router.post('/consultations/:id/reply-user', async (req, res) => {
     const { noi_dung } = req.body;
     if (!noi_dung?.trim()) return res.status(400).json({ message: 'Nội dung không được trống' });
     const newMsg = { vai_tro: 'nguoidung', noi_dung: noi_dung.trim(), thoigian: new Date() };
+    // Nếu tư vấn đã đóng (da_dong), tự động mở lại → cho_phan_hoi khi user nhắn
+    const existing = await db.collection('LIENHE').findOne({ _id: new ObjectId(req.params.id) });
+    const newStatus = existing?.trang_thai === 'da_dong' ? 'cho_phan_hoi' : existing?.trang_thai;
     await db.collection('LIENHE').updateOne(
       { _id: new ObjectId(req.params.id) },
-      { $push: { tin_nhan: newMsg } }
+      { $push: { tin_nhan: newMsg }, $set: { trang_thai: newStatus } }
     );
-    res.json({ ok: true, tin_nhan: newMsg });
+    res.json({ ok: true, tin_nhan: newMsg, reopened: existing?.trang_thai === 'da_dong' });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi gửi tin nhắn', error: error.message });
   }
@@ -491,7 +532,7 @@ router.put('/diagnostics/:id/verify', async (req, res) => {
           tieu_de,
           noi_dung,
           da_doc:       false,
-          lien_ket:     '/home',
+          lien_ket:     '/home#lich-su-chan-doan',
           ngaytao:      new Date(),
         };
         const inserted = await db.collection('THONGBAO').insertOne(notifDoc);
@@ -556,8 +597,17 @@ router.get('/inventory', async (req, res) => {
 
     const formatted = products.map(p => {
       const qty = p.soluong ?? 0;
-      const status = qty === 0 ? 'het_hang' : qty <= 15 ? 'sap_het' : 'con_hang';
-      const statusLabel = { het_hang: 'Hết hàng', sap_het: 'Sắp hết', con_hang: 'Còn hàng' }[status];
+      // 3 mức: het_hang (=0) | nguy_cap (1-5) | sap_het (6-15) | con_hang (>15)
+      const status =
+        qty <= 0  ? 'het_hang'  :
+        qty <= 5  ? 'nguy_cap'  :
+        qty <= 15 ? 'sap_het'   : 'con_hang';
+      const statusLabel = {
+        het_hang: 'Hết hàng',
+        nguy_cap: 'Nguy cấp',
+        sap_het:  'Sắp hết',
+        con_hang: 'Còn hàng',
+      }[status];
       return {
         id:       p._id.toString(),
         name:     p.tensanpham,
@@ -572,13 +622,22 @@ router.get('/inventory', async (req, res) => {
         status,
         statusLabel,
         image:    (p.hinhanh && p.hinhanh[0]) || null,
+        benh_ids: (p.benh_ids || []).map(id => (typeof id === 'object' && id.$oid) ? id.$oid : id.toString()),
+        mota:     p.mota     || '',
+        goc_thuoc:p.goc_thuoc|| '',
+        congdung: p.congdung || [],
+        lieudung: p.lieudung || {},
+        muc_dich: p.muc_dich_su_dung || [],
+        trangthai:p.trangthai|| 'dang_ban',
       };
     });
 
-    // Đếm sản phẩm sắp hết / hết hàng
-    const lowStock = await db.collection('SANPHAM').countDocuments({ soluong: { $lte: 15 } });
+    // Đếm theo mức
+    const outOfStock    = await db.collection('SANPHAM').countDocuments({ soluong: { $lte: 0 } });
+    const criticalCount = await db.collection('SANPHAM').countDocuments({ soluong: { $gt: 0, $lte: 5 } });
+    const lowStock      = await db.collection('SANPHAM').countDocuments({ soluong: { $gt: 0, $lte: 15 } });
 
-    res.json({ products: formatted, total, page: parseInt(page), limit: parseInt(limit), lowStock });
+    res.json({ products: formatted, total, page: parseInt(page), limit: parseInt(limit), outOfStock, criticalCount, lowStock });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi lấy kho hàng', error: error.message });
@@ -592,25 +651,76 @@ router.get('/inventory', async (req, res) => {
 router.get('/orders', async (req, res) => {
   try {
     const db = mongoose.connection.db;
-    const { status, search, page = 1, limit = 10 } = req.query;
+    const { status, search, page = 1, limit = 10, month } = req.query;
 
     const filter = {};
     if (status && status !== 'all') filter.trang_thai_don_hang = status;
-    // Tìm kiếm theo tên hoặc SĐT
-    if (search) {
+
+    // Tìm kiếm theo tên KH, SĐT hoặc mã đơn hàng
+    // Hỗ trợ cả field trực tiếp (cũ) lẫn nested trong thong_tin_nhan_hang (mới)
+    if (search && search.trim()) {
+      const s = search.trim();
       filter.$or = [
-        { ho_ten:        { $regex: search, $options: 'i' } },
-        { so_dien_thoai: { $regex: search, $options: 'i' } },
+        { ho_ten:        { $regex: s, $options: 'i' } },
+        { so_dien_thoai: { $regex: s, $options: 'i' } },
+        { ma_don_hang:   { $regex: s, $options: 'i' } },
+        { mavandon:      { $regex: s, $options: 'i' } },
+        { 'thong_tin_nhan_hang.ho_ten':        { $regex: s, $options: 'i' } },
+        { 'thong_tin_nhan_hang.so_dien_thoai': { $regex: s, $options: 'i' } },
       ];
+    }
+
+    // Lọc theo tháng (định dạng: 'YYYY-MM' hoặc 'current')
+    if (month && month !== 'all') {
+      let startDate, endDate;
+      if (month === 'current') {
+        const now = new Date();
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      } else {
+        // 'YYYY-MM'
+        const [y, m] = month.split('-').map(Number);
+        if (!isNaN(y) && !isNaN(m)) {
+          startDate = new Date(y, m - 1, 1);
+          endDate   = new Date(y, m, 0, 23, 59, 59, 999);
+        }
+      }
+      if (startDate && endDate) {
+        filter.$and = filter.$and || [];
+        // Hỗ trợ cả hai tên field: ngaytao (mới) và ngay_tao (cũ)
+        filter.$and.push({
+          $or: [
+            { ngaytao: { $gte: startDate, $lte: endDate } },
+            { ngay_tao: { $gte: startDate, $lte: endDate } },
+          ],
+        });
+      }
     }
 
     const total = await db.collection('DONHANG').countDocuments(filter);
     const skip  = (parseInt(page) - 1) * parseInt(limit);
 
     // san_pham đã embedded trong DONHANG — không cần lookup CHITIETDONHANG
+    // Sắp xếp: "chờ xử lý" lên đầu (priority=0), sau đó theo thời gian mua mới nhất
     const orders = await db.collection('DONHANG').aggregate([
       { $match: filter },
-      { $sort: { ngay_tao: -1 } },
+      {
+        $addFields: {
+          sort_priority: {
+            $switch: {
+              branches: [
+                { case: { $eq: ['$trang_thai_don_hang', 'cho_xac_nhan'] },   then: 0 },
+                { case: { $eq: ['$trang_thai_don_hang', 'dang_giao_hang'] }, then: 1 },
+                { case: { $eq: ['$trang_thai_don_hang', 'da_giao_hang'] },   then: 2 },
+                { case: { $eq: ['$trang_thai_don_hang', 'da_huy'] },         then: 3 },
+              ],
+              default: 4,
+            },
+          },
+          sort_date: { $ifNull: ['$ngay_tao', '$ngaytao'] },
+        },
+      },
+      { $sort: { sort_priority: 1, sort_date: -1 } },
       { $skip: skip },
       { $limit: parseInt(limit) },
       { $lookup: { from: 'NGUOIDUNG', localField: 'user_id', foreignField: '_id', as: 'user_info' } },
@@ -634,15 +744,17 @@ router.get('/orders', async (req, res) => {
     const formatted = orders.map(o => {
       const st = STATUS_MAP[o.trang_thai_don_hang] || { label: o.trang_thai_don_hang, color: 'info' };
 
-      // Tên: ưu tiên field trực tiếp trong đơn, fallback user_info
-      const name     = o.ho_ten || o.user_info?.ten || 'Khách hàng';
+      // Tên: ưu tiên field trực tiếp trong đơn, fallback thong_tin_nhan_hang, fallback user_info
+      const name     = o.ho_ten || o.thong_tin_nhan_hang?.ho_ten || o.user_info?.ten || 'Khách hàng';
       const words    = name.trim().split(/\s+/);
       const initials = words.length >= 2
         ? (words[words.length - 2][0] + words[words.length - 1][0]).toUpperCase()
         : name.substring(0, 2).toUpperCase();
 
-      // Địa chỉ rút gọn
-      const parts    = [o.dia_chi, o.tinh_thanh].filter(Boolean);
+      // Địa chỉ rút gọn: ưu tiên nested, fallback field trực tiếp
+      const diaChiNested = o.thong_tin_nhan_hang?.dia_chi || '';
+      const tinhNested   = o.thong_tin_nhan_hang?.tinh_thanh || '';
+      const parts    = [o.dia_chi || diaChiNested, o.tinh_thanh || tinhNested].filter(Boolean);
       const location = parts.length ? parts.slice(-2).join(', ') : '—';
 
       // Ngày tạo — field thực tế là ngay_tao
@@ -660,7 +772,7 @@ router.get('/orders', async (req, res) => {
         id:           o._id.toString(),
         code:         o.ma_don_hang || o.mavandon || ('DH-' + o._id.toString().slice(-6).toUpperCase()),
         name,
-        phone:        o.so_dien_thoai || o.user_info?.sodienthoai || '',
+        phone:        o.so_dien_thoai || o.thong_tin_nhan_hang?.so_dien_thoai || o.user_info?.sodienthoai || '',
         initials,
         location,
         date,
@@ -702,17 +814,69 @@ router.get('/orders', async (req, res) => {
 // INVENTORY CRUD
 // ═══════════════════════════════════════════════════
 
+/** GET /api/admin/inventory/:id — Lấy chi tiết sản phẩm */
+router.get('/inventory/:id', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { ObjectId } = mongoose.Types;
+    const p = await db.collection('SANPHAM').findOne({ _id: new ObjectId(req.params.id) });
+    if (!p) return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+
+    const CATEGORY_LABELS = {
+      dac_tri:               'Đặc trị',
+      vi_sinh:               'Vi sinh',
+      vi_sinh_moi_truong:    'Vi sinh MT',
+      dinh_duong_de_khang:   'Dinh dưỡng',
+    };
+    const qty = p.soluong ?? 0;
+    const status =
+      qty <= 0  ? 'het_hang'  :
+      qty <= 5  ? 'nguy_cap'  :
+      qty <= 15 ? 'sap_het'   : 'con_hang';
+
+    res.json({
+      id:          p._id.toString(),
+      name:        p.tensanpham     || '',
+      brand:       p.thuonghieu     || '',
+      sku:         p._id.toString().slice(-8).toUpperCase(),
+      category:    CATEGORY_LABELS[p.loaisanpham] || p.loaisanpham,
+      categoryKey: p.loaisanpham    || 'dac_tri',
+      qty,
+      unit:        p.donvi          || 'chai',
+      price:       p.gia            || 0,
+      sold:        p.daban          || 0,
+      status,
+      image:       (p.hinhanh && p.hinhanh[0]) || null,
+      benh_ids:    (p.benh_ids || []).map(id => (typeof id === 'object' && id.$oid) ? id.$oid : id.toString()),
+      mota:        p.mota           || '',
+      goc_thuoc:   p.goc_thuoc      || '',
+      congdung:    p.congdung       || [],
+      lieudung:    p.lieudung       || { dinh_ky: '', xu_ly_benh: '' },
+      muc_dich:    p.muc_dich_su_dung || [],
+      trangthai:   p.trangthai      || 'dang_ban',
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi lấy chi tiết sản phẩm', error: error.message });
+  }
+});
+
 /** POST /api/admin/inventory — Thêm sản phẩm mới */
 router.post('/inventory', async (req, res) => {
   try {
     const db = mongoose.connection.db;
+    const { ObjectId } = mongoose.Types;
     const {
       tensanpham, thuonghieu, loaisanpham, soluong, gia, donvi, mota,
-      goc_thuoc, congdung, lieudung, hinhanh, trangthai, muc_dich_su_dung,
+      goc_thuoc, congdung, lieudung, hinhanh, trangthai, muc_dich_su_dung, benh_ids,
     } = req.body;
     if (!tensanpham?.trim() || !loaisanpham) {
       return res.status(400).json({ message: 'Thiếu thông tin bắt buộc: tên sản phẩm và danh mục' });
     }
+    // Chuyển benh_ids string[] → ObjectId[]
+    const benhObjectIds = Array.isArray(benh_ids)
+      ? benh_ids.filter(Boolean).map(id => { try { return new ObjectId(id); } catch { return null; } }).filter(Boolean)
+      : [];
     const doc = {
       tensanpham:        tensanpham.trim(),
       thuonghieu:        thuonghieu?.trim()  || '',
@@ -729,6 +893,7 @@ router.post('/inventory', async (req, res) => {
       hinhanh:           Array.isArray(hinhanh) ? hinhanh : (hinhanh ? [hinhanh] : []),
       trangthai:         trangthai           || 'dang_ban',
       muc_dich_su_dung:  Array.isArray(muc_dich_su_dung) ? muc_dich_su_dung : [],
+      benh_ids:          benhObjectIds,
       daban:             0,
       ngaytao:           new Date(),
     };
@@ -747,7 +912,7 @@ router.put('/inventory/:id', async (req, res) => {
     const { ObjectId } = mongoose.Types;
     const {
       tensanpham, thuonghieu, loaisanpham, soluong, gia, donvi, mota,
-      goc_thuoc, congdung, lieudung, hinhanh, trangthai, muc_dich_su_dung,
+      goc_thuoc, congdung, lieudung, hinhanh, trangthai, muc_dich_su_dung, benh_ids,
     } = req.body;
     const update = { capnhat: new Date() };
     if (tensanpham    !== undefined) update.tensanpham        = tensanpham.trim();
@@ -764,6 +929,13 @@ router.put('/inventory/:id', async (req, res) => {
     if (Array.isArray(hinhanh))           update.hinhanh           = hinhanh;
     if (lieudung && typeof lieudung === 'object') {
       update.lieudung = { dinh_ky: lieudung.dinh_ky || '', xu_ly_benh: lieudung.xu_ly_benh || '' };
+    }
+    // Cập nhật benh_ids: chuyển string[] → ObjectId[]
+    if (Array.isArray(benh_ids)) {
+      update.benh_ids = benh_ids
+        .filter(Boolean)
+        .map(id => { try { return new ObjectId(id); } catch { return null; } })
+        .filter(Boolean);
     }
     await db.collection('SANPHAM').updateOne({ _id: new ObjectId(req.params.id) }, { $set: update });
     res.json({ ok: true, message: 'Cập nhật thành công' });
@@ -810,9 +982,15 @@ router.patch('/orders/:id/status', async (req, res) => {
 
     // ── Gửi SMS xác nhận khi đơn hàng đã giao thành công ──
     if (trang_thai === 'da_giao_hang') {
-      const phone  = order.so_dien_thoai || order.thong_tin_nhan_hang?.sodienthoai;
-      const hoTen  = order.ho_ten || order.thong_tin_nhan_hang?.nguoi_nhan || 'Quý khách';
-      const maDon  = order.ma_don_hang || ('DH' + order._id.toString().slice(-6).toUpperCase());
+      // Hỗ trợ cả hai cấu trúc DB: field trực tiếp và nested trong thong_tin_nhan_hang
+      const phone  = order.so_dien_thoai
+                  || order.thong_tin_nhan_hang?.so_dien_thoai
+                  || order.thong_tin_nhan_hang?.sodienthoai;
+      const hoTen  = order.ho_ten
+                  || order.thong_tin_nhan_hang?.ho_ten
+                  || order.thong_tin_nhan_hang?.nguoi_nhan
+                  || 'Quý khách';
+      const maDon  = order.ma_don_hang || order.mavandon || ('DH' + order._id.toString().slice(-6).toUpperCase());
       const tongTien  = order.tong_tien || order.tong_tien_thanh_toan || 0;
       const sanPham   = order.san_pham?.[0]?.ten_san_pham || 'sản phẩm';
 
@@ -849,9 +1027,10 @@ router.get('/orders/:id', async (req, res) => {
     res.json({
       id:           o._id.toString(),
       code:         o.ma_don_hang || o.mavandon || ('DH-' + o._id.toString().slice(-6).toUpperCase()),
-      name:         o.ho_ten || 'Khách hàng',
-      phone:        o.so_dien_thoai || '',
-      address:      [o.dia_chi, o.tinh_thanh].filter(Boolean).join(', '),
+      name:         o.ho_ten || o.thong_tin_nhan_hang?.ho_ten || 'Khách hàng',
+      phone:        o.so_dien_thoai || o.thong_tin_nhan_hang?.so_dien_thoai || '',
+      address:      [o.dia_chi || o.thong_tin_nhan_hang?.dia_chi, o.tinh_thanh || o.thong_tin_nhan_hang?.tinh_thanh].filter(Boolean).join(', '),
+      note:         o.ghi_chu || o.thong_tin_nhan_hang?.ghi_chu || '',
       date:         rawDate ? new Date(rawDate).toLocaleDateString('vi-VN') : '—',
       status:       o.trang_thai_don_hang,
       payment:      pttt,
@@ -920,11 +1099,14 @@ router.put('/users/:id', async (req, res) => {
     const { ObjectId } = mongoose.Types;
     const { ten, email, vaitro, trangthai } = req.body;
     const update = { capnhat: new Date() };
-    if (ten !== undefined) update.ten = ten;
-    if (email !== undefined) update.email = email;
-    if (vaitro !== undefined) update.vaitro = vaitro;
+    if (ten       !== undefined) update.ten       = ten;
+    if (email     !== undefined) update.email     = email;
+    if (vaitro    !== undefined) update.vaitro    = vaitro;
     if (trangthai !== undefined) update.trangthai = trangthai;
-    await db.collection('NGUOIDUNG').updateOne({ _id: new ObjectId(req.params.id) }, { $set: update });
+    await db.collection('NGUOIDUNG').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: update }
+    );
     res.json({ ok: true });
   } catch (error) {
     console.error(error);
@@ -942,6 +1124,177 @@ router.delete('/users/:id', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi xóa người dùng', error: error.message });
+  }
+});
+
+
+// ═══════════════════════════════════════════════════
+// DISEASE (BENH) — CRUD quản lý bệnh tôm
+// ═══════════════════════════════════════════════════
+
+// Chuẩn hoá mucdo từ chuỗi DB cũ → key chuẩn frontend
+function normalizeMucDo(v) {
+  if (!v) return 'trung_binh';
+  const map = {
+    'nhe': 'nhe', 'nhẹ': 'nhe',
+    'trung_binh': 'trung_binh', 'trung bình': 'trung_binh',
+    'nang': 'nang', 'nặng': 'nang',
+    'rat_nang': 'rat_nang', 'rất nặng': 'rat_nang',
+    'rất nghiêm trọng': 'rat_nang', 'nghiem trong': 'rat_nang',
+  };
+  return map[v.toLowerCase().trim()] || 'trung_binh';
+}
+
+/**
+ * Chuyển chuỗi triệu chứng (ngăn cách bởi \n hoặc dấu phẩy) → array
+ * Hỗ trợ cả khi frontend gửi array sẵn.
+ */
+function parseTrieuChung(value) {
+  if (Array.isArray(value)) return value.map(s => s.trim()).filter(Boolean);
+  if (!value || !value.trim()) return [];
+  return value.split(/\n|,/).map(s => s.trim()).filter(Boolean);
+}
+
+/** GET /api/admin/diseases — Lấy danh sách bệnh */
+router.get('/diseases', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const list = await db.collection('BENH')
+      .find({})
+      .sort({ tenbenh: 1 })
+      .toArray();
+
+    const mapDisease = (b) => ({
+      id:          b._id.toString(),   // string ID dùng cho frontend checkbox
+      _id:         b._id,
+      tenbenh:     b.tenbenh        || b.ten_benh    || '',   // alias khớp frontend
+      ten_benh:    b.tenbenh        || b.ten_benh    || '',
+      mota:        b.mota           || b.mo_ta       || '',
+      trieu_chung: Array.isArray(b.trieuchung)
+                     ? b.trieuchung.join('\n')
+                     : (b.trieuchung || b.trieu_chung || ''),
+      nguyen_nhan: b.nguyennhan     || b.nguyen_nhan || '',
+      phong_ngua:  b.phongngua      || b.phong_ngua  || '',
+      dieu_tri:    b.dieutri        || b.dieu_tri    || '',
+      nhom:        b.nhom           || '',
+      muc_do:      normalizeMucDo(b.mucdo || b.muc_do),
+      hinhanh:     b.hinhanh        || '',
+    });
+    res.json({ diseases: list.map(mapDisease) });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi lấy danh sách bệnh', error: error.message });
+  }
+});
+
+/** GET /api/admin/diseases/:id — Chi tiết một bệnh */
+router.get('/diseases/:id', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { ObjectId } = mongoose.Types;
+    const b = await db.collection('BENH').findOne({ _id: new ObjectId(req.params.id) });
+    if (!b) return res.status(404).json({ message: 'Không tìm thấy bệnh' });
+    res.json({
+      id:          b._id.toString(),
+      tenbenh:     b.tenbenh        || '',
+      mota:        b.mota           || b.mo_ta       || '',
+      nhom:        b.nhom           || '',
+      trieu_chung: Array.isArray(b.trieuchung)
+                     ? b.trieuchung.join('\n')
+                     : (b.trieuchung || b.trieu_chung || ''),
+      nguyen_nhan: b.nguyennhan     || b.nguyen_nhan || '',
+      phong_ngua:  b.phongngua      || b.phong_ngua  || '',
+      dieu_tri:    b.dieutri        || b.dieu_tri    || '',
+      muc_do:      normalizeMucDo(b.mucdo || b.muc_do),
+      hinhanh:     b.hinhanh        || '',
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi lấy chi tiết bệnh', error: error.message });
+  }
+});
+
+/** POST /api/admin/diseases — Thêm bệnh mới */
+router.post('/diseases', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { tenbenh, nhom, mota, trieu_chung, nguyen_nhan, phong_ngua, dieu_tri, muc_do, hinhanh } = req.body;
+    if (!tenbenh?.trim()) return res.status(400).json({ message: 'Tên bệnh là bắt buộc' });
+
+    // Kiểm tra trùng tên
+    const exist = await db.collection('BENH').findOne({
+      tenbenh: { $regex: `^${tenbenh.trim()}$`, $options: 'i' },
+    });
+    if (exist) return res.status(400).json({ message: 'Tên bệnh đã tồn tại' });
+
+    const doc = {
+      tenbenh:     tenbenh.trim(),
+      nhom:        nhom?.trim()         || '',
+      mota:        mota?.trim()         || '',
+      trieuchung:  parseTrieuChung(trieu_chung),
+      nguyennhan:  nguyen_nhan?.trim()  || '',
+      phongngua:   phong_ngua?.trim()   || '',
+      dieutri:     dieu_tri?.trim()     || '',
+      mucdo:       muc_do               || 'trung_binh',
+      hinhanh:     hinhanh?.trim()      || '',
+      ngaytao:     new Date(),
+    };
+    const result = await db.collection('BENH').insertOne(doc);
+    res.status(201).json({ ok: true, id: result.insertedId.toString(), message: 'Thêm bệnh thành công' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi thêm bệnh', error: error.message });
+  }
+});
+
+/** PUT /api/admin/diseases/:id — Cập nhật bệnh */
+router.put('/diseases/:id', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { ObjectId } = mongoose.Types;
+    const { tenbenh, nhom, mota, trieu_chung, nguyen_nhan, phong_ngua, dieu_tri, muc_do, hinhanh } = req.body;
+    if (!tenbenh?.trim()) return res.status(400).json({ message: 'Tên bệnh là bắt buộc' });
+
+    const update = {
+      tenbenh:     tenbenh.trim(),
+      nhom:        nhom?.trim()         || '',
+      mota:        mota?.trim()         || '',
+      trieuchung:  parseTrieuChung(trieu_chung),
+      nguyennhan:  nguyen_nhan?.trim()  || '',
+      phongngua:   phong_ngua?.trim()   || '',
+      dieutri:     dieu_tri?.trim()     || '',
+      mucdo:       muc_do               || 'trung_binh',
+      hinhanh:     hinhanh?.trim()      || '',
+      capnhat:     new Date(),
+    };
+    await db.collection('BENH').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: update }
+    );
+    res.json({ ok: true, message: 'Cập nhật bệnh thành công' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi cập nhật bệnh', error: error.message });
+  }
+});
+
+/** DELETE /api/admin/diseases/:id — Xóa bệnh */
+router.delete('/diseases/:id', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const { ObjectId } = mongoose.Types;
+    const benhId = new ObjectId(req.params.id);
+
+    // Gỡ bệnh này khỏi tất cả sản phẩm đang liên kết
+    await db.collection('SANPHAM').updateMany(
+      { benh_ids: benhId },
+      { $pull: { benh_ids: benhId } }
+    );
+
+    await db.collection('BENH').deleteOne({ _id: benhId });
+    res.json({ ok: true, message: 'Xóa bệnh thành công' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi xóa bệnh', error: error.message });
   }
 });
 

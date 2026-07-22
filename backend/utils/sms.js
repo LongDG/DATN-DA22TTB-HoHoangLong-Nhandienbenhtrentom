@@ -79,7 +79,7 @@ function msgOrderDelivered({ maDon, hoTen, tongTien, sanPhamDau }) {
     `[AquaHealth] Don hang ${maDon} cua quy khach ${hoTen} da duoc giao thanh cong!\n` +
     `San pham: ${sanPhamDau}...\n` +
     `Tong thanh toan: ${fmt(tongTien)}d\n` +
-    `Cam on quy khach da tin tuong AquaHealth. Lien he 1800 1234 neu can ho tro.`
+    `Cam on quy khach da tin tuong AquaHealth. Lien he 0383277120 neu can ho tro.`
   );
 }
 

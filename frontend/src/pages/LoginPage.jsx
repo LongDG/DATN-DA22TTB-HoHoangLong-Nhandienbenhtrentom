@@ -1,16 +1,32 @@
 import { motion } from 'motion/react';
 import { Phone, Lock, LogIn, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import GoogleAuthButton from '../components/GoogleAuthButton';
 
+const ERROR_MESSAGES = {
+  account_locked: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.',
+  server_error:   'Lỗi hệ thống, vui lòng thử lại sau.',
+};
 
 export default function LoginPage({ onGoogleLogin, onLogin }) {
   const [formData, setFormData] = useState({ phone: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const location = useLocation();
+
+  // Đọc error từ query param (Google OAuth redirect)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const err = params.get('error');
+    if (err && ERROR_MESSAGES[err]) {
+      setError(ERROR_MESSAGES[err]);
+      // Xóa query param khỏi URL để URL sạch hơn
+      window.history.replaceState({}, document.title, '/login');
+    }
+  }, [location.search]);
 
   const handleChange = (field) => (e) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));

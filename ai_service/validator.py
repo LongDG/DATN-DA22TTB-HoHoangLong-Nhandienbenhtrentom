@@ -152,7 +152,7 @@ def validate_image(img_bytes: bytes, filename: str) -> dict:
         tips.append('Chiếu sáng đều từ nhiều phía, tránh nguồn sáng đơn chiều.')
 
     # ── Tính điểm chất lượng ──────────────────────────────────────────────────
-    quality_score = _compute_quality(blur_score, brightness, contrast, shadow_ratio, w, h)
+    quality_score = _compute_quality(blur_score, brightness, contrast, shadow_ratio, w, h, size_bytes)
     details['quality_score'] = quality_score
 
     valid = len(errors) == 0
@@ -191,7 +191,8 @@ def _shadow_ratio(v_chan: np.ndarray) -> float:
 
 
 def _compute_quality(blur: float, brightness: float, contrast: float,
-                     shadow: float, w: int, h: int) -> int:
+                     shadow: float, w: int, h: int,
+                     file_size_bytes: int = 0) -> int:
     score = 100
 
     # Blur penalty
@@ -220,11 +221,22 @@ def _compute_quality(blur: float, brightness: float, contrast: float,
     elif shadow < 0.6:
         score -= 5
 
-    # Resolution bonus/penalty
+    # Resolution penalty — tăng mức phạt cho ảnh nhỏ hơn khuyến nghị
     min_dim = min(w, h)
     if min_dim < MIN_RESOLUTION:
         score -= 30
     elif min_dim < RECOMMEND_RESOLUTION:
-        score -= 10
+        # Phạt theo mức độ thiếu: càng xa 224px càng bị phạt nhiều
+        deficit_ratio = (RECOMMEND_RESOLUTION - min_dim) / RECOMMEND_RESOLUTION
+        score -= int(10 + deficit_ratio * 20)   # từ -10 đến -30 tùy mức độ
+
+    # File size penalty — file quá nhỏ thường bị nén mất chi tiết
+    if file_size_bytes > 0:
+        size_kb = file_size_bytes / 1024
+        if size_kb < MIN_FILE_KB:             # < 50KB
+            if size_kb < 20:
+                score -= 25                   # Cực nhỏ (< 20KB) — mất nhiều chi tiết
+            else:
+                score -= 15                   # Nhỏ (20–50KB) — có thể bị nén quá mức
 
     return max(0, min(100, score))

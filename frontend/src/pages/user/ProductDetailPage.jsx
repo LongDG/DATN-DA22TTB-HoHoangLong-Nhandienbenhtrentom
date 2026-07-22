@@ -18,9 +18,10 @@ const PURPOSE_LABEL = {
 };
 
 const STATUS_CONFIG = {
-  con_hang:  { label: 'Còn hàng',    cls: 'bg-green-100 text-green-700 border-green-200' },
-  sap_het:   { label: 'Sắp hết hàng',cls: 'bg-amber-100 text-amber-700 border-amber-200' },
-  het_hang:  { label: 'Hết hàng',    cls: 'bg-red-100 text-red-600 border-red-200' },
+  con_hang:  { label: 'Còn hàng',       cls: 'bg-green-100 text-green-700 border-green-200' },
+  sap_het:   { label: 'Sắp hết hàng', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
+  het_hang:  { label: 'Hết hàng',      cls: 'bg-red-100 text-red-600 border-red-200' },
+  ngung_ban: { label: 'Ngừng kinh doanh', cls: 'bg-slate-100 text-slate-500 border-slate-200' },
 };
 
 /* ── Image Gallery ── */
@@ -107,8 +108,9 @@ export default function ProductDetailPage() {
   }, [id]);
 
   const handleAddToCart = () => {
-    if (!product || product.status === 'het_hang') return;
-    for (let i = 0; i < qty; i++) addToCart(product);
+    if (!product || product.status === 'het_hang' || product.isNgungBan) return;
+    const resolvedImage = product.image || FALLBACK_IMG;
+    for (let i = 0; i < qty; i++) addToCart({ ...product, image: resolvedImage });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -130,8 +132,8 @@ export default function ProductDetailPage() {
     </div>
   );
 
-  const statusCfg = STATUS_CONFIG[product.status] || STATUS_CONFIG.het_hang;
-  const isOut = product.status === 'het_hang';
+  const statusCfg = STATUS_CONFIG[product.isNgungBan ? 'ngung_ban' : product.status] || STATUS_CONFIG.het_hang;
+  const isOut = product.status === 'het_hang' || product.isNgungBan;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -205,7 +207,7 @@ export default function ProductDetailPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-current" />
               {statusCfg.label}
             </span>
-            {product.qty > 0 && (
+            {product.qty > 0 && !product.isNgungBan && (
               <span className="text-sm text-slate-400">Còn <span className="font-semibold text-slate-600">{product.qty}</span> {product.unit}</span>
             )}
           </div>
@@ -239,8 +241,36 @@ export default function ProductDetailPage() {
           )}
 
           {isOut && (
-            <div className="h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-semibold text-sm">
-              Sản phẩm tạm hết hàng
+            <div className={`rounded-xl p-4 border flex flex-col gap-2 ${
+              product.isNgungBan
+                ? 'bg-slate-50 border-slate-200'
+                : 'bg-amber-50 border-amber-200'
+            }`}>
+              <div className="flex items-center gap-2">
+                <AlertCircle className={`w-5 h-5 shrink-0 ${
+                  product.isNgungBan ? 'text-slate-400' : 'text-amber-500'
+                }`} />
+                <p className={`font-bold text-sm ${
+                  product.isNgungBan ? 'text-slate-600' : 'text-amber-700'
+                }`}>
+                  {product.isNgungBan
+                    ? 'Sản phẩm đã ngừng kinh doanh'
+                    : 'Sản phẩm tạm hết hàng'
+                  }
+                </p>
+              </div>
+              <p className="text-xs text-slate-400 ml-7">
+                {product.isNgungBan
+                  ? 'Sản phẩm này không còn được cung cấp. Vui lòng xem các sản phẩm khác.'
+                  : 'Sản phẩm đang được nhập hàng, vui lòng quay lại sau.'
+                }
+              </p>
+              <button
+                onClick={() => navigate('/store')}
+                className="ml-7 w-fit text-xs font-semibold text-[#0077b6] hover:underline"
+              >
+                Xem sản phẩm khác →
+              </button>
             </div>
           )}
 

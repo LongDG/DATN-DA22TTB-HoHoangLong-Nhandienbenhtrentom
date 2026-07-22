@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   MessageCircle, Clock, CheckCircle2, Star, TrendingUp,
-  CheckCircle, Send, Paperclip, Image as ImageIcon, FileText,
-  Video, Info, Lightbulb, User, MapPin, RefreshCw,
+  CheckCircle, Send, Lightbulb, User, MapPin, RefreshCw, Eye, EyeOff,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
@@ -68,7 +67,7 @@ function ConsultationItem({ c, isActive, onClick, idx }) {
   return (
     <div
       onClick={onClick}
-      className={`p-4 cursor-pointer transition-colors border-b border-[#e7e8e9]/60 ${isActive ? 'bg-sky-50 border-l-4 border-l-[#0077b6]' : 'hover:bg-[#f8f9fa] border-l-4 border-l-transparent'} ${c.status === 'da_dong' ? 'opacity-60' : ''}`}
+      className={`p-4 cursor-pointer transition-colors border-b border-[#e7e8e9]/60 ${isActive ? 'bg-sky-50 border-l-4 border-l-[#0077b6]' : 'hover:bg-[#f8f9fa] border-l-4 border-l-transparent'}`}
     >
       <div className="flex gap-3">
         <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${avt}`}>
@@ -109,7 +108,7 @@ function ChatArea({ consultation, onReply, onClose }) {
   };
 
   const handleClose = async () => {
-    if (!window.confirm('Đóng tư vấn này?')) return;
+    if (!window.confirm('Đóng tư vấn này? Cuộc hội thoại sẽ bị ẩn khỏi danh sách cho đến khi người dùng nhắn lại.')) return;
     await onClose(consultation.id);
   };
 
@@ -140,8 +139,6 @@ function ChatArea({ consultation, onReply, onClose }) {
           </div>
         </div>
         <div className="flex gap-2 items-center">
-          <button className="p-2 text-[#707881] hover:bg-[#f3f4f5] rounded-full transition-colors"><Video className="w-5 h-5" /></button>
-          <button className="p-2 text-[#707881] hover:bg-[#f3f4f5] rounded-full transition-colors"><Info className="w-5 h-5" /></button>
           {!isClosed && (
             <button onClick={handleClose} className="ml-2 px-4 py-2 bg-[#0077b6] text-white rounded-lg text-sm font-semibold hover:bg-[#005d90] transition-colors">
               Hoàn thành tư vấn
@@ -150,6 +147,14 @@ function ChatArea({ consultation, onReply, onClose }) {
           {isClosed && <span className="ml-2 px-3 py-1 bg-[#aeeecb] text-[#2c694e] rounded-lg text-xs font-bold">Đã đóng</span>}
         </div>
       </div>
+
+      {/* Closed notice banner */}
+      {isClosed && (
+        <div className="px-6 py-2 bg-[#f0fdf4] border-b border-[#aeeecb] flex items-center gap-2 text-[#2c694e] text-xs font-medium">
+          <Lightbulb className="w-3.5 h-3.5 shrink-0" />
+          Tư vấn đã đóng. Sẽ tự động hiện lại khi người dùng nhắn tin mới.
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 p-6 overflow-y-auto space-y-5 bg-[#f8f9fa] min-h-[380px] max-h-[420px]">
@@ -209,11 +214,7 @@ function ChatArea({ consultation, onReply, onClose }) {
               placeholder="Nhập phản hồi chuyên gia... (Enter để gửi)"
             />
             <div className="flex justify-between items-center px-2 pb-1">
-              <div className="flex gap-1">
-                {[Paperclip, ImageIcon, FileText].map((Icon, i) => (
-                  <button key={i} className="p-2 text-[#707881] hover:bg-[#e7e8e9] rounded-lg transition-colors"><Icon className="w-4 h-4" /></button>
-                ))}
-              </div>
+              <div />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || sending}
@@ -226,10 +227,10 @@ function ChatArea({ consultation, onReply, onClose }) {
           </div>
         </div>
       ) : (
-        <div className="p-4 bg-[#f3f4f5] border-t border-[#e1e3e4] text-center">
+        <div className="p-4 bg-[#f0fdf4] border-t border-[#aeeecb] text-center">
           <div className="flex items-center justify-center gap-2 text-[#2c694e]">
             <Lightbulb className="w-4 h-4" />
-            <p className="text-sm font-medium">Cuộc tư vấn này đã được đóng.</p>
+            <p className="text-sm font-medium">Cuộc tư vấn này đã hoàn thành và đã được ẩn khỏi danh sách chính.</p>
           </div>
         </div>
       )}
@@ -244,22 +245,38 @@ export default function ConsultationPage() {
   const [activeId, setActiveId]     = useState(null);
   const [detail, setDetail]         = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [showClosed, setShowClosed] = useState(false); // toggle xem tư vấn đã đóng
 
-  // Fetch list + stats on mount
-  const fetchList = useCallback(async () => {
+  // Fetch list + stats
+  const fetchList = useCallback(async (showClosedOverride) => {
+    const closed = showClosedOverride !== undefined ? showClosedOverride : showClosed;
+    const listUrl = closed
+      ? `${API_BASE}/admin/consultations?show_closed=1`
+      : `${API_BASE}/admin/consultations`;
+
     const [sRes, lRes] = await Promise.all([
       authFetch(`${API_BASE}/admin/consultations/stats`).then(r => r.json()),
-      authFetch(`${API_BASE}/admin/consultations`).then(r => r.json()),
+      authFetch(listUrl).then(r => r.json()),
     ]);
     setStats(sRes);
-    setList(Array.isArray(lRes) ? lRes : []);
-    // Auto-select first
-    if (!activeId && Array.isArray(lRes) && lRes.length > 0) {
-      setActiveId(lRes[0].id);
-    }
-  }, []);
+    const arr = Array.isArray(lRes) ? lRes : [];
+    setList(arr);
+    // Auto-select first nếu chưa chọn hoặc item đang chọn không còn trong list
+    setActiveId(prev => {
+      if (!prev || !arr.find(c => c.id === prev)) {
+        return arr.length > 0 ? arr[0].id : null;
+      }
+      return prev;
+    });
+  }, [showClosed]);
 
   useEffect(() => { fetchList(); }, [fetchList]);
+
+  // Auto-refresh mỗi 30 giây để bắt tin nhắn mới từ user
+  useEffect(() => {
+    const timer = setInterval(() => fetchList(), 30_000);
+    return () => clearInterval(timer);
+  }, [fetchList]);
 
   // Fetch detail when activeId changes
   useEffect(() => {
@@ -295,8 +312,25 @@ export default function ConsultationPage() {
   const handleClose = async (id) => {
     await authFetch(`${API_BASE}/admin/consultations/${id}/close`, { method: 'PATCH' });
     setDetail(prev => ({ ...prev, status: 'da_dong' }));
-    setList(prev => prev.map(c => c.id === id ? { ...c, status: 'da_dong' } : c));
+    // Xoá khỏi list nếu đang không ở chế độ show_closed
+    if (!showClosed) {
+      setList(prev => {
+        const newList = prev.filter(c => c.id !== id);
+        // Chuyển sang item tiếp theo
+        setActiveId(newList.length > 0 ? newList[0].id : null);
+        if (newList.length === 0) setDetail(null);
+        return newList;
+      });
+    } else {
+      setList(prev => prev.map(c => c.id === id ? { ...c, status: 'da_dong' } : c));
+    }
     setStats(prev => ({ ...prev, active: Math.max(0, prev.active - 1), done: prev.done + 1 }));
+  };
+
+  const handleToggleClosed = () => {
+    const next = !showClosed;
+    setShowClosed(next);
+    fetchList(next);
   };
 
   return (
@@ -316,13 +350,31 @@ export default function ConsultationPage() {
         <div className="col-span-12 lg:col-span-4 flex flex-col bg-white rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-[#bfc7d1] overflow-hidden">
           <div className="p-4 border-b border-[#e1e3e4] bg-[#f3f4f5] flex justify-between items-center">
             <span className="text-sm font-semibold text-[#191c1d]">Danh sách hội thoại</span>
-            <span className="bg-[#ba1a1a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-              {stats.pending} chờ
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="bg-[#ba1a1a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                {stats.pending} chờ
+              </span>
+              {/* Toggle xem đã đóng */}
+              <button
+                onClick={handleToggleClosed}
+                title={showClosed ? 'Ẩn tư vấn đã đóng' : 'Xem tư vấn đã đóng'}
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+                  showClosed
+                    ? 'bg-[#2c694e] text-white'
+                    : 'bg-[#e7e8e9] text-[#404850] hover:bg-[#d0d3d5]'
+                }`}
+              >
+                {showClosed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                {showClosed ? 'Ẩn đã đóng' : 'Xem đã đóng'}
+              </button>
+            </div>
           </div>
+
           <div className="flex-1 overflow-y-auto divide-y divide-[#e7e8e9]/40">
             {list.length === 0 && (
-              <div className="p-8 text-center text-[#707881] text-sm">Không có yêu cầu tư vấn nào.</div>
+              <div className="p-8 text-center text-[#707881] text-sm">
+                {showClosed ? 'Không có tư vấn đã đóng.' : 'Không có yêu cầu tư vấn đang hoạt động.'}
+              </div>
             )}
             {list.map((c, i) => (
               <ConsultationItem
@@ -332,6 +384,16 @@ export default function ConsultationPage() {
               />
             ))}
           </div>
+
+          {/* Footer hint */}
+          {!showClosed && stats.done > 0 && (
+            <div className="p-3 border-t border-[#e1e3e4] bg-[#f8f9fa]">
+              <p className="text-[11px] text-[#707881] text-center">
+                {stats.done} tư vấn đã hoàn thành bị ẩn.
+                <button onClick={handleToggleClosed} className="ml-1 text-[#0077b6] font-semibold hover:underline">Xem tất cả</button>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Chat Area */}
